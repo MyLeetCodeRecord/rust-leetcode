@@ -1,0 +1,98 @@
+name: Cargo Test & coverage
+
+on: [push, pull_request]
+
+jobs:
+  test-lib:
+    name: Test library
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        toolchain: [stable, nightly]
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Rust
+        run: |
+          rustup toolchain add ${{ matrix.toolchain }} --component llvm-tools-preview
+          rustup override set ${{ matrix.toolchain }}
+      - name: Configure cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: test-${{ runner.os }}-cargo-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.lock') }}
+      - name: Test
+        run: cargo test --lib
+  test-coverage:
+    name: Test coverage (gcc-${{ matrix.gcc }}, clang-${{ matrix.clang }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - gcc: 10
+            clang: 11
+          - gcc: 11
+            clang: 12
+          - gcc: 11
+            clang: 13
+    env:
+      CXX: clang++-${{ matrix.clang }}
+      CLANG_CXX: clang++-${{ matrix.clang }}
+      GCC_CXX: g++-${{ matrix.gcc }}
+    continue-on-error: true
+    steps:
+      - name: Prepare C toolchains
+        run: |
+          # Add LLVM keys
+          curl -o- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+          # Add extra APT repos
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+          sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-11 main'
+          sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main'
+          sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main'
+          # Install toolchains
+          sudo apt-get update
+          sudo apt-get install -y clang-${{ matrix.clang }} g++-${{ matrix.gcc }}
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Setup Rust
+        run: |
+          rustup toolchain add nightly --component llvm-tools-preview
+          rustup override set nightly
+          cargo install grcov
+      - name: Configure cache
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: test-${{ runner.os }}-cargo-gcc-${{ matrix.gcc }}-clang-${{ matrix.clang }}-${{ hashFiles('**/Cargo.lock') }}
+      - name: Build
+        env:
+          RUSTFLAGS: -Cinstrument-coverage
+        run: cargo build
+      - name: Test
+        env:
+          LLVM_PROFILE_FILE: grcov-%p-%m.profraw
+          RUSTFLAGS: -Cinstrument-coverage
+        run: cargo test
+      - name: Generate coverage
+        run: |
+          ~/.cargo/bin/grcov $(find . -name "grcov-*.profraw" -print) \
+            --branch \
+            --ignore-not-existing \
+            --binary-path ./target/debug/ \
+            -s . \
+            -t lcov \
+            --ignore "/*" \
+            -o lcov.info
