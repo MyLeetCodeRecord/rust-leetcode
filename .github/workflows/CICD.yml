@@ -96,3 +96,8 @@ jobs:
             -t lcov \
             --ignore "/*" \
             -o lcov.info
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: lcov.info
