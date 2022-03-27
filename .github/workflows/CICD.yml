@@ -78,17 +78,12 @@ jobs:
             target/
           key: test-${{ runner.os }}-cargo-gcc-${{ matrix.gcc }}-clang-${{ matrix.clang }}-${{ hashFiles('**/Cargo.lock') }}
       - name: Build
-        env:
-          RUSTFLAGS: -Cinstrument-coverage
         run: cargo build
       - name: Test
-        env:
-          LLVM_PROFILE_FILE: grcov-%p-%m.profraw
-          RUSTFLAGS: -Cinstrument-coverage
         run: cargo test
       - name: Generate coverage
         run: |
-          ~/.cargo/bin/grcov $(find . -name "grcov-*.profraw" -print) \
+          ~/.cargo/bin/grcov $(find . -name "grcov.profraw" -print) \
             --branch \
             --ignore-not-existing \
             --binary-path ./target/debug/ \

@@ -1,0 +1,41 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "watch coverage",
+            "type": "shell",
+            "isBackground": true,
+            "command": "~/.cargo/bin/watchexec",
+            "args": [
+                "--no-vcs-ignore",
+                "-w", "target/coverage/raw",
+                "-e", "profraw",
+                "--restart",
+                "~/.cargo/bin/grcov target/coverage/raw/grcov.profraw --branch --ignore-not-existing --binary-path ./target/debug/ -s . -t lcov --ignore \"/*\" -o target/coverage/lcov.info"
+            ],
+            "problemMatcher": {
+                "pattern":[
+                    {
+                        "regexp": "^error:\\s+(.*)$",
+                        "file": 1,
+                        "line": 0,
+                        "message": 1
+                    }
+                ],
+            },
+            // 如果需要开启项目后自动启动
+            // 可能会进程泄露, 暂时没有处理好 problemMatcher
+            // "runOptions": {
+            //     "runOn": "folderOpen"
+            // },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": true
+            }
+        }
+    ]
+}

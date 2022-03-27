@@ -496,10 +496,39 @@ pub mod binary_search {
     }
 }
 
-/// 双指针
-/// https://labuladong.gitee.io/algo/1/9/
-/// https://labuladong.gitee.io/algo/1/8/
+/// # 双指针
+/// > swap 不就是双指针吗
+/// 特点: 就地; 相对
+///
+/// ## 概念
+/// 双指针主要有 **快慢指针**, **左右指针**.
+/// * 快慢指针: 两个指针同向而行，一快一慢
+/// * 左右指针: 两个指针相向而行或者相背而行
+///
+/// 落到具体数据结构中
+/// * 数组中用索引代替指针
+/// * 单链表只有快慢指针
+///
+/// 其他形式的变种
+/// * 滑动窗口
+/// * 二分 可以视为左右指针
+/// * 归并排序
+///
+/// ## 题目链接
+/// * 简单:
+///     * [27. 移除元素](https://leetcode-cn.com/problems/remove-element/)
+///     * [26. 删除有序数组中的重复项](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array/)
+///     * [83. 删除排序链表中的重复元素](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list/)
+///     * [283. 移动零](https://leetcode-cn.com/problems/move-zeroes/)
+///     * [344. 反转字符串](https://leetcode-cn.com/problems/reverse-string/)
+///     * [977. 有序数组的平方](https://leetcode-cn.com/problems/squares-of-a-sorted-array/)
+/// * 中等:
+///     * [167. 两数之和 II - 输入有序数组](https://leetcode-cn.com/problems/two-sum-ii-input-array-is-sorted/)
+///     * [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
+///
 pub mod two_pointers {
+
+    /// [27. 移除元素](https://leetcode-cn.com/problems/remove-element/)
     /// 索引 usize 可能溢出
     pub fn remove_element(nums: &mut Vec<i32>, val: i32) -> i32 {
         if nums.is_empty() {
@@ -508,7 +537,8 @@ pub mod two_pointers {
         let (mut from, mut end) = (0, nums.len() - 1);
         while from <= end {
             if val.eq(nums.get(end).unwrap()) {
-                if let Some(x) = end.checked_sub(1) { // 防止溢出
+                if let Some(x) = end.checked_sub(1) {
+                    // 防止溢出
                     end = x;
                 } else {
                     break;
@@ -524,6 +554,165 @@ pub mod two_pointers {
         from as i32
     }
 
+    /// [26. 删除有序数组中的重复项](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array/)
+    pub fn remove_duplicates(nums: &mut Vec<i32>) -> i32 {
+        if nums.len() <= 1 {
+            return nums.len() as i32;
+        }
+        let (mut slow, mut fast) = (1, 1);
+        let mut curr = nums.first().copied().unwrap();
+
+        while let Some(&x) = nums.get(fast) {
+            if x == curr {
+                fast += 1;
+                continue;
+            }
+
+            *nums.get_mut(slow).unwrap() = x;
+            slow += 1;
+            fast += 1;
+            curr = x;
+        }
+        slow as i32
+    }
+
+    #[derive(PartialEq, Eq, Clone, Debug)]
+    pub struct ListNode {
+        pub val: i32,
+        pub next: Option<Box<ListNode>>,
+    }
+
+    /// [83. 删除排序链表中的重复元素](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list/)
+    pub fn delete_duplicates(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+        if head.is_none() {
+            return head;
+        }
+        let mut head = head;
+        let mut node = head.as_mut().unwrap();
+        let mut duplicate = node.val;
+
+        while let Some(next) = node.next.take() {
+            // 先夺
+            if next.val == duplicate {
+                node.next = next.next;
+            } else {
+                duplicate = next.val; // 更新下次比较值
+                node.next = Some(next); // 放回去
+                node = node.next.as_mut().unwrap(); // 慢指针前进
+            }
+        }
+        head
+    }
+
+    /// [283. 移动零](https://leetcode-cn.com/problems/move-zeroes/)
+    pub fn move_zeroes(nums: &mut Vec<i32>) {
+        let mut slow = {
+            let mut idx = nums.len();
+            // 找到第一个0, 作为起始插入点
+            for (i, num) in nums.iter().enumerate() {
+                if *num == 0 {
+                    idx = i;
+                    break;
+                }
+            }
+            idx
+        };
+        let mut fast = slow;
+
+        while slow < nums.len() && fast < nums.len() {
+            let x = nums.get(fast).copied().unwrap();
+            if x != 0 {
+                *nums.get_mut(slow).unwrap() = x;
+                slow += 1;
+            }
+            fast += 1;
+        }
+        // 将结尾置为0
+        // while slow < nums.len(){
+        //     *nums.get_mut(slow).unwrap() = 0;
+        //     slow += 1;
+        // }
+        nums[slow..].fill(0);
+    }
+
+    /// [167. 两数之和 II - 输入有序数组](https://leetcode-cn.com/problems/two-sum-ii-input-array-is-sorted/)
+    pub fn two_sum(numbers: Vec<i32>, target: i32) -> Vec<i32> {
+        use std::cmp::Ordering;
+        let (mut left, mut right) = (1, numbers.len());
+        while left < right {
+            let l = numbers.get(left - 1).copied().unwrap();
+            let r = numbers.get(right - 1).copied().unwrap();
+            match target.cmp(&(l + r)) {
+                Ordering::Equal => break,
+                Ordering::Greater => left += 1,
+                Ordering::Less => right -= 1,
+            }
+        }
+        return vec![left as i32, right as i32];
+    }
+
+    /// [344. 反转字符串](https://leetcode-cn.com/problems/reverse-string/)
+    pub fn reverse_string(s: &mut Vec<char>) {
+        let (mut left, mut right) = (0, s.len() - 1);
+        while left < right {
+            s.swap(left, right);
+            left += 1;
+            right -= 1;
+        }
+    }
+
+    /// [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
+    pub fn longest_palindrome(s: String) -> String {
+        let palindrome = |s: &[char], l: usize, r: usize| -> String {
+            let (mut l, mut r) = (l as isize, r as isize);
+            while l >= 0
+                && (r as usize) < s.len()
+                && s.get(l as usize).unwrap().eq(s.get(r as usize).unwrap())
+            {
+                l -= 1; // 可能-1
+                r += 1;
+            }
+
+            s[(l + 1) as usize..r as usize].into_iter().collect()
+        };
+
+        let chars: Vec<char> = s.chars().collect();
+
+        let mut ret = "".to_string();
+        for i in 0..chars.len() {
+            let s1 = palindrome(&chars, i, i);
+            let s2 = palindrome(&chars, i, i + 1);
+
+            if s1.len() > ret.len() {
+                ret = s1;
+            }
+            if s2.len() > ret.len() {
+                ret = s2;
+            }
+        }
+        ret
+    }
+
+    /// [977. 有序数组的平方](https://leetcode-cn.com/problems/squares-of-a-sorted-array/)
+    pub fn sorted_squares(nums: Vec<i32>) -> Vec<i32> {
+        let mut ret = Vec::with_capacity(nums.len());
+        let(mut left, mut right) = (1, nums.len());
+        while left <= right {
+            let l = nums.get(left-1).copied().unwrap();
+            let r = nums.get(right-1).copied().unwrap();
+
+            if l.abs() > r.abs(){
+                ret.push(l*l);
+                left += 1;
+            } else {
+                ret.push(r*r);
+                right -= 1;
+            }
+        }
+        ret.reverse();
+        ret
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
@@ -534,7 +723,6 @@ pub mod two_pointers {
                 name: &'static str,
                 nums: &'static [i32],
                 val: i32,
-                expect: i32,
             }
 
             vec![
@@ -542,26 +730,290 @@ pub mod two_pointers {
                     name: "basic",
                     nums: &[3, 2, 2, 3],
                     val: 3,
-                    expect: 2,
                 },
                 TestCase {
                     name: "basic 2",
                     nums: &[0, 1, 2, 2, 3, 0, 4, 2],
                     val: 2,
-                    expect: 5,
                 },
                 TestCase {
                     name: "fix 1",
                     nums: &[1],
                     val: 1,
-                    expect: 0,
+                },
+                TestCase {
+                    name: "empty",
+                    nums: &[],
+                    val: 0,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                use std::collections::HashSet;
+
+                let expect = {
+                    let mut tmp = testcase.nums.iter().map(|x| *x).collect::<HashSet<i32>>();
+                    tmp.remove(&testcase.val);
+                    tmp
+                };
+                let expect_length = testcase.nums.iter().fold(0, |acc, &x| {
+                    if x != testcase.val {
+                        return acc + 1;
+                    }
+                    return acc;
+                });
+
+                let mut tmp = testcase.nums.to_vec();
+                let length = remove_element(&mut tmp, testcase.val) as usize;
+
+                assert_eq!(expect_length, length, "{} length not match", testcase.name);
+
+                let actual = tmp[..length].iter().map(|x| *x).collect::<HashSet<i32>>();
+                assert_eq!(expect, actual, "{} result not match", testcase.name);
+            })
+        }
+
+        #[test]
+        fn test_remove_duplicates() {
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums: &[1, 1, 2],
+                    expect: &[1, 2],
+                },
+                TestCase {
+                    name: "basic 2",
+                    nums: &[0, 0, 1, 1, 1, 2, 2, 3, 3, 4],
+                    expect: &[0, 1, 2, 3, 4],
+                },
+                TestCase {
+                    name: "basic 3",
+                    nums: &[1],
+                    expect: &[1],
+                },
+                TestCase {
+                    name: "fix 1",
+                    nums: &[1, 2],
+                    expect: &[1, 2],
                 },
             ]
             .iter()
             .for_each(|testcase| {
                 let mut tmp = testcase.nums.to_vec();
-                let actual = remove_element(&mut tmp, testcase.val);
-                assert_eq!(actual, testcase.expect, "{} failed", testcase.name);
+                let actual = remove_duplicates(&mut tmp) as usize;
+                assert_eq!(testcase.expect.len(), actual, "{} failed", testcase.name);
+                assert_eq!(testcase.expect, &tmp[..actual], "{} failed", testcase.name);
+            });
+        }
+
+        fn build_list_from_slice(s: &[i32]) -> Option<Box<ListNode>> {
+            if s.is_empty() {
+                return None;
+            }
+            let head = Box::new(ListNode {
+                val: s.first().copied().unwrap(),
+                next: build_list_from_slice(&s[1..]),
+            });
+            Some(head)
+        }
+
+        #[test]
+        fn test_delete_duplicates() {
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums: &[1, 1, 2, 3, 3],
+                    expect: &[1, 2, 3],
+                },
+                TestCase {
+                    name: "cov 1",
+                    nums: &[],
+                    expect: &[],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let head = build_list_from_slice(testcase.nums);
+                let actual = delete_duplicates(head);
+                let expect = build_list_from_slice(testcase.expect);
+                assert_eq!(expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_move_zeroes() {
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums: &[0, 1, 0, 3, 12],
+                    expect: &[1, 3, 12, 0, 0],
+                },
+                TestCase {
+                    name: "basic 2",
+                    nums: &[0],
+                    expect: &[0],
+                },
+                TestCase {
+                    name: "cov 1",
+                    nums: &[1, 2, 0, 3, 4, 5],
+                    expect: &[1, 2, 3, 4, 5, 0],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let mut tmp = testcase.nums.to_vec();
+                move_zeroes(&mut tmp);
+                assert_eq!(testcase.expect, tmp, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_two_sum() {
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                target: i32,
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums: &[2, 7, 11, 15],
+                    target: 9,
+                    expect: &[1, 2],
+                },
+                TestCase {
+                    name: "basic 2",
+                    nums: &[2, 3, 4],
+                    target: 6,
+                    expect: &[1, 3],
+                },
+                TestCase {
+                    name: "basic 3",
+                    nums: &[-1, 0],
+                    target: -1,
+                    expect: &[1, 2],
+                },
+                TestCase {
+                    name: "cov 1",
+                    nums: &[1, 2, 3, 4, 5, 6],
+                    target: 10,
+                    expect: &[4, 6],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = two_sum(testcase.nums.to_vec(), testcase.target);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_reverse_string() {
+            struct TestCase {
+                name: &'static str,
+                s: &'static [char],
+                expect: &'static [char],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    s: &['h', 'e', 'l', 'l', 'o'],
+                    expect: &['o', 'l', 'l', 'e', 'h'],
+                },
+                TestCase {
+                    name: "basic 2",
+                    s: &['H', 'a', 'n', 'n', 'a', 'h'],
+                    expect: &['h', 'a', 'n', 'n', 'a', 'H'],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let mut tmp = testcase.s.to_vec();
+                reverse_string(&mut tmp);
+                assert_eq!(testcase.expect, tmp, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_longest_palindrome() {
+            struct TestCase {
+                name: &'static str,
+                s: &'static str,
+                expect: &'static str,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    s: "babad",
+                    expect: "bab",
+                },
+                TestCase {
+                    name: "basic 2",
+                    s: "cbbd",
+                    expect: "bb",
+                },
+                TestCase {
+                    name: "fix 1",
+                    s: "a",
+                    expect: "a",
+                },
+            ]
+            .iter()
+            .for_each(|testcae| {
+                let actual = longest_palindrome(testcae.s.to_string());
+                assert_eq!(testcae.expect, actual, "{} failed", testcae.name);
+            });
+        }
+
+        #[test]
+        fn test_sorted_squares(){
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase{
+                    name: "basic",
+                    nums: &[-4,-1,0,3,10],
+                    expect: &[0,1,9,16,100]
+                },
+                TestCase{
+                    name: "basic 2",
+                    nums: &[-7,-3,2,3,11],
+                    expect: &[4,9,9,49,121]
+                },
+                TestCase{
+                    name: "fix 1",
+                    nums: &[1],
+                    expect: &[1]
+                }
+            ].iter().for_each(|testcase| {
+                let actual = sorted_squares(testcase.nums.to_vec());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
             })
         }
     }
