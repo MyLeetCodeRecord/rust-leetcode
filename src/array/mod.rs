@@ -522,9 +522,17 @@ pub mod binary_search {
 ///     * [283. 移动零](https://leetcode-cn.com/problems/move-zeroes/)
 ///     * [344. 反转字符串](https://leetcode-cn.com/problems/reverse-string/)
 ///     * [977. 有序数组的平方](https://leetcode-cn.com/problems/squares-of-a-sorted-array/)
+///     * [21. 合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
+///     * [876. 链表的中间结点](https://leetcode-cn.com/problems/middle-of-the-linked-list/)
 /// * 中等:
 ///     * [167. 两数之和 II - 输入有序数组](https://leetcode-cn.com/problems/two-sum-ii-input-array-is-sorted/)
 ///     * [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
+///     * [19. 删除链表的倒数第 N 个结点](https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list/)
+/// * 困难:
+///     * [23. 合并K个升序链表](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
+/// * 没有rust模版的题:
+///     * [141. 环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
+///     * [160. 相交链表](https://leetcode-cn.com/problems/intersection-of-two-linked-lists/)
 ///
 pub mod two_pointers {
 
@@ -696,21 +704,185 @@ pub mod two_pointers {
     /// [977. 有序数组的平方](https://leetcode-cn.com/problems/squares-of-a-sorted-array/)
     pub fn sorted_squares(nums: Vec<i32>) -> Vec<i32> {
         let mut ret = Vec::with_capacity(nums.len());
-        let(mut left, mut right) = (1, nums.len());
+        let (mut left, mut right) = (1, nums.len());
         while left <= right {
-            let l = nums.get(left-1).copied().unwrap();
-            let r = nums.get(right-1).copied().unwrap();
+            let l = nums.get(left - 1).copied().unwrap();
+            let r = nums.get(right - 1).copied().unwrap();
 
-            if l.abs() > r.abs(){
-                ret.push(l*l);
+            if l.abs() > r.abs() {
+                ret.push(l * l);
                 left += 1;
             } else {
-                ret.push(r*r);
+                ret.push(r * r);
                 right -= 1;
             }
         }
         ret.reverse();
         ret
+    }
+
+    /// [21. 合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
+    ///
+    /// 递归写法
+    /// ```ignore
+    /// pub fn merge_two_lists(list1: Option<Box<ListNode>>, list2: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+    ///     if list1.is_none(){
+    ///         return list2;
+    ///     } else if list2.is_none(){
+    ///         return  list1;
+    ///     }
+    ///
+    ///     let (v1, v2) = (
+    ///         list1.as_ref().unwrap().val,
+    ///         list2.as_ref().unwrap().val
+    ///     );
+    ///
+    ///     let mut head;
+    ///     if v1 < v2{
+    ///         head = list1;
+    ///         let next = head.as_mut().unwrap().next.take();
+    ///         head.as_mut().unwrap().next = merge_two_lists(next, list2);
+    ///     } else {
+    ///         head = list2;
+    ///         let next = head.as_mut().unwrap().next.take();
+    ///         head.as_mut().unwrap().next = merge_two_lists(next, list1);
+    ///     }
+    ///
+    ///     head
+    /// }
+    /// ```
+    pub fn merge_two_lists(
+        list1: Option<Box<ListNode>>,
+        list2: Option<Box<ListNode>>,
+    ) -> Option<Box<ListNode>> {
+        if list1.is_none() {
+            return list2;
+        } else if list2.is_none() {
+            return list1;
+        }
+
+        let mut head = Some(Box::new(ListNode { val: 0, next: None }));
+
+        let (mut list1, mut list2) = (list1, list2);
+
+        let mut curr = head.as_mut().unwrap();
+        while list1.is_some() && list2.is_some() {
+            // i32 Copy, 所以无借用
+            let (v1, v2) = (list1.as_ref().unwrap().val, list2.as_ref().unwrap().val);
+
+            if v1 < v2 {
+                let tmp = list1.as_mut().unwrap().next.take(); // 把list1的next摘下来, 暂存
+                curr.next = list1;
+                list1 = tmp; // 更新list1, 指针向后一个
+            } else {
+                curr.next = list2;
+                list2 = curr.next.as_mut().unwrap().next.take(); // 或者再取出
+                                                                 // 注意这里没有像其他语言一样 直接 list2 = list2.next, 因为list2的所有权已经转移
+            }
+            curr = curr.next.as_mut().unwrap(); // 整体指针后移一个
+        }
+
+        if list1.is_some() {
+            curr.next = list1;
+        }
+        if list2.is_some() {
+            curr.next = list2;
+        }
+
+        head.unwrap().next
+    }
+
+    /// [23. 合并K个升序链表](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
+    pub fn merge_k_lists(lists: Vec<Option<Box<ListNode>>>) -> Option<Box<ListNode>> {
+        use std::cmp::Ordering;
+        impl ListNode {
+            fn reverse_cmp(&self, other: &Self) -> Ordering {
+                // 这里将大小反转, 实现 core::cmp::Reverse 效果
+                // 这样在 BinaryHeap 中可以偷懒
+                match self.val.cmp(&other.val) {
+                    Ordering::Greater => Ordering::Less,
+                    Ordering::Less => Ordering::Greater,
+                    Ordering::Equal => Ordering::Equal,
+                }
+            }
+        }
+
+        impl PartialOrd for ListNode {
+            fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+                Some(self.reverse_cmp(other))
+            }
+        }
+
+        impl Ord for ListNode {
+            fn cmp(&self, other: &Self) -> Ordering {
+                self.reverse_cmp(other)
+            }
+        }
+
+        if lists.is_empty() {
+            return None;
+        }
+
+        use std::collections::BinaryHeap; // 默认是大顶堆
+
+        let mut heap = BinaryHeap::from_iter(lists.into_iter());
+
+        let mut head = Some(Box::new(ListNode { val: 0, next: None }));
+        let mut curr = head.as_mut().unwrap();
+
+        while !heap.is_empty() {
+            let mut node = heap.pop().unwrap();
+            if node.is_none() {
+                continue;
+            }
+            let next = node.as_mut().unwrap().next.take();
+            curr.next = node;
+            if next.is_some() {
+                heap.push(next);
+            }
+
+            curr = curr.next.as_mut().unwrap();
+        }
+
+        head.unwrap().next
+    }
+
+    /// [19. 删除链表的倒数第 N 个结点](https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list/)
+    pub fn remove_nth_from_end(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
+
+        let mut dummy = Some(Box::new(ListNode { val: 0, next: head }));
+        let mut slow_p = &mut dummy;
+        let mut fast_p = &slow_p.clone();
+
+        for _ in 0..=n {
+            fast_p = &fast_p.as_ref().unwrap().next;
+        }
+
+        while fast_p.is_some() {
+            fast_p = &fast_p.as_ref().unwrap().next;
+            slow_p = &mut slow_p.as_mut().unwrap().next;
+        }
+
+        let remove_p = &mut slow_p.as_mut().unwrap().next;
+        slow_p.as_mut().unwrap().next = remove_p.as_mut().unwrap().next.take();
+
+        dummy.unwrap().next
+    }
+
+    /// [876. 链表的中间结点](https://leetcode-cn.com/problems/middle-of-the-linked-list/)
+    pub fn middle_node(head: Option<Box<ListNode>>) -> Option<Box<ListNode>> {
+        let mut head = head;
+        let mut slow_p = &mut head;
+        let mut fast_p = &slow_p.clone();
+        while fast_p.is_some(){
+            let next = &fast_p.as_ref().unwrap().next;
+            if next.is_none(){
+                break;
+            }
+            slow_p = &mut slow_p.as_mut().unwrap().next;
+            fast_p = &next.as_ref().unwrap().next;
+        }
+        slow_p.clone()
     }
 
     #[cfg(test)]
@@ -988,7 +1160,7 @@ pub mod two_pointers {
         }
 
         #[test]
-        fn test_sorted_squares(){
+        fn test_sorted_squares() {
             struct TestCase {
                 name: &'static str,
                 nums: &'static [i32],
@@ -996,25 +1168,177 @@ pub mod two_pointers {
             }
 
             vec![
-                TestCase{
+                TestCase {
                     name: "basic",
-                    nums: &[-4,-1,0,3,10],
-                    expect: &[0,1,9,16,100]
+                    nums: &[-4, -1, 0, 3, 10],
+                    expect: &[0, 1, 9, 16, 100],
                 },
-                TestCase{
+                TestCase {
                     name: "basic 2",
-                    nums: &[-7,-3,2,3,11],
-                    expect: &[4,9,9,49,121]
+                    nums: &[-7, -3, 2, 3, 11],
+                    expect: &[4, 9, 9, 49, 121],
                 },
-                TestCase{
+                TestCase {
                     name: "fix 1",
                     nums: &[1],
-                    expect: &[1]
-                }
-            ].iter().for_each(|testcase| {
+                    expect: &[1],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
                 let actual = sorted_squares(testcase.nums.to_vec());
                 assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
             })
+        }
+
+        #[test]
+        fn test_merge_two_lists() {
+            struct TestCase {
+                name: &'static str,
+                list1: &'static [i32],
+                list2: &'static [i32],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    list1: &[1, 2, 4],
+                    list2: &[1, 3, 4],
+                    expect: &[1, 1, 2, 3, 4, 4],
+                },
+                TestCase {
+                    name: "basic 2",
+                    list1: &[],
+                    list2: &[],
+                    expect: &[],
+                },
+                TestCase {
+                    name: "basic 3",
+                    list1: &[],
+                    list2: &[0],
+                    expect: &[0],
+                },
+                TestCase {
+                    name: "cov 1",
+                    list1: &[0],
+                    list2: &[],
+                    expect: &[0],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let list1 = build_list_from_slice(testcase.list1);
+                let list2 = build_list_from_slice(testcase.list2);
+                let expect = build_list_from_slice(testcase.expect);
+                let actual = merge_two_lists(list1, list2);
+                assert_eq!(expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_merge_k_lists() {
+            struct TestCase {
+                name: &'static str,
+                lists: &'static [&'static [i32]],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    lists: &[&[1, 4, 5], &[1, 3, 4], &[2, 6]],
+                    expect: &[1, 1, 2, 3, 4, 4, 5, 6],
+                },
+                TestCase {
+                    name: "basic 2",
+                    lists: &[],
+                    expect: &[],
+                },
+                TestCase {
+                    name: "basic 3",
+                    lists: &[&[]],
+                    expect: &[],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let lists: Vec<Option<Box<ListNode>>> = testcase
+                    .lists
+                    .iter()
+                    .map(|l| build_list_from_slice(*l))
+                    .collect();
+                let expect = build_list_from_slice(testcase.expect);
+                let actual = merge_k_lists(lists);
+                assert_eq!(expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_remove_nth_from_end() {
+            struct TestCase {
+                name: &'static str,
+                head: &'static [i32],
+                n: i32,
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    head: &[1, 2, 3, 4, 5],
+                    n: 2,
+                    expect: &[1, 2, 3, 5],
+                },
+                TestCase {
+                    name: "basic 2",
+                    head: &[1],
+                    n: 1,
+                    expect: &[],
+                },
+                TestCase {
+                    name: "basic 3",
+                    head: &[1, 2],
+                    n: 1,
+                    expect: &[1],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let head = build_list_from_slice(testcase.head);
+                let expect = build_list_from_slice(testcase.expect);
+                let actual = remove_nth_from_end(head, testcase.n);
+                assert_eq!(expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_middle_node(){
+            struct TestCase {
+                name: &'static str,
+                head: &'static [i32],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    head: &[1, 2, 3, 4, 5],
+                    expect: &[3, 4,  5],
+                },
+                TestCase {
+                    name: "basic 2",
+                    head: &[1,2,3,4,5,6],
+                    expect: &[4, 5, 6],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let head = build_list_from_slice(testcase.head);
+                let expect = build_list_from_slice(testcase.expect);
+                let actual = middle_node(head);
+                assert_eq!(expect, actual, "{} failed", testcase.name);
+            });
         }
     }
 }
