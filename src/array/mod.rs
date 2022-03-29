@@ -849,7 +849,6 @@ pub mod two_pointers {
 
     /// [19. 删除链表的倒数第 N 个结点](https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list/)
     pub fn remove_nth_from_end(head: Option<Box<ListNode>>, n: i32) -> Option<Box<ListNode>> {
-
         let mut dummy = Some(Box::new(ListNode { val: 0, next: head }));
         let mut slow_p = &mut dummy;
         let mut fast_p = &slow_p.clone();
@@ -874,9 +873,9 @@ pub mod two_pointers {
         let mut head = head;
         let mut slow_p = &mut head;
         let mut fast_p = &slow_p.clone();
-        while fast_p.is_some(){
+        while fast_p.is_some() {
             let next = &fast_p.as_ref().unwrap().next;
-            if next.is_none(){
+            if next.is_none() {
                 break;
             }
             slow_p = &mut slow_p.as_mut().unwrap().next;
@@ -1313,7 +1312,7 @@ pub mod two_pointers {
         }
 
         #[test]
-        fn test_middle_node(){
+        fn test_middle_node() {
             struct TestCase {
                 name: &'static str,
                 head: &'static [i32],
@@ -1324,11 +1323,11 @@ pub mod two_pointers {
                 TestCase {
                     name: "basic",
                     head: &[1, 2, 3, 4, 5],
-                    expect: &[3, 4,  5],
+                    expect: &[3, 4, 5],
                 },
                 TestCase {
                     name: "basic 2",
-                    head: &[1,2,3,4,5,6],
+                    head: &[1, 2, 3, 4, 5, 6],
                     expect: &[4, 5, 6],
                 },
             ]
@@ -1338,6 +1337,743 @@ pub mod two_pointers {
                 let expect = build_list_from_slice(testcase.expect);
                 let actual = middle_node(head);
                 assert_eq!(expect, actual, "{} failed", testcase.name);
+            });
+        }
+    }
+}
+
+/// # 滑动窗口
+///
+/// 特点:
+/// * 连续
+/// * two pointers 的扩展
+///
+/// 主要点: 什么时机动哪个边界.
+///
+/// ## 题目链接
+/// * 中等
+///     * [2024. 考试的最大困扰度](https://leetcode-cn.com/problems/maximize-the-confusion-of-an-exam/)
+///     * [1004. 最大连续1的个数 III](https://leetcode-cn.com/problems/max-consecutive-ones-iii/)
+///     * [209. 长度最小的子数组](https://leetcode-cn.com/problems/minimum-size-subarray-sum/)
+///     * [567. 字符串的排列](https://leetcode-cn.com/problems/permutation-in-string/)
+///     * [3. 无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
+///     * [904. 水果成篮](https://leetcode-cn.com/problems/fruit-into-baskets/)
+/// * 困难
+///     * [76. 最小覆盖子串](https://leetcode-cn.com/problems/minimum-window-substring/)
+/// 
+/// ## 总结
+/// * 快慢指针的扩展, 即都是向一个方向跑的
+/// * 题目都是要求连续的xxx, 常见的比如连续子串, 连续子数组, 即能组成一个窗口
+/// * 核心在于什么时机移动哪个边界
+///     * 一般右边界O(N)逐次移动, 即 一个 `for right in 0..lenggh`
+///     * 左边界根据窗口的定义条件移动探索目标解
+///     * 有时窗口大小是固定的
+pub mod windows {
+
+    /// [2024. 考试的最大困扰度](https://leetcode-cn.com/problems/maximize-the-confusion-of-an-exam/)
+    /// 题目描述简化:
+    /// 已知字符串中只有 `T` 和 `F`两种字符, 替换其中的k个字符, 使连续的 `T`或`F`最长
+    ///
+    /// 维持窗口内至多有k个非想要的字符;
+    /// 如果不到k个, 就扩张右边界
+    /// 如果多于k个, 就收缩左边界
+    pub fn max_consecutive_answers(answer_key: String, k: i32) -> i32 {
+        let bytes = answer_key.as_bytes();
+
+        let max_replace = |ser: &[u8], target: u8| -> usize {
+            let mut max_consecutive = 0;
+            let mut other_cnt = 0;
+
+            let mut left = 0;
+
+            for right in 0..ser.len() {
+                let r = ser.get(right).unwrap();
+                if !target.eq(r) {
+                    other_cnt += 1;
+                }
+                while other_cnt > k {
+                    let l = ser.get(left).unwrap();
+                    if !target.eq(l) {
+                        other_cnt -= 1;
+                    }
+                    left += 1;
+                }
+                max_consecutive = max_consecutive.max(right - left + 1);
+            }
+            max_consecutive
+        };
+
+        max_replace(bytes, b'T').max(max_replace(bytes, b'F')) as i32
+    }
+
+    /// [1004. 最大连续1的个数 III](https://leetcode-cn.com/problems/max-consecutive-ones-iii/)
+    pub fn longest_ones(nums: Vec<i32>, k: i32) -> i32 {
+        let longest = |ser: &[i32], target: i32| -> usize {
+            let mut max_consecutive = 0;
+            let mut other_cnt = 0;
+
+            let mut left = 0;
+            for right in 0..ser.len() {
+                let i = ser.get(right).unwrap();
+                if !target.eq(i) {
+                    other_cnt += 1;
+                }
+                while other_cnt > k {
+                    let l = ser.get(left).unwrap();
+                    if !target.eq(l) {
+                        other_cnt -= 1;
+                    }
+                    left += 1;
+                }
+                max_consecutive = max_consecutive.max(right - left + 1); // 同为索引, 因此需要+1
+            }
+            max_consecutive
+        };
+
+        longest(&nums, 1) as i32
+    }
+
+    /// [209. 长度最小的子数组](https://leetcode-cn.com/problems/minimum-size-subarray-sum/)
+    ///
+    /// 如果窗口内和不够, 就扩展右边界
+    /// 如果大于等于, 就尝试收缩左边界, 以便求出最小长度
+    pub fn min_sub_array_len(target: i32, nums: Vec<i32>) -> i32 {
+        let mut min_len: Option<usize> = None;
+
+        let mut left = 0;
+        let mut curr_sum = 0;
+        for right in 0..nums.len() {
+            let r = nums.get(right).unwrap();
+            curr_sum += *r;
+            while curr_sum >= target {
+                if min_len.is_none() {
+                    min_len.replace(right - left + 1);
+                }
+                min_len = min_len.min(Some(right - left + 1));
+
+                let l = nums.get(left).unwrap();
+                curr_sum -= *l;
+                left += 1;
+            }
+        }
+        min_len.unwrap_or(0) as i32
+    }
+
+    /// [76. 最小覆盖子串](https://leetcode-cn.com/problems/minimum-window-substring/)
+    ///
+    /// 如果窗口内的覆盖不了, 就扩展右边界
+    /// 如果窗口内的能覆盖, 就尝试收缩左边界, 求最小长度
+    ///
+    /// ```ignore
+    /// pub fn min_window(s: String, t: String) -> String {
+    ///     use std::cmp::Ordering;
+    ///     use std::collections::HashMap;
+    ///
+    ///     let can_cover = |target: &HashMap<u8, i32>, range: &HashMap<u8, i32>| -> bool{
+    ///         for (k, v) in target.iter(){
+    ///             let x = range.get(k);
+    ///             if x.is_none(){
+    ///                 return false;
+    ///             }
+    ///             match v.cmp(x.unwrap()){
+    ///                 Ordering::Greater => return false,
+    ///                 _ => {}
+    ///             }
+    ///         }
+    ///         return true;
+    ///     };
+    ///
+    ///     let t_cnt = {
+    ///         let mut tmp = HashMap::with_capacity(52);
+    ///         t.bytes().for_each(|c|{
+    ///             *tmp.entry(c).or_insert(0) += 1;
+    ///         });
+    ///         tmp
+    ///     };
+    ///
+    ///     let s_cnt = {
+    ///         let mut tmp = HashMap::with_capacity(52);
+    ///         s.bytes().for_each(|c|{
+    ///             *tmp.entry(c).or_insert(0) += 1;
+    ///         });
+    ///         tmp
+    ///     };
+    ///
+    ///     if !can_cover(&t_cnt, &s_cnt){
+    ///         return "".to_string();
+    ///     }
+    ///
+    ///     let bytes = s.as_bytes();
+    ///     
+    ///     let mut left= 0;
+    ///     let (mut start, mut length) = (0, usize::MAX);
+    ///
+    ///     let mut counter = HashMap::with_capacity(52);
+    ///
+    ///     for right in 0..bytes.len(){
+    ///         let c = bytes.get(right).unwrap();
+    ///         *counter.entry(*c).or_insert(0) += 1;
+    ///
+    ///         while can_cover(&t_cnt, &counter){
+    ///             if right - left + 1 < length{
+    ///                 start = left;
+    ///                 length = right - left + 1;
+    ///             }
+    ///             let l = bytes.get(left).unwrap();
+    ///             *counter.entry(*l).or_default() -= 1;
+    ///             left += 1;
+    ///         }
+    ///     }
+    ///
+    ///     String::from_utf8(bytes[start..start+length].to_vec()).unwrap()
+    /// }
+    /// ```
+    ///
+    /// * 由于字母计数不会突变, 因此在 判定是否覆盖时, 可以不用全量扫描
+    /// * 由于全英文字母, 因此可以用 26 * 2的数组表示替换hash表
+    ///     * 不过大小写范围不同, 还得处理索引, 不如hash方便
+    pub fn min_window(s: String, t: String) -> String {
+        use std::collections::HashMap;
+
+        let need = {
+            let mut tmp = HashMap::with_capacity(52);
+            t.bytes().for_each(|c| {
+                *tmp.entry(c).or_insert(0) += 1;
+            });
+            tmp
+        };
+
+        let bytes = s.as_bytes();
+
+        let (mut start, mut length): (usize, Option<usize>) = (0, None);
+
+        let mut window_cnt = HashMap::with_capacity(52);
+        let mut valid_char_cnt = 0;
+
+        let mut left = 0;
+        for right in 0..bytes.len() {
+            let rc = bytes.get(right).unwrap();
+
+            if let Some(cnt) = need.get(rc) {
+                // 不需要的字符, 不统计
+                let entry = window_cnt.entry(*rc).or_insert(0);
+                *entry += 1;
+                if entry == cnt {
+                    // 又一个字符达到要求
+                    valid_char_cnt += 1;
+                }
+            }
+
+            while valid_char_cnt == need.len() {
+                let ll = length.unwrap_or(usize::MAX);
+                if right - left + 1 < ll {
+                    start = left;
+                    length.replace(right - left + 1);
+                }
+
+                let lc = bytes.get(left).unwrap();
+                left += 1;
+
+                if let Some(cnt) = need.get(lc) {
+                    // 不需要的字符, 不统计
+                    let entry = window_cnt.entry(*lc).or_insert(0);
+                    if entry == cnt {
+                        // 一个达标字符被删掉一个
+                        valid_char_cnt -= 1;
+                    }
+                    *entry -= 1;
+                }
+            }
+        }
+        if length.is_none() {
+            return "".to_string();
+        }
+
+        String::from_utf8(bytes[start..start + length.unwrap()].to_vec()).unwrap()
+    }
+
+    /// [567. 字符串的排列](https://leetcode-cn.com/problems/permutation-in-string/)
+    ///
+    /// 由于是子串, 长度必然要相等, 因此固定窗口大小为 s1 的长度.
+    ///
+    /// 与 76 基本相似, 只是窗口大小固定
+    /// 因此调整窗口边界增加一个大小限制
+    pub fn check_inclusion(s1: String, s2: String) -> bool {
+        use std::collections::HashMap;
+        let need: HashMap<u8, i32> = {
+            let mut tmp = HashMap::with_capacity(26);
+            s1.bytes().for_each(|b| {
+                *tmp.entry(b).or_default() += 1;
+            });
+            tmp
+        };
+
+        let bytes = s2.as_bytes();
+        let length = s1.as_bytes().len();
+
+        let mut valid = 0;
+        let mut window_cnt: HashMap<u8, i32> = HashMap::with_capacity(26);
+
+        let mut left = 0;
+        for right in 0..bytes.len() {
+            let rc = bytes.get(right).unwrap();
+            if let Some(nc) = need.get(rc) {
+                let entry = window_cnt.entry(*rc).or_default();
+                *entry += 1;
+                if entry == nc {
+                    valid += 1;
+                }
+            }
+
+            while right - left + 1 >= length {
+                if valid == need.len() {
+                    return true;
+                }
+                let lc = bytes.get(left).unwrap();
+                left += 1;
+
+                if let Some(nc) = need.get(lc) {
+                    let entry = window_cnt.entry(*lc).or_default();
+                    if entry == nc {
+                        valid -= 1;
+                    }
+                    *entry -= 1;
+                }
+            }
+        }
+
+        false
+    }
+
+    /// [438. 找到字符串中所有字母异位词](https://leetcode-cn.com/problems/find-all-anagrams-in-a-string/)
+    ///
+    /// 与 567 基本相似, 只是需要记录起点位置
+    pub fn find_anagrams(s: String, p: String) -> Vec<i32> {
+        use std::collections::HashMap;
+        let need = {
+            let mut tmp = HashMap::with_capacity(26);
+            p.bytes().for_each(|c| {
+                *tmp.entry(c).or_insert(0) += 1;
+            });
+            tmp
+        };
+
+        let bytes = s.as_bytes();
+        let window_size = p.as_bytes().len();
+
+        let mut valid = 0;
+        let mut window_cnt = HashMap::with_capacity(0);
+
+        let mut ret = vec![];
+
+        let mut left = 0;
+        for right in 0..bytes.len() {
+            let rc = bytes.get(right).unwrap();
+            if let Some(nc) = need.get(rc) {
+                let entry = window_cnt.entry(*rc).or_insert(0);
+                *entry += 1;
+                if entry == nc {
+                    valid += 1;
+                }
+            }
+
+            while right - left + 1 >= window_size {
+                if valid == need.len() {
+                    ret.push(left as i32);
+                }
+                let lc = bytes.get(left).unwrap();
+                left += 1;
+                if let Some(nc) = need.get(lc) {
+                    let entry = window_cnt.entry(*lc).or_insert(0);
+                    if entry == nc {
+                        valid -= 1;
+                    }
+                    *entry -= 1;
+                }
+            }
+        }
+
+        ret
+    }
+
+    /// [3. 无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
+    ///
+    /// 窗口内没有重复字符时, 就扩张右边界, 并记录结果
+    /// 窗口内有重复字符时, 就收缩左边界
+    ///
+    /// ~~由于窗口内字母常态时仅一个, 可以不用保存计数,~~
+    /// * 可以保存谁破坏了规则, 即谁重复了
+    pub fn length_of_longest_substring(s: String) -> i32 {
+        use std::collections::HashMap;
+
+        let bytes = s.as_bytes();
+
+        let mut max_length = 0;
+
+        let mut who: Option<u8> = None;
+        let mut cnt = HashMap::with_capacity(26);
+
+        let mut left = 0;
+        for right in 0..bytes.len() {
+            let rc = bytes.get(right).unwrap();
+
+            let entry = cnt.entry(*rc).or_insert(0);
+            *entry += 1;
+
+            if *entry >= 2 {
+                who.replace(*rc);
+            } else {
+                max_length = max_length.max(right - left + 1);
+            }
+
+            // 没有像其他语言一样直接 cnt[rc] > 1
+            // 也没有用上面的entry, 语言限制 ??
+            while who.is_some() {
+                let lc = bytes.get(left).unwrap();
+                left += 1;
+
+                let entry = cnt.entry(*lc).or_insert(0);
+                *entry -= 1;
+
+                if who.unwrap() == *lc {
+                    who.take();
+                }
+            }
+        }
+
+        max_length as i32
+    }
+
+    /// [904. 水果成篮](https://leetcode-cn.com/problems/fruit-into-baskets/)
+    ///
+    /// * 保持窗口内 只有 f1, f2 两种水果
+    /// * 如果 符合, 继续扩张右边界, 并计算将结果
+    /// * 如果出现不符合, 找到窗口内 离f3最远那个的最后出现位置, 将left重置到 其最后出现位置 + 1
+    ///     * 因此需要保存每个水果种类最后出现的问题
+    ///
+    pub fn total_fruit(fruits: Vec<i32>) -> i32 {
+        let (mut f1, mut f2): (Option<(i32, usize)>, Option<(i32, usize)>) = (None, None);
+
+        let mut max_length = 0;
+
+        let mut left = 0;
+        for right in 0..fruits.len() {
+            let f3_calss = fruits.get(right).unwrap();
+
+            if f1.is_none() {
+                f1.replace((*f3_calss, right));
+            } else if *f3_calss == f1.unwrap().0 {
+                f1.replace((*f3_calss, right));
+            } else if f2.is_none() {
+                f2.replace((*f3_calss, right));
+            } else if *f3_calss == f2.unwrap().0 {
+                f2.replace((*f3_calss, right));
+            } else {
+                let prev_class = fruits.get(right - 1).unwrap();
+                if *prev_class == f1.unwrap().0 {
+                    left = f2.unwrap().1 + 1;
+                    f2.replace((*f3_calss, right));
+                } else {
+                    left = f1.unwrap().1 + 1;
+                    f1.replace((*f3_calss, right));
+                }
+            }
+
+            max_length = max_length.max(right - left + 1);
+        }
+
+        max_length as i32
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_total_fruit() {
+            struct TestCase {
+                name: &'static str,
+                fruits: &'static [i32],
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    fruits: &[1, 2, 1],
+                    expect: 3,
+                },
+                TestCase {
+                    name: "basic 2",
+                    fruits: &[0, 1, 2, 2],
+                    expect: 3,
+                },
+                TestCase {
+                    name: "basic 3",
+                    fruits: &[1, 2, 3, 2, 2],
+                    expect: 4,
+                },
+                TestCase {
+                    name: "basic 4",
+                    fruits: &[3, 3, 3, 1, 2, 1, 1, 2, 3, 3, 4],
+                    expect: 5,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = total_fruit(testcase.fruits.to_vec());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_length_of_longest_substring() {
+            struct TestCase {
+                name: &'static str,
+                s: &'static str,
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    s: "abcabcbb",
+                    expect: 3,
+                },
+                TestCase {
+                    name: "basic 2",
+                    s: "bbbbb",
+                    expect: 1,
+                },
+                TestCase {
+                    name: "basic 3",
+                    s: "pwwkew",
+                    expect: 3,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = length_of_longest_substring(testcase.s.to_string());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_find_anagrams() {
+            struct TestCase {
+                name: &'static str,
+                s: &'static str,
+                p: &'static str,
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    s: "cbaebabacd",
+                    p: "abc",
+                    expect: &[0, 6],
+                },
+                TestCase {
+                    name: "basic 2",
+                    s: "abab",
+                    p: "ab",
+                    expect: &[0, 1, 2],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = find_anagrams(testcase.s.to_string(), testcase.p.to_string());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_check_inclusion() {
+            struct TestCase {
+                name: &'static str,
+                s1: &'static str,
+                s2: &'static str,
+                expect: bool,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    s1: "ab",
+                    s2: "eidbaooo",
+                    expect: true,
+                },
+                TestCase {
+                    name: "basic 2",
+                    s1: "ab",
+                    s2: "eidboaoo",
+                    expect: false,
+                },
+                TestCase {
+                    name: "fix 1",
+                    s1: "hello",
+                    s2: "ooolleoooleh",
+                    expect: false,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = check_inclusion(testcase.s1.to_string(), testcase.s2.to_string());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            })
+        }
+
+        #[test]
+        fn test_min_window() {
+            struct TestCase {
+                name: &'static str,
+                s: &'static str,
+                t: &'static str,
+                expect: &'static str,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    s: "ADOBECODEBANC",
+                    t: "ABC",
+                    expect: "BANC",
+                },
+                TestCase {
+                    name: "basic 2",
+                    s: "a",
+                    t: "a",
+                    expect: "a",
+                },
+                TestCase {
+                    name: "basic 3",
+                    s: "a",
+                    t: "aa",
+                    expect: "",
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = min_window(testcase.s.to_string(), testcase.t.to_string());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_min_sub_array_len() {
+            struct TestCase {
+                name: &'static str,
+                target: i32,
+                nums: &'static [i32],
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    target: 7,
+                    nums: &[2, 3, 1, 2, 4, 3],
+                    expect: 2,
+                },
+                TestCase {
+                    name: "basic 2",
+                    target: 4,
+                    nums: &[1, 4, 4],
+                    expect: 1,
+                },
+                TestCase {
+                    name: "basic 3",
+                    target: 11,
+                    nums: &[1, 1, 1, 1, 1, 1, 1, 1],
+                    expect: 0,
+                },
+                TestCase {
+                    name: "fix 1",
+                    target: 11,
+                    nums: &[1, 2, 3, 4, 5],
+                    expect: 3,
+                },
+                TestCase {
+                    name: "fix 2",
+                    target: 15,
+                    nums: &[1, 2, 3, 4, 5],
+                    expect: 5,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let nums = testcase.nums.to_vec();
+                let actual = min_sub_array_len(testcase.target, nums);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_longest_ones() {
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                k: i32,
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums: &[1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0],
+                    k: 2,
+                    expect: 6,
+                },
+                TestCase {
+                    name: "basic 2",
+                    nums: &[0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
+                    k: 3,
+                    expect: 10,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let nums = testcase.nums.to_vec();
+                let actual = longest_ones(nums, testcase.k);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name)
+            });
+        }
+
+        #[test]
+        fn test_max_consecutive_answers() {
+            struct TestCase {
+                name: &'static str,
+                answer: &'static str,
+                k: i32,
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    answer: "TTFF",
+                    k: 2,
+                    expect: 4,
+                },
+                TestCase {
+                    name: "basic 2",
+                    answer: "TFFT",
+                    k: 1,
+                    expect: 3,
+                },
+                TestCase {
+                    name: "basic 3",
+                    answer: "TTFTTFTT",
+                    k: 1,
+                    expect: 5,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let answer = testcase.answer.to_string();
+                let actual = max_consecutive_answers(answer, testcase.k);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
             });
         }
     }
