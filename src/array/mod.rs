@@ -119,12 +119,12 @@
 /// ## 题目链接
 ///
 /// * 简单:
-///     * [704. 二分查找](https://leetcode-cn.com/problems/binary-search/)
-///     * [35. 搜索插入位置](https://leetcode-cn.com/problems/search-insert-position/)
+///     * [704. 二分查找](search)
+///     * [35. 搜索插入位置](search_insert)
 /// * 中等:
-///     * [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
-///     * [875. 爱吃香蕉的珂珂](https://leetcode-cn.com/problems/koko-eating-bananas/)
-///     * [1011. 在 D 天内送达包裹的能力](https://leetcode-cn.com/problems/capacity-to-ship-packages-within-d-days/)
+///     * [34. 在排序数组中查找元素的第一个和最后一个位置](search_range)
+///     * [875. 爱吃香蕉的珂珂](min_eating_speed)
+///     * [1011. 在 D 天内送达包裹的能力](ship_within_days)
 ///
 pub mod binary_search {
 
@@ -516,20 +516,20 @@ pub mod binary_search {
 ///
 /// ## 题目链接
 /// * 简单:
-///     * [27. 移除元素](https://leetcode-cn.com/problems/remove-element/)
-///     * [26. 删除有序数组中的重复项](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array/)
-///     * [83. 删除排序链表中的重复元素](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-list/)
-///     * [283. 移动零](https://leetcode-cn.com/problems/move-zeroes/)
-///     * [344. 反转字符串](https://leetcode-cn.com/problems/reverse-string/)
-///     * [977. 有序数组的平方](https://leetcode-cn.com/problems/squares-of-a-sorted-array/)
-///     * [21. 合并两个有序链表](https://leetcode-cn.com/problems/merge-two-sorted-lists/)
-///     * [876. 链表的中间结点](https://leetcode-cn.com/problems/middle-of-the-linked-list/)
+///     * [27. 移除元素](remove_element)
+///     * [26. 删除有序数组中的重复项](remove_duplicates)
+///     * [83. 删除排序链表中的重复元素](delete_duplicates)
+///     * [283. 移动零](move_zeroes)
+///     * [344. 反转字符串](reverse_string)
+///     * [977. 有序数组的平方](sorted_squares)
+///     * [21. 合并两个有序链表](merge_k_lists)
+///     * [876. 链表的中间结点](middle_node)
 /// * 中等:
-///     * [167. 两数之和 II - 输入有序数组](https://leetcode-cn.com/problems/two-sum-ii-input-array-is-sorted/)
-///     * [5. 最长回文子串](https://leetcode-cn.com/problems/longest-palindromic-substring/)
-///     * [19. 删除链表的倒数第 N 个结点](https://leetcode-cn.com/problems/remove-nth-node-from-end-of-list/)
+///     * [167. 两数之和 II - 输入有序数组](two_sum)
+///     * [5. 最长回文子串](longest_palindrome)
+///     * [19. 删除链表的倒数第 N 个结点](remove_nth_from_end)
 /// * 困难:
-///     * [23. 合并K个升序链表](https://leetcode-cn.com/problems/merge-k-sorted-lists/)
+///     * [23. 合并K个升序链表](merge_k_lists)
 /// * 没有rust模版的题:
 ///     * [141. 环形链表](https://leetcode-cn.com/problems/linked-list-cycle/)
 ///     * [160. 相交链表](https://leetcode-cn.com/problems/intersection-of-two-linked-lists/)
@@ -1356,14 +1356,15 @@ pub mod two_pointers {
 ///
 /// ## 题目链接
 /// * 中等
-///     * [2024. 考试的最大困扰度](https://leetcode-cn.com/problems/maximize-the-confusion-of-an-exam/)
-///     * [1004. 最大连续1的个数 III](https://leetcode-cn.com/problems/max-consecutive-ones-iii/)
-///     * [209. 长度最小的子数组](https://leetcode-cn.com/problems/minimum-size-subarray-sum/)
-///     * [567. 字符串的排列](https://leetcode-cn.com/problems/permutation-in-string/)
-///     * [3. 无重复字符的最长子串](https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/)
-///     * [904. 水果成篮](https://leetcode-cn.com/problems/fruit-into-baskets/)
+///     * [2024. 考试的最大困扰度](max_consecutive_answers)
+///     * [1004. 最大连续1的个数 III](longest_ones)
+///     * [209. 长度最小的子数组](min_sub_array_len)
+///     * [567. 字符串的排列](check_inclusion)
+///     * [3. 无重复字符的最长子串](length_of_longest_substring)
+///     * [904. 水果成篮](total_fruit)
+///     * [438. 找到字符串中所有字母异位词](find_anagrams)
 /// * 困难
-///     * [76. 最小覆盖子串](https://leetcode-cn.com/problems/minimum-window-substring/)
+///     * [76. 最小覆盖子串](min_window)
 ///
 /// ## 总结
 /// * 快慢指针的扩展, 即都是向一个方向跑的
@@ -2086,13 +2087,14 @@ pub mod windows {
 ///
 /// ## 题目
 /// * 简单
-///     * [303. 区域和检索 - 数组不可变](https://leetcode-cn.com/problems/range-sum-query-immutable/)
+///     * [303. 区域和检索 - 数组不可变](NumArray)
 /// * 中等
-///     * [304. 二维区域和检索 - 矩阵不可变](https://leetcode-cn.com/problems/range-sum-query-2d-immutable/)
-///     * [560. 和为 K 的子数组](https://leetcode-cn.com/problems/subarray-sum-equals-k/)
+///     * [304. 二维区域和检索 - 矩阵不可变](NumMatrix)
+///     * [560. 和为 K 的子数组](subarray_sum)
 /// * 困难
 pub mod pre_sum {
 
+    /// [303. 区域和检索 - 数组不可变](https://leetcode-cn.com/problems/range-sum-query-immutable/)
     #[allow(dead_code)]
     struct NumArray {
         pre: Vec<i32>,
@@ -2126,6 +2128,7 @@ pub mod pre_sum {
         }
     }
 
+    /// [304. 二维区域和检索 - 矩阵不可变](https://leetcode-cn.com/problems/range-sum-query-2d-immutable/)
     #[allow(dead_code)]
     struct NumMatrix {
         pre: Vec<Vec<i32>>,
@@ -2369,8 +2372,9 @@ pub mod pre_sum {
 /// ## 题目
 /// * 简单
 /// * 中等
-///     * [370. 区间加法](https://leetcode-cn.com/problems/range-addition/)
-///     *[1109. 航班预订统计](https://leetcode-cn.com/problems/corporate-flight-bookings/)
+///     * [370. 区间加法](get_modified_array)
+///     * [1109. 航班预订统计](corp_flight_bookings)
+///     * [1094. 拼车](car_pooling)
 /// * 困难
 pub mod diff_sub {
 
@@ -2544,3 +2548,7 @@ pub mod diff_sub {
         }
     }
 }
+
+
+/// 一些周边题目
+pub mod ext;
