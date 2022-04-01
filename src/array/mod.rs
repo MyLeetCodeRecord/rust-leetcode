@@ -538,6 +538,7 @@ pub mod two_pointers {
 
     /// [27. 移除元素](https://leetcode-cn.com/problems/remove-element/)
     /// 索引 usize 可能溢出
+    #[allow(clippy::ptr_arg)]
     pub fn remove_element(nums: &mut Vec<i32>, val: i32) -> i32 {
         if nums.is_empty() {
             return 0;
@@ -563,6 +564,7 @@ pub mod two_pointers {
     }
 
     /// [26. 删除有序数组中的重复项](https://leetcode-cn.com/problems/remove-duplicates-from-sorted-array/)
+    #[allow(clippy::ptr_arg)]
     pub fn remove_duplicates(nums: &mut Vec<i32>) -> i32 {
         if nums.len() <= 1 {
             return nums.len() as i32;
@@ -613,6 +615,7 @@ pub mod two_pointers {
     }
 
     /// [283. 移动零](https://leetcode-cn.com/problems/move-zeroes/)
+    #[allow(clippy::ptr_arg)]
     pub fn move_zeroes(nums: &mut Vec<i32>) {
         let mut slow = {
             let mut idx = nums.len();
@@ -660,6 +663,7 @@ pub mod two_pointers {
     }
 
     /// [344. 反转字符串](https://leetcode-cn.com/problems/reverse-string/)
+    #[allow(clippy::ptr_arg)]
     pub fn reverse_string(s: &mut Vec<char>) {
         let (mut left, mut right) = (0, s.len() - 1);
         while left < right {
@@ -681,7 +685,7 @@ pub mod two_pointers {
                 r += 1;
             }
 
-            s[(l + 1) as usize..r as usize].into_iter().collect()
+            s[(l + 1) as usize..r as usize].iter().collect()
         };
 
         let chars: Vec<char> = s.chars().collect();
@@ -923,7 +927,7 @@ pub mod two_pointers {
                 use std::collections::HashSet;
 
                 let expect = {
-                    let mut tmp = testcase.nums.iter().map(|x| *x).collect::<HashSet<i32>>();
+                    let mut tmp = testcase.nums.iter().copied().collect::<HashSet<i32>>();
                     tmp.remove(&testcase.val);
                     tmp
                 };
@@ -931,7 +935,7 @@ pub mod two_pointers {
                     if x != testcase.val {
                         return acc + 1;
                     }
-                    return acc;
+                    acc
                 });
 
                 let mut tmp = testcase.nums.to_vec();
@@ -939,7 +943,7 @@ pub mod two_pointers {
 
                 assert_eq!(expect_length, length, "{} length not match", testcase.name);
 
-                let actual = tmp[..length].iter().map(|x| *x).collect::<HashSet<i32>>();
+                let actual = tmp[..length].iter().copied().collect::<HashSet<i32>>();
                 assert_eq!(expect, actual, "{} result not match", testcase.name);
             })
         }
@@ -1752,7 +1756,8 @@ pub mod windows {
     ///     * 因此需要保存每个水果种类最后出现的问题
     ///
     pub fn total_fruit(fruits: Vec<i32>) -> i32 {
-        let (mut f1, mut f2): (Option<(i32, usize)>, Option<(i32, usize)>) = (None, None);
+        let mut f1: Option<(i32, usize)> = None;
+        let mut f2: Option<(i32, usize)> = None;
 
         let mut max_length = 0;
 
@@ -1760,13 +1765,9 @@ pub mod windows {
         for right in 0..fruits.len() {
             let f3_calss = fruits.get(right).unwrap();
 
-            if f1.is_none() {
+            if f1.is_none() || *f3_calss == f1.unwrap().0 {
                 f1.replace((*f3_calss, right));
-            } else if *f3_calss == f1.unwrap().0 {
-                f1.replace((*f3_calss, right));
-            } else if f2.is_none() {
-                f2.replace((*f3_calss, right));
-            } else if *f3_calss == f2.unwrap().0 {
+            } else if f2.is_none() || *f3_calss == f2.unwrap().0 {
                 f2.replace((*f3_calss, right));
             } else {
                 let prev_class = fruits.get(right - 1).unwrap();
@@ -2092,7 +2093,6 @@ pub mod windows {
 /// * 困难
 pub mod pre_sum {
 
-
     #[allow(dead_code)]
     struct NumArray {
         pre: Vec<i32>,
@@ -2126,7 +2126,6 @@ pub mod pre_sum {
         }
     }
 
-
     #[allow(dead_code)]
     struct NumMatrix {
         pre: Vec<Vec<i32>>,
@@ -2153,10 +2152,8 @@ pub mod pre_sum {
         fn sum_region(&self, row1: i32, col1: i32, row2: i32, col2: i32) -> i32 {
             let (row1, col1, row2, col2) =
                 (row1 as usize, col1 as usize, row2 as usize, col2 as usize);
-            return self.pre[row2 + 1][col2 + 1]
-                - self.pre[row1][col2 + 1]
-                - self.pre[row2 + 1][col1]
-                + self.pre[row1][col1];
+            self.pre[row2 + 1][col2 + 1] - self.pre[row1][col2 + 1] - self.pre[row2 + 1][col1]
+                + self.pre[row1][col1]
         }
     }
 
