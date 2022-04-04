@@ -528,6 +528,7 @@ pub mod binary_search {
 ///     * [167. 两数之和 II - 输入有序数组](two_sum)
 ///     * [5. 最长回文子串](longest_palindrome)
 ///     * [19. 删除链表的倒数第 N 个结点](remove_nth_from_end)
+///     * [870. 优势洗牌](advantage_count)
 /// * 困难:
 ///     * [23. 合并K个升序链表](merge_k_lists)
 /// * 没有rust模版的题:
@@ -888,9 +889,138 @@ pub mod two_pointers {
         slow_p.clone()
     }
 
+    /// [870. 优势洗牌](https://leetcode-cn.com/problems/advantage-shuffle/)
+    ///
+    /// 田忌赛马
+    ///
+    /// 齐王的马顺序不能变, 因此需要记录位置之后再排序. 可以使用优先队列, 也可以直接排
+    /// ```
+    /// pub fn advantage_count(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
+    ///     use std::cmp::Ordering;
+    ///     use std::collections::BinaryHeap;
+    /// 
+    ///     struct Element(usize, i32);
+    ///     impl std::cmp::Ord for Element {
+    ///         fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    ///             self.1.cmp(&other.1)
+    ///         }
+    ///     }
+    ///     impl std::cmp::PartialOrd for Element {
+    ///         fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+    ///             Some(self.cmp(other))
+    ///         }
+    ///     }
+    ///     impl std::cmp::PartialEq for Element {
+    ///         fn eq(&self, other: &Self) -> bool {
+    ///             self.1.eq(&other.1)
+    ///         }
+    ///     }
+    ///     impl std::cmp::Eq for Element {}
+    /// 
+    ///     let mut nums2: BinaryHeap<Element> = nums2
+    ///         .into_iter()
+    ///         .enumerate()
+    ///         .map(|(idx, num)| Element(idx, num))
+    ///         .collect();
+    /// 
+    ///     let mut nums1 = nums1;
+    ///     nums1.sort();
+    /// 
+    ///     let mut result = nums1.clone();
+    /// 
+    ///     let (mut left, mut right) = (1, nums1.len());
+    ///     while !nums2.is_empty() {
+    ///         let Element(index, val) = nums2.pop().unwrap();
+    ///         match val.cmp(nums1.get(right - 1).unwrap()) {
+    ///             Ordering::Greater => {
+    ///                 // 用次等马对它的好马
+    ///                 *result.get_mut(index).unwrap() = nums1.get(left - 1).copied().unwrap();
+    ///                 left += 1;
+    ///             }
+    ///             Ordering::Less => {
+    ///                 // 能胜过就胜过
+    ///                 *result.get_mut(index).unwrap() = nums1.get(right - 1).copied().unwrap();
+    ///                 right -= 1;
+    ///             }
+    ///             Ordering::Equal => {
+    ///                 // 同等战力, 用次的替换, 保存实力
+    ///                 *result.get_mut(index).unwrap() = nums1.get(left - 1).copied().unwrap();
+    ///                 left += 1;
+    ///             }
+    ///         }
+    ///     }
+    /// 
+    ///     result
+    /// }
+    /// ```
+    pub fn advantage_count(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
+        use std::cmp::Ordering;
+
+        let mut nums1 = nums1;
+        nums1.sort();
+        let mut nums2 = nums2.into_iter().enumerate().collect::<Vec<(usize, i32)>>();
+        nums2.sort_by(|a, b| a.1.cmp(&b.1));
+
+        let mut result = nums1.clone();
+
+        let (mut left, mut right) = (1, nums1.len());
+        while !nums2.is_empty() {
+            let (index, val) = nums2.pop().unwrap();
+            match val.cmp(nums1.get(right - 1).unwrap()) {
+                Ordering::Greater => {
+                    // 用次等马对它的好马
+                    *result.get_mut(index).unwrap() = nums1.get(left - 1).copied().unwrap();
+                    left += 1;
+                }
+                Ordering::Less => {
+                    // 能胜过就胜过
+                    *result.get_mut(index).unwrap() = nums1.get(right - 1).copied().unwrap();
+                    right -= 1;
+                }
+                Ordering::Equal => {
+                    // 同等战力, 用次的替换, 保存实力
+                    *result.get_mut(index).unwrap() = nums1.get(left - 1).copied().unwrap();
+                    left += 1;
+                }
+            }
+        }
+
+        result
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_advantage_count() {
+            struct TestCase {
+                name: &'static str,
+                nums1: &'static [i32],
+                nums2: &'static [i32],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums1: &[2, 7, 11, 15],
+                    nums2: &[1, 10, 4, 11],
+                    expect: &[2, 11, 7, 15],
+                },
+                TestCase {
+                    name: "basic",
+                    nums1: &[12, 24, 8, 32],
+                    nums2: &[13, 25, 32, 11],
+                    expect: &[24, 32, 8, 12],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let acutal = advantage_count(testcase.nums1.to_vec(), testcase.nums2.to_vec());
+                assert_eq!(testcase.expect, acutal, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_remove_element() {
@@ -2548,7 +2678,6 @@ pub mod diff_sub {
         }
     }
 }
-
 
 /// 一些周边题目
 pub mod ext;
