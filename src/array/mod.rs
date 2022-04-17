@@ -125,6 +125,7 @@
 ///     * [34. 在排序数组中查找元素的第一个和最后一个位置](search_range)
 ///     * [875. 爱吃香蕉的珂珂](min_eating_speed)
 ///     * [1011. 在 D 天内送达包裹的能力](ship_within_days)
+///     * [2226. 每个小孩最多能分到多少糖果](maximum_candies)
 ///
 pub mod binary_search {
 
@@ -295,9 +296,58 @@ pub mod binary_search {
         left
     }
 
+    /// [2226. 每个小孩最多能分到多少糖果](https://leetcode-cn.com/problems/maximum-candies-allocated-to-k-children/)
+    pub fn maximum_candies(candies: Vec<i32>, k: i64) -> i32 {
+        const MAX_CANDY : i64 = 10000000;
+        if candies.iter().fold(0i64, |acc, x| { acc + *x as i64}) < k{
+            return 0;
+        }
+        let (mut left, mut right) = (1i64, MAX_CANDY);
+
+        while left <= right{
+            let mid = (left + right)/2;
+            let _k = candies.iter().map(|x| *x as i64/mid).sum::<i64>();
+            if _k >=k{
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+
+        left as i32 - 1
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_maximum_candies(){
+            struct TestCase{
+                name: &'static str,
+                candies: &'static[i32],
+                k: i64,
+                expect: i32,
+            }
+
+            vec![
+                TestCase{
+                    name:"basic",
+                    candies: &[5,8,6],
+                    k: 3,
+                    expect: 5
+                },
+                TestCase{
+                    name:"basic 2",
+                    candies: &[2,5],
+                    k: 11,
+                    expect: 0
+                },
+            ].iter().for_each(|testcase| {
+                let actual = maximum_candies(testcase.candies.to_vec(), testcase.k);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_search() {
