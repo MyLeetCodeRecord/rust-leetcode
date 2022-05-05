@@ -298,16 +298,16 @@ pub mod binary_search {
 
     /// [2226. 每个小孩最多能分到多少糖果](https://leetcode-cn.com/problems/maximum-candies-allocated-to-k-children/)
     pub fn maximum_candies(candies: Vec<i32>, k: i64) -> i32 {
-        const MAX_CANDY : i64 = 10000000;
-        if candies.iter().fold(0i64, |acc, x| { acc + *x as i64}) < k{
+        const MAX_CANDY: i64 = 10000000;
+        if candies.iter().fold(0i64, |acc, x| acc + *x as i64) < k {
             return 0;
         }
         let (mut left, mut right) = (1i64, MAX_CANDY);
 
-        while left <= right{
-            let mid = (left + right)/2;
-            let _k = candies.iter().map(|x| *x as i64/mid).sum::<i64>();
-            if _k >=k{
+        while left <= right {
+            let mid = (left + right) / 2;
+            let _k = candies.iter().map(|x| *x as i64 / mid).sum::<i64>();
+            if _k >= k {
                 left = mid + 1;
             } else {
                 right = mid - 1;
@@ -322,28 +322,30 @@ pub mod binary_search {
         use super::*;
 
         #[test]
-        fn test_maximum_candies(){
-            struct TestCase{
+        fn test_maximum_candies() {
+            struct TestCase {
                 name: &'static str,
-                candies: &'static[i32],
+                candies: &'static [i32],
                 k: i64,
                 expect: i32,
             }
 
             vec![
-                TestCase{
-                    name:"basic",
-                    candies: &[5,8,6],
+                TestCase {
+                    name: "basic",
+                    candies: &[5, 8, 6],
                     k: 3,
-                    expect: 5
+                    expect: 5,
                 },
-                TestCase{
-                    name:"basic 2",
-                    candies: &[2,5],
+                TestCase {
+                    name: "basic 2",
+                    candies: &[2, 5],
                     k: 11,
-                    expect: 0
+                    expect: 0,
                 },
-            ].iter().for_each(|testcase| {
+            ]
+            .iter()
+            .for_each(|testcase| {
                 let actual = maximum_candies(testcase.candies.to_vec(), testcase.k);
                 assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
             });
@@ -948,7 +950,7 @@ pub mod two_pointers {
     /// pub fn advantage_count(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
     ///     use std::cmp::Ordering;
     ///     use std::collections::BinaryHeap;
-    /// 
+    ///
     ///     struct Element(usize, i32);
     ///     impl std::cmp::Ord for Element {
     ///         fn cmp(&self, other: &Self) -> std::cmp::Ordering {
@@ -966,18 +968,18 @@ pub mod two_pointers {
     ///         }
     ///     }
     ///     impl std::cmp::Eq for Element {}
-    /// 
+    ///
     ///     let mut nums2: BinaryHeap<Element> = nums2
     ///         .into_iter()
     ///         .enumerate()
     ///         .map(|(idx, num)| Element(idx, num))
     ///         .collect();
-    /// 
+    ///
     ///     let mut nums1 = nums1;
     ///     nums1.sort();
-    /// 
+    ///
     ///     let mut result = nums1.clone();
-    /// 
+    ///
     ///     let (mut left, mut right) = (1, nums1.len());
     ///     while !nums2.is_empty() {
     ///         let Element(index, val) = nums2.pop().unwrap();
@@ -999,7 +1001,7 @@ pub mod two_pointers {
     ///             }
     ///         }
     ///     }
-    /// 
+    ///
     ///     result
     /// }
     /// ```
@@ -1543,6 +1545,7 @@ pub mod two_pointers {
 ///     * [3. 无重复字符的最长子串](length_of_longest_substring)
 ///     * [904. 水果成篮](total_fruit)
 ///     * [438. 找到字符串中所有字母异位词](find_anagrams)
+///     * [713. 乘积小于 K 的子数组](num_subarray_product_less_than_k)
 /// * 困难
 ///     * [76. 最小覆盖子串](min_window)
 ///
@@ -1967,9 +1970,56 @@ pub mod windows {
         max_length as i32
     }
 
+    /// [713. 乘积小于 K 的子数组](https://leetcode.cn/problems/subarray-product-less-than-k/)
+    pub fn num_subarray_product_less_than_k(nums: Vec<i32>, k: i32) -> i32 {
+        let mut count = 0;
+        let mut curr_mul = 1;
+
+        let mut left = 0;
+        for right in 0..nums.len() {
+            curr_mul *= nums.get(right).copied().unwrap();
+            while left <= right && curr_mul >= k {
+                curr_mul /= nums.get(left).copied().unwrap();
+                left += 1;
+            }
+            // count += right - left + 1 会导致溢出
+            count += right + 1 - left
+        }
+        count as i32
+    }
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_num_subarray_product_less_than_k() {
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                k: i32,
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums: &[10, 5, 2, 6],
+                    k: 100,
+                    expect: 8,
+                },
+                TestCase {
+                    name: "basic 2",
+                    nums: &[1, 2, 3],
+                    k: 0,
+                    expect: 0,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = num_subarray_product_less_than_k(testcase.nums.to_vec(), testcase.k);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_total_fruit() {
