@@ -1,3 +1,7 @@
+//! 虽然mod名为`array`, 但并不只是数组相关题目
+//! 线性表相关的都会涉及
+//! 比如数组(连续存储), 简单链表, 字符串(连续存储)
+
 /// # 二分查找
 /// 特点:
 /// 1. 数组(连续内存, 或可用索引随机访问) + 有序
@@ -576,11 +580,15 @@ pub mod binary_search {
 ///     * [977. 有序数组的平方](sorted_squares)
 ///     * [21. 合并两个有序链表](merge_k_lists)
 ///     * [876. 链表的中间结点](middle_node)
+///     * [541. 反转字符串 II](reverse_str)
+///     * [剑指 Offer 05. 替换空格](replace_space)
 /// * 中等:
 ///     * [167. 两数之和 II - 输入有序数组](two_sum)
 ///     * [5. 最长回文子串](longest_palindrome)
 ///     * [19. 删除链表的倒数第 N 个结点](remove_nth_from_end)
 ///     * [870. 优势洗牌](advantage_count)
+///     * [186. 翻转字符串里的单词 II](reverse_words)
+///     * [151. 颠倒字符串中的单词](reverse_words_1)
 /// * 困难:
 ///     * [23. 合并K个升序链表](merge_k_lists)
 /// * 没有rust模版的题:
@@ -1040,9 +1048,263 @@ pub mod two_pointers {
         result
     }
 
+    /// [541. 反转字符串 II](https://leetcode-cn.com/problems/reverse-string-ii/)
+    pub fn reverse_str(s: String, k: i32) -> String {
+        let mut s = s;
+        let k = k as usize;
+        let bytes = unsafe { s.as_mut_vec() };
+
+        let mut start = 0;
+        while start < bytes.len() {
+            let mut x = start;
+            let mut y = start + k - 1;
+
+            if start + k >= bytes.len() {
+                y = bytes.len() - 1;
+            }
+            while x < y {
+                bytes.swap(x, y);
+                x += 1;
+                y -= 1;
+            }
+            start += 2 * k;
+        }
+        s
+    }
+
+    /// [剑指 Offer 05. 替换空格](https://leetcode-cn.com/problems/ti-huan-kong-ge-lcof/)
+    pub fn replace_space(s: String) -> String {
+        let mut s = s;
+        let bytes = unsafe { s.as_mut_vec() };
+        let mut old = bytes.len();
+
+        let space_cnt = bytes.iter().filter(|b| b' '.eq(b)).count();
+
+        bytes.extend(vec![0; space_cnt * 2]);
+        let mut new = bytes.len();
+
+        while old > 0 {
+            let b = bytes.get(old - 1).copied().unwrap();
+            if b != b' ' {
+                *bytes.get_mut(new - 1).unwrap() = b;
+                new -= 1;
+            } else {
+                *bytes.get_mut(new - 1).unwrap() = b'0';
+                new -= 1;
+                *bytes.get_mut(new - 1).unwrap() = b'2';
+                new -= 1;
+                *bytes.get_mut(new - 1).unwrap() = b'%';
+                new -= 1;
+            }
+            old -= 1;
+        }
+        s
+    }
+
+    /// [186. 翻转字符串里的单词 II](https://leetcode-cn.com/problems/reverse-words-in-a-string-ii/)
+    pub fn reverse_words(s: &mut Vec<char>) {
+        s.reverse();
+
+        let mut start = 0;
+        while start < s.len() {
+            let mut x = start;
+            let mut y = start;
+            while let Some(c) = s.get(y) {
+                if *c == ' ' {
+                    break;
+                }
+                y += 1;
+            }
+
+            start = y + 1;
+
+            y = y - 1;
+            while x < y {
+                s.swap(x, y);
+                x += 1;
+                y -= 1;
+            }
+        }
+    }
+
+    /// [151. 颠倒字符串中的单词](https://leetcode-cn.com/problems/reverse-words-in-a-string/)
+    ///
+    /// 思路1: 字符串操作, 分割拼接
+    /// ```
+    /// pub fn reverse_words(s: String) -> String {
+    ///     s.split_ascii_whitespace()
+    ///         .filter(|ss| !ss.eq(&" "))
+    ///         .rev()
+    ///         .map(|ss| ss.to_string())
+    ///         .collect::<Vec<String>>()
+    ///         .join(" ")
+    /// }
+    /// ```
+    /// 但是这样做, 需要O(N)的空间
+    /// 思路2: 双指针, 原地操作.
+    /// 只是在T186的基础上, 加了删除空格
+    pub fn reverse_words_1(s: String) -> String {
+        let mut s = s;
+        let bytes = unsafe { s.as_mut_vec() };
+        bytes.reverse();
+
+        // clean space
+        let mut insert_pos = 0;
+        let mut need_space = false;
+        for i in 0..bytes.len() {
+            let curr = bytes.get(i).copied().unwrap();
+            if curr != b' ' {
+                *bytes.get_mut(insert_pos).unwrap() = curr;
+                need_space = true;
+                insert_pos += 1;
+            } else {
+                if need_space {
+                    *bytes.get_mut(insert_pos).unwrap() = curr;
+                    insert_pos += 1;
+                    need_space = false;
+                }
+            }
+        }
+        if let Some(c) = bytes.get(insert_pos-1){
+            if *c == b' '{
+                insert_pos -= 1;
+            }
+        }
+        bytes.truncate(insert_pos);
+
+        let mut start = 0;
+        while start < bytes.len() {
+            let mut x = start;
+            let mut y = start;
+            while let Some(c) = bytes.get(y) {
+                if *c == b' ' {
+                    break;
+                }
+                y += 1;
+            }
+
+            start = y + 1;
+
+            y = y - 1;
+            while x < y {
+                bytes.swap(x, y);
+                x += 1;
+                y -= 1;
+            }
+        }
+        s
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_reverse_words_1() {
+            struct TestCase {
+                name: &'static str,
+                s: &'static str,
+                expect: &'static str,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    s: "the sky is blue",
+                    expect: "blue is sky the",
+                },
+                TestCase {
+                    name: "basic 2",
+                    s: "  hello world  ",
+                    expect: "world hello",
+                },
+                TestCase {
+                    name: "basic 3",
+                    s: "a good   example",
+                    expect: "example good a",
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = reverse_words_1(testcase.s.to_string());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_reverse_words() {
+            struct TestCase {
+                name: &'static str,
+                s: &'static [char],
+                expect: &'static [char],
+            }
+
+            vec![TestCase {
+                name: "basic",
+                s: &[
+                    't', 'h', 'e', ' ', 's', 'k', 'y', ' ', 'i', 's', ' ', 'b', 'l', 'u', 'e',
+                ],
+                expect: &[
+                    'b', 'l', 'u', 'e', ' ', 'i', 's', ' ', 's', 'k', 'y', ' ', 't', 'h', 'e',
+                ],
+            }]
+            .iter()
+            .for_each(|testcase| {
+                let mut s = testcase.s.to_vec();
+                reverse_words(&mut s);
+                assert_eq!(testcase.expect, s, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_replace_space() {
+            struct TestCase {
+                name: &'static str,
+                s: &'static str,
+                expect: &'static str,
+            }
+
+            vec![TestCase {
+                name: "basic",
+                s: "We are happy.",
+                expect: "We%20are%20happy.",
+            }]
+            .iter()
+            .for_each(|testcase| {
+                let actual = replace_space(testcase.s.to_string());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_reverse_str() {
+            struct TestCase {
+                name: &'static str,
+                s: &'static str,
+                k: i32,
+                expect: &'static str,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    s: "abcdefg",
+                    k: 2,
+                    expect: "bacdfeg",
+                },
+                TestCase {
+                    name: "basic 2",
+                    s: "abcd",
+                    k: 2,
+                    expect: "bacd",
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = reverse_str(testcase.s.to_string(), testcase.k);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_advantage_count() {
