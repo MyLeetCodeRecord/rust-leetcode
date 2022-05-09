@@ -64,7 +64,7 @@ mod just_equal {
     }
 
     /// [383. 赎金信](https://leetcode-cn.com/problems/ransom-note/)
-    /// 
+    ///
     /// 优化: 如果都是小写英文字母, 可以自己用数组替换hashmap
     pub fn can_construct(ransom_note: String, magazine: String) -> bool {
         use std::collections::HashMap;
@@ -218,6 +218,8 @@ mod just_find {}
 ///     * [350. 两个数组的交集 II](intersect)
 ///     * [1002. 查找共用字符](common_chars)
 ///     * [202. 快乐数](is_happy)
+/// * 中等
+///     * [433. 最小基因变化](min_mutation)
 mod set_and_mark {
     /// [349. 两个数组的交集](https://leetcode-cn.com/problems/intersection-of-two-arrays/)
     ///
@@ -359,9 +361,139 @@ mod set_and_mark {
         true
     }
 
+    /// [433. 最小基因变化](https://leetcode.cn/problems/minimum-genetic-mutation/)
+    /// 
+    /// BFS 和层序遍历有些相似, 需要记录自己在第几层
+    /// 
+    /// 可以利用set去重, 用map缓存数据去除重复计算
+    pub fn min_mutation(start: String, end: String, bank: Vec<String>) -> i32 {
+        use std::collections::HashMap;
+        use std::collections::HashSet;
+        use std::collections::VecDeque;
+
+        struct Diff {
+            cache: HashMap<String, HashMap<String, usize>>,
+        }
+        impl Diff {
+            fn new() -> Self {
+                Diff {
+                    cache: HashMap::new(),
+                }
+            }
+
+            fn diff(&mut self, s1: &String, s2: &String) -> usize {
+                if let Some(d) = self.hit(s1, s2) {
+                    return d;
+                }
+
+                let d = self.diff_cal(s1, s2);
+                self.store(s1, s2, d);
+
+                d
+            }
+
+            fn diff_cal(&self, s1: &String, s2: &String) -> usize {
+                let b1 = s1.as_bytes();
+                let b2 = s2.as_bytes();
+                b1.iter().zip(b2.iter()).filter(|(c1, c2)| c1 != c2).count()
+            }
+
+            fn hit(&self, s1: &String, s2: &String) -> Option<usize> {
+                if let Some(inner) = self.cache.get(s1) {
+                    if let Some(d) = inner.get(s2) {
+                        return Some(*d);
+                    }
+                }
+                None
+            }
+            fn store(&mut self, s1: &String, s2: &String, d: usize) {
+                self.cache
+                    .entry(s1.to_owned())
+                    .or_default()
+                    .insert(s2.to_owned(), d);
+                self.cache
+                    .entry(s2.to_owned())
+                    .or_default()
+                    .insert(s1.to_owned(), d);
+            }
+        }
+
+        let mut differ = Diff::new();
+        let mut visited = HashSet::new();
+        let mut deque = VecDeque::new();
+        deque.push_back((&start, 0));
+
+        while !deque.is_empty() {
+            let (curr, lvl) = deque.pop_front().unwrap();
+            if end.eq(curr) {
+                return lvl;
+            }
+
+            visited.insert(curr);
+            bank.iter()
+                .filter(|&s| {
+                    if differ.diff(s, curr) <= 1 {
+                        if !visited.contains(&s) {
+                            return true;
+                        }
+                    }
+                    false
+                })
+                .for_each(|s| {
+                    if !visited.contains(&s) {
+                        deque.push_back((s, lvl + 1));
+                    }
+                });
+        }
+
+        -1
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_min_mutation() {
+            struct TestCase {
+                name: &'static str,
+                start: &'static str,
+                end: &'static str,
+                bank: &'static [&'static str],
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    start: "AACCGGTT",
+                    end: "AACCGGTA",
+                    bank: &["AACCGGTA"],
+                    expect: 1,
+                },
+                TestCase {
+                    name: "basic 2",
+                    start: "AACCGGTT",
+                    end: "AAACGGTA",
+                    bank: &["AACCGGTA", "AACCGCTA", "AAACGGTA"],
+                    expect: 2,
+                },
+                TestCase {
+                    name: "basic 3",
+                    start: "AAAAACCC",
+                    end: "AACCCCCC",
+                    bank: &["AAAACCCC", "AAACCCCC", "AACCCCCC"],
+                    expect: 3,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let bank = testcase.bank.iter().map(|s| s.to_string()).collect();
+                let actual =
+                    min_mutation(testcase.start.to_string(), testcase.end.to_string(), bank);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_is_happy() {
