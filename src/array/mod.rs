@@ -582,6 +582,7 @@ pub mod binary_search {
 ///     * [876. 链表的中间结点](middle_node)
 ///     * [541. 反转字符串 II](reverse_str)
 ///     * [剑指 Offer 05. 替换空格](replace_space)
+///     * [88. 合并两个有序数组](merge)
 /// * 中等:
 ///     * [167. 两数之和 II - 输入有序数组](two_sum)
 ///     * [5. 最长回文子串](longest_palindrome)
@@ -1118,7 +1119,7 @@ pub mod two_pointers {
 
             start = y + 1;
 
-            y = y - 1;
+            y -= 1;
             while x < y {
                 s.swap(x, y);
                 x += 1;
@@ -1157,16 +1158,14 @@ pub mod two_pointers {
                 *bytes.get_mut(insert_pos).unwrap() = curr;
                 need_space = true;
                 insert_pos += 1;
-            } else {
-                if need_space {
-                    *bytes.get_mut(insert_pos).unwrap() = curr;
-                    insert_pos += 1;
-                    need_space = false;
-                }
+            } else if need_space {
+                *bytes.get_mut(insert_pos).unwrap() = curr;
+                insert_pos += 1;
+                need_space = false;
             }
         }
-        if let Some(c) = bytes.get(insert_pos-1){
-            if *c == b' '{
+        if let Some(c) = bytes.get(insert_pos - 1) {
+            if *c == b' ' {
                 insert_pos -= 1;
             }
         }
@@ -1185,7 +1184,7 @@ pub mod two_pointers {
 
             start = y + 1;
 
-            y = y - 1;
+            y -= 1;
             while x < y {
                 bytes.swap(x, y);
                 x += 1;
@@ -1195,9 +1194,86 @@ pub mod two_pointers {
         s
     }
 
+    /// [88. 合并两个有序数组](https://leetcode.cn/problems/merge-sorted-array/)
+    ///
+    /// nums1 有后缀填充的0
+    /// 如果正向(从小到大)的合并, 由于插入, 需要有shift操作.
+    /// 因此需要从大到小的merge
+    #[rustfmt::skip]
+    #[allow(clippy::ptr_arg)]
+    pub fn merge(nums1: &mut Vec<i32>, m: i32, nums2: &mut Vec<i32>, n: i32) {
+        let mut insert_position = (nums1.len() - 1) as isize;
+        let (mut p0, mut p1) = (m as usize, n as usize);
+        while insert_position >= 0 {
+            let x = { if p0 == 0 { i32::MIN } else { nums1.get(p0 - 1).copied().unwrap() } };
+            let y = { if p1 == 0 { i32::MIN } else { nums2.get(p1 - 1).copied().unwrap() } };
+
+            nums1[insert_position as usize] = std::cmp::max(x, y);
+            insert_position -= 1;
+            match x.cmp(&y) {
+                std::cmp::Ordering::Greater => { p0 -= 1; }
+                _ => { p1 -= 1; }
+            }
+        }
+    }
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_merge() {
+            struct TestCase {
+                name: &'static str,
+                nums1: &'static [i32],
+                m: i32,
+                nums2: &'static [i32],
+                n: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums1: &[1, 2, 3, 0, 0, 0],
+                    m: 3,
+                    nums2: &[2, 5, 6],
+                    n: 3,
+                },
+                TestCase {
+                    name: "basic 2",
+                    nums1: &[1],
+                    m: 1,
+                    nums2: &[],
+                    n: 0,
+                },
+                TestCase {
+                    name: "basic 3",
+                    nums1: &[0],
+                    m: 0,
+                    nums2: &[1],
+                    n: 1,
+                },
+                TestCase {
+                    name: "fix 1",
+                    nums1: &[4, 5, 6, 0, 0, 0],
+                    m: 3,
+                    nums2: &[1, 2, 3],
+                    n: 3,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let mut nums1 = testcase.nums1.to_vec();
+                let mut nums2 = testcase.nums2.to_vec();
+                merge(&mut nums1, testcase.m, &mut nums2, testcase.n);
+
+                let mut nums = testcase.nums1.to_vec();
+                let m = testcase.m as usize;
+                nums[m..].copy_from_slice(&testcase.nums2[..(testcase.nums1.len() - m)]);
+                nums.sort();
+
+                assert_eq!(nums, nums1, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_reverse_words_1() {

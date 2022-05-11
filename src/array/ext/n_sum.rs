@@ -172,8 +172,9 @@ pub fn four_sum(nums: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
             let (mut c, mut d) = (b + 1, length - 1);
             while c < d {
                 let sum = nums[a] + nums[b] + nums[c] + nums[d];
-                if sum == target {
-                    result.push(vec![
+                match sum.cmp(&target) {
+                    std::cmp::Ordering::Equal => {
+                        result.push(vec![
                         nums[a] as i32,
                         nums[b] as i32,
                         nums[c] as i32,
@@ -187,10 +188,13 @@ pub fn four_sum(nums: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
                         d -= 1;
                     }
                     d -= 1;
-                } else if sum > target {
-                    d -= 1;
-                } else {
-                    c += 1
+                    },
+                    std::cmp::Ordering::Greater => {
+                        d -= 1;
+                    },
+                    std::cmp::Ordering::Less => {
+                        c += 1;
+                    }
                 }
             }
         }

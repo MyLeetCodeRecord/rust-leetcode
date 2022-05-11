@@ -36,7 +36,7 @@ pub fn sort_array(nums: Vec<i32>) -> Vec<i32> {
     let mut nums = nums;
     let length = nums.len();
     sort_array_range(&mut nums, 0, length - 1);
-    return nums;
+    nums
 }
 
 /// [215. 数组中的第K个最大元素](https://leetcode-cn.com/problems/kth-largest-element-in-an-array/)
