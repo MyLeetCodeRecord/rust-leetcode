@@ -26,7 +26,19 @@ pub mod random;
 /// * 简单
 /// * 中等
 ///     * [912. 排序数组](sort_array)
+///     * [56. 合并区间](merge)
 pub mod quick;
 
 
 pub mod n_sum;
+
+pub mod kmp;
+
+/// 数学相关题目
+pub mod math;
+/// 区间相关题目
+pub mod rng;
+/// 栈相关题目
+pub mod stack;
+// 拓扑排序
+// pub mod topological;

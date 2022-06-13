@@ -10,3 +10,4 @@ pub mod array;
 pub mod mhash;
 pub mod moreandmore;
 pub mod dp;
+pub mod sstr;

@@ -130,6 +130,10 @@
 ///     * [875. 爱吃香蕉的珂珂](min_eating_speed)
 ///     * [1011. 在 D 天内送达包裹的能力](ship_within_days)
 ///     * [2226. 每个小孩最多能分到多少糖果](maximum_candies)
+///     * [436. 寻找右区间](find_right_interval)
+///     * [33. 搜索旋转排序数组](search_2)
+/// * 困难
+///     * [668. 乘法表中第k小的数](find_kth_number)
 ///
 pub mod binary_search {
 
@@ -321,9 +325,262 @@ pub mod binary_search {
         left as i32 - 1
     }
 
+    /// [668. 乘法表中第k小的数](https://leetcode.cn/problems/kth-smallest-number-in-multiplication-table/)
+    ///
+    /// tips:
+    ///     1. (1<<32) - 1  > 30000 * 30000, 因此可以不用i64
+    ///
+    /// 解释:
+    /// 假设乘法表中数x, 求x在什么位置(第几个).
+    ///
+    /// 记m行, n列.
+    ///
+    /// x/n 就表示在x之前有多少个完整的行. 因此起点计数即为  x/n * n
+    /// 再补齐不满一行的.
+    /// 还是前面的式子, 可知前面 x/n 行是满的, 从行号 x/n + 1 开始有不满一行的, 直到m
+    /// 每一行的数量为 x/行号
+    #[rustfmt::skip]
+    pub fn find_kth_number(m: i32, n: i32, k: i32) -> i32 {
+        let (mut l, mut r) = (1, m * n);
+
+        while l <= r {
+            let mid = (l + r) / 2; // mid不一定在乘法表中
+
+            let mut cnt = mid / n * n; // 整行的
+            for i in (mid / n + 1)..=m {
+                cnt += mid / i; // 不满整行的
+            }
+
+            // 由于mid不一定在乘法表中, 因此cnt有重复的可能, 因此属于有重复数组中找边界.
+            match cnt.cmp(&k) {
+                std::cmp::Ordering::Equal   => { r = mid - 1; },
+                std::cmp::Ordering::Less    => { l = mid + 1; },
+                std::cmp::Ordering::Greater => { r = mid - 1; },
+            }
+        }
+
+        l
+    }
+
+    /// [436. 寻找右区间](https://leetcode.cn/problems/find-right-interval/)
+    ///
+    /// 最小起始位置
+    ///
+    /// 也就是找边界, 不是单独位置
+    pub fn find_right_interval(intervals: Vec<Vec<i32>>) -> Vec<i32> {
+        // if intervals.len() <= 1 {
+        //     return vec![-1];
+        // }
+
+        fn find_pos(rng: &[(i32, usize)], target: i32) -> Option<usize> {
+            let (mut l, mut r) = (1, rng.len());
+            while l <= r {
+                let mid = (l + r) / 2;
+                let p = rng.get(mid - 1).unwrap();
+                match target.cmp(&p.0) {
+                    std::cmp::Ordering::Less => {
+                        r = mid - 1;
+                    }
+                    std::cmp::Ordering::Equal => {
+                        r = mid - 1; // 发现第一个大于等于的, 因此把r向前提
+                    }
+                    std::cmp::Ordering::Greater => {
+                        l = mid + 1;
+                    }
+                }
+            }
+            if l > rng.len() {
+                None
+            } else {
+                Some(rng.get(l - 1).unwrap().1)
+            }
+        }
+
+        let mut start = intervals
+            .iter()
+            .enumerate()
+            .map(|(idx, rng)| (rng.first().copied().unwrap(), idx))
+            .collect::<Vec<(i32, usize)>>();
+        start.sort_by(|a, b| a.0.cmp(&b.0));
+
+        let mut ret = vec![];
+        for inter in intervals.iter() {
+            let end = inter.last().copied().unwrap();
+            if let Some(pos) = find_pos(&start, end) {
+                ret.push(pos as i32);
+            } else {
+                ret.push(-1);
+            }
+        }
+        ret
+    }
+
+    /// [33. 搜索旋转排序数组](https://leetcode.cn/problems/search-in-rotated-sorted-array/)
+    /// 分情况讨论
+    pub fn search_2(nums: Vec<i32>, target: i32) -> i32 {
+        let (mut left, mut right) = (1, nums.len());
+        while left <= right {
+            let mid = (left + right) / 2;
+            let (l, m, r) = (
+                nums.get(left - 1).copied().unwrap(),
+                nums.get(mid - 1).copied().unwrap(),
+                nums.get(right - 1).copied().unwrap(),
+            );
+            match target.cmp(&m) {
+                std::cmp::Ordering::Equal => {
+                    return mid as i32 - 1;
+                }
+                std::cmp::Ordering::Greater => {
+                    if l > r {
+                        if m > l {
+                            left = mid + 1;
+                        } else if target > r {
+                            right = mid - 1;
+                        } else {
+                            left = mid + 1;
+                        }
+                    } else {
+                        left = mid + 1;
+                    }
+                }
+                std::cmp::Ordering::Less => {
+                    if l > r {
+                        if m > l {
+                            if target < l {
+                                left = mid + 1;
+                            } else {
+                                right = mid - 1;
+                            }
+                        } else {
+                            right = mid - 1;
+                        }
+                    } else {
+                        right = mid - 1;
+                    }
+                }
+            }
+        }
+        -1
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_search_2() {
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                target: i32,
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums: &[4, 5, 6, 7, 0, 1, 2],
+                    target: 0,
+                    expect: 4,
+                },
+                TestCase {
+                    name: "basic 2",
+                    nums: &[4, 5, 6, 7, 0, 1, 2],
+                    target: 3,
+                    expect: -1,
+                },
+                TestCase {
+                    name: "basic 3",
+                    nums: &[1],
+                    target: 0,
+                    expect: -1,
+                },
+                TestCase {
+                    name: "fix 1",
+                    nums: &[3, 5, 1],
+                    target: 3,
+                    expect: 0,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = search_2(testcase.nums.to_vec(), testcase.target);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            })
+        }
+
+        #[test]
+        fn test_find_right_interval() {
+            struct TestCase {
+                name: &'static str,
+                intervals: &'static [&'static [i32]],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    intervals: &[&[1, 2]],
+                    expect: &[-1],
+                },
+                TestCase {
+                    name: "basic 2",
+                    intervals: &[&[3, 4], &[2, 3], &[1, 2]],
+                    expect: &[-1, 0, 1],
+                },
+                TestCase {
+                    name: "basic 3",
+                    intervals: &[&[1, 4], &[2, 3], &[3, 4]],
+                    expect: &[-1, 2, -1],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let intervals = testcase.intervals.iter().map(|x| x.to_vec()).collect();
+                let actual = find_right_interval(intervals);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_find_kth_number() {
+            struct TestCase {
+                name: &'static str,
+                m: i32,
+                n: i32,
+                k: i32,
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    m: 3,
+                    n: 3,
+                    k: 5,
+                    expect: 3,
+                },
+                TestCase {
+                    name: "basic 2",
+                    m: 2,
+                    n: 3,
+                    k: 6,
+                    expect: 6,
+                },
+                TestCase {
+                    name: "fix 1",
+                    m: 1,
+                    n: 3,
+                    k: 2,
+                    expect: 2,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = find_kth_number(testcase.m, testcase.n, testcase.k);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_maximum_candies() {
@@ -590,6 +847,7 @@ pub mod binary_search {
 ///     * [870. 优势洗牌](advantage_count)
 ///     * [186. 翻转字符串里的单词 II](reverse_words)
 ///     * [151. 颠倒字符串中的单词](reverse_words_1)
+///     * * [面试题 17.11. 单词距离](find_closest)
 /// * 困难:
 ///     * [23. 合并K个升序链表](merge_k_lists)
 /// * 没有rust模版的题:
@@ -1216,9 +1474,94 @@ pub mod two_pointers {
             }
         }
     }
+
+    /// [面试题 17.11. 单词距离](https://leetcode.cn/problems/find-closest-lcci/)
+    pub fn find_closest(words: Vec<String>, word1: String, word2: String) -> i32 {
+        enum WhichWord {
+            X,
+            Y,
+        }
+        // 优化点: 可以不用全量记录位置, 直接双指针
+        let mark = words
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, s)| {
+                if word1.eq(s) {
+                    Some((WhichWord::X, idx))
+                } else if word2.eq(s) {
+                    Some((WhichWord::Y, idx))
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<(WhichWord, usize)>>();
+
+        let (mut last_x, mut last_y): (Option<i32>, Option<i32>) = (None, None);
+        let mut ret = i32::MAX;
+        for (class, pos) in mark.iter() {
+            let pos = *pos as i32;
+            match class {
+                WhichWord::X => {
+                    if let Some(y) = last_y {
+                        ret = std::cmp::min(ret, (pos - y).abs());
+                    }
+                    last_x.replace(pos);
+                }
+                WhichWord::Y => {
+                    if let Some(x) = last_x {
+                        ret = std::cmp::min(ret, (pos - x).abs());
+                    }
+                    last_y.replace(pos);
+                }
+            }
+        }
+        ret
+    }
+
+    
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_find_closest() {
+            struct TestCase {
+                name: &'static str,
+                words: &'static [&'static str],
+                word1: &'static str,
+                word2: &'static str,
+                expect: i32,
+            }
+
+            vec![TestCase {
+                name: "basic 1",
+                words: &[
+                    "I",
+                    "am",
+                    "a",
+                    "student",
+                    "from",
+                    "a",
+                    "university",
+                    "in",
+                    "a",
+                    "city",
+                ],
+                word1: "a",
+                word2: "student",
+                expect: 1,
+            }]
+            .iter()
+            .for_each(|testcase| {
+                let words = testcase.words.iter().map(|s| s.to_string()).collect();
+                let actual = find_closest(
+                    words,
+                    testcase.word1.to_string(),
+                    testcase.word2.to_string(),
+                );
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_merge() {
@@ -1875,6 +2218,10 @@ pub mod two_pointers {
 /// 主要点: 什么时机动哪个边界.
 ///
 /// ## 题目链接
+/// * 简单
+///     * [944. 删列造序](min_deletion_size)
+///     * [961. 在长度 2N 的数组中找出重复 N 次的元素](repeated_n_times)
+///     *
 /// * 中等
 ///     * [2024. 考试的最大困扰度](max_consecutive_answers)
 ///     * [1004. 最大连续1的个数 III](longest_ones)
@@ -1884,6 +2231,7 @@ pub mod two_pointers {
 ///     * [904. 水果成篮](total_fruit)
 ///     * [438. 找到字符串中所有字母异位词](find_anagrams)
 ///     * [713. 乘积小于 K 的子数组](num_subarray_product_less_than_k)
+///     * [面试题 01.05. 一次编辑](one_edit_away)
 /// * 困难
 ///     * [76. 最小覆盖子串](min_window)
 ///
@@ -2325,9 +2673,229 @@ pub mod windows {
         }
         count as i32
     }
+
+    /// [944. 删列造序](https://leetcode.cn/problems/delete-columns-to-make-sorted/)
+    pub fn min_deletion_size(strs: Vec<String>) -> i32 {
+        if strs.len() <= 1 {
+            return 0;
+        }
+        let n = strs.first().unwrap().len();
+        let mut ans = 0;
+        'NextPoi: for i in 0..n {
+            for win in strs.windows(2) {
+                let (a, b) = (win.get(0).unwrap(), win.get(1).unwrap());
+                let (a_bytes, b_bytes) = (a.as_bytes(), b.as_bytes());
+                if b_bytes[i] < a_bytes[i] {
+                    ans += 1;
+                    continue 'NextPoi;
+                }
+            }
+        }
+        ans
+    }
+
+    /// [面试题 01.05. 一次编辑](https://leetcode.cn/problems/one-away-lcci/)
+    pub fn one_edit_away(first: String, second: String) -> bool {
+        if second.len() > first.len() {
+            return one_edit_away(second, first);
+        }
+        if first.len() - second.len() >= 2 {
+            return false;
+        }
+
+        let (first_bytes, second_bytes) = (first.as_bytes(), second.as_bytes());
+        let (mut a, mut b) = (0, 0);
+        let mut cnt = 0;
+        while a < first_bytes.len() && b < second_bytes.len() {
+            if first_bytes[a] == second_bytes[b] {
+                a += 1;
+                b += 1;
+                continue;
+            }
+            if first_bytes.len() == second_bytes.len() {
+                a += 1;
+                b += 1;
+                cnt += 1;
+                continue;
+            }
+            // 向后错位1个
+            a += 1;
+            cnt += 1;
+        }
+        cnt < 2
+    }
+
+    /// [961. 在长度 2N 的数组中找出重复 N 次的元素](https://leetcode.cn/problems/n-repeated-element-in-size-2n-array/)
+    ///
+    /// 假设相同元素的间隔至少为2, 则总长度为 n + 2(n-1) = 3n - 2
+    /// 当 n > 2 时, 3n - 2 > 2n, 不满足题意, 也即 n > 2 时, 间隔只能为 0或1 
+    ///
+    /// * 间隔为0的, 可以用窗口为2的检查
+    /// * 间隔为1的, 分为开头是重复元素, 结尾是重复元素两种
+    ///     * 如果两两判定消除, 使用剩余那个, 那重复元素在开头时, 会有问题
+    ///     * 可以将窗口变为3
+    /// * 间隔为2的, 可以将窗口变为4
+    /// 
+    /// 因此直接窗口使用4, 遍历即可
+    /// 
+    /// 写法1:
+    /// ```
+    /// pub fn repeated_n_times(nums: Vec<i32>) -> i32 {
+    ///     // 最小长度为4
+    ///     if nums.len() == 4{
+    ///         let (a, b, c, d) = (nums[0], nums[1], nums[2], nums[3]);
+    ///         if a==b { return a; }
+    ///         else if b==c { return b; }
+    ///         else if c==d { return c; }
+    ///         else if a==c { return a; }
+    ///         else if a==d { return a; }
+    ///         else if b==d { return b; }
+    ///     }
+    /// 
+    ///     for win in nums.windows(3) {
+    ///         let (a, b, c) = (win[0], win[1], win[2]);
+    ///         if a == b {
+    ///             return a;
+    ///         } else if b == c {
+    ///             return b;
+    ///         } else if a == c {
+    ///             return c;
+    ///         }
+    ///     }
+    ///     unreachable!()
+    /// }
+    /// ```
+    /// 也可以统一逻辑
+    #[rustfmt::skip]
+    #[allow(clippy::if_same_then_else)]
+    pub fn repeated_n_times(nums: Vec<i32>) -> i32 {
+        for win in nums.windows(4){
+            let (a, b, c, d) = (win[0], win[1], win[2], win[3]);
+            if a==b { return a; }
+            else if b==c { return b; }
+            else if c==d { return c; }
+            else if a==c { return a; }
+            else if a==d { return a; }
+            else if b==d { return b; }
+        }
+        unreachable!()
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_repeated_n_times() {
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    nums: &[1, 2, 3, 3],
+                    expect: 3,
+                },
+                TestCase {
+                    name: "basic 2",
+                    nums: &[2, 1, 2, 5, 3, 2],
+                    expect: 2,
+                },
+                TestCase {
+                    name: "basic 3",
+                    nums: &[5, 1, 5, 2, 5, 3, 5, 4],
+                    expect: 5,
+                },
+                TestCase {
+                    name: "fix 1",
+                    nums: &[9, 5, 6, 9],
+                    expect: 9,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = repeated_n_times(testcase.nums.to_vec());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_one_edit_away() {
+            struct TestCase {
+                name: &'static str,
+                first: &'static str,
+                second: &'static str,
+                expect: bool,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    first: "pale",
+                    second: "ple",
+                    expect: true,
+                },
+                TestCase {
+                    name: "basic 2",
+                    first: "pales",
+                    second: "pal",
+                    expect: false,
+                },
+                TestCase {
+                    name: "fix 1",
+                    first: "intention",
+                    second: "execution",
+                    expect: false,
+                },
+                TestCase {
+                    name: "fix 2",
+                    first: "teacher",
+                    second: "taches",
+                    expect: false,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = one_edit_away(testcase.first.to_string(), testcase.second.to_string());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_min_deletion_size() {
+            struct TestCase {
+                name: &'static str,
+                strs: &'static [&'static str],
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    strs: &["cba", "daf", "ghi"],
+                    expect: 1,
+                },
+                TestCase {
+                    name: "basic 2",
+                    strs: &["a", "b"],
+                    expect: 0,
+                },
+                TestCase {
+                    name: "basic 3",
+                    strs: &["zyx", "wvu", "tsr"],
+                    expect: 3,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let strs = testcase.strs.iter().map(|s| s.to_string()).collect();
+                let actual = min_deletion_size(strs);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_num_subarray_product_less_than_k() {

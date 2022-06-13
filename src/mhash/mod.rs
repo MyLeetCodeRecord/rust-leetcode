@@ -8,7 +8,7 @@
 ///     8 [383. 赎金信](can_construct)
 /// * 中等
 ///     * [49. 字母异位词分组](group_anagrams)
-mod just_equal {
+pub mod just_equal {
 
     /// [242. 有效的字母异位词](https://leetcode-cn.com/problems/valid-anagram/)
     ///
@@ -60,7 +60,7 @@ mod just_equal {
             store.entry(mark).or_insert(vec![]).push(s);
         }
 
-        store.values().map(|s| s.clone()).collect()
+        store.values().cloned().collect()
     }
 
     /// [383. 赎金信](https://leetcode-cn.com/problems/ransom-note/)
@@ -203,7 +203,100 @@ mod just_equal {
 /// 利用hash加速查找
 /// * 特点: 要求 O(1) 时间复杂度
 ///
-mod just_find {}
+/// ## 题目
+/// * 简单
+///     * [953. 验证外星语词典](is_alien_sorted)
+/// * 困难
+///     * [269. 火星词典](alien_order)
+///
+pub mod just_find {
+
+    /// [953. 验证外星语词典](https://leetcode.cn/problems/verifying-an-alien-dictionary/)
+    pub fn is_alien_sorted(words: Vec<String>, order: String) -> bool {
+        use std::collections::HashMap;
+        let order_map = order
+            .chars()
+            .enumerate()
+            .map(|(i, c)| (c, i))
+            .collect::<HashMap<char, usize>>();
+
+        fn x_before_y(x: &str, y: &str, order_map: &HashMap<char, usize>) -> bool {
+            let (x_len, y_len) = (x.len(), y.len());
+            for (a, b) in x.chars().zip(y.chars()) {
+                if a == b {
+                    continue;
+                }
+                let (ai, bi) = (order_map.get(&a).unwrap(), order_map.get(&b).unwrap());
+                match ai.cmp(bi) {
+                    std::cmp::Ordering::Less => {
+                        return true;
+                    }
+                    std::cmp::Ordering::Greater => {
+                        return false;
+                    }
+                    std::cmp::Ordering::Equal => {}
+                }
+            }
+            x_len <= y_len
+        }
+
+        for win in words.windows(2) {
+            let (a, b) = (&win[0], &win[1]);
+            if !x_before_y(a.as_str(), b.as_str(), &order_map) {
+                return false;
+            }
+        }
+        true
+    }
+
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+
+        #[test]
+        fn test_is_alien_sorted() {
+            struct TestCase {
+                name: &'static str,
+                words: &'static [&'static str],
+                order: &'static str,
+                expect: bool,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    words: &["hello", "leetcode"],
+                    order: "hlabcdefgijkmnopqrstuvwxyz",
+                    expect: true,
+                },
+                TestCase {
+                    name: "basic 2",
+                    words: &["word", "world", "row"],
+                    order: "worldabcefghijkmnpqstuvxyz",
+                    expect: false,
+                },
+                TestCase {
+                    name: "basic 3",
+                    words: &["apple", "app"],
+                    order: "abcdefghijklmnopqrstuvwxyz",
+                    expect: false,
+                },
+                TestCase {
+                    name: "fix 1",
+                    words: &["hello", "hello"],
+                    order: "abcdefghijklmnopqrstuvwxyz",
+                    expect: true,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let words = testcase.words.iter().map(|s| s.to_string()).collect();
+                let actual = is_alien_sorted(words, testcase.order.to_string());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            })
+        }
+    }
+}
 
 ///
 /// 特点:
@@ -220,7 +313,10 @@ mod just_find {}
 ///     * [202. 快乐数](is_happy)
 /// * 中等
 ///     * [433. 最小基因变化](min_mutation)
-mod set_and_mark {
+///     * [890. 查找和替换模式](find_and_replace_pattern)
+/// * 困难
+///     * [41. 缺失的第一个正数](first_missing_positive)
+pub mod set_and_mark {
     /// [349. 两个数组的交集](https://leetcode-cn.com/problems/intersection-of-two-arrays/)
     ///
     /// 思路1:
@@ -295,14 +391,18 @@ mod set_and_mark {
         while a < nums1.len() && b < nums2.len() {
             let x = nums1.get(a).copied().unwrap();
             let y = nums2.get(b).copied().unwrap();
-            if x == y {
-                result.push(x);
-                a += 1;
-                b += 1;
-            } else if x < y {
-                a += 1;
-            } else {
-                b += 1;
+            match x.cmp(&y) {
+                std::cmp::Ordering::Equal => {
+                    result.push(x);
+                    a += 1;
+                    b += 1;
+                }
+                std::cmp::Ordering::Less => {
+                    a += 1;
+                }
+                std::cmp::Ordering::Greater => {
+                    b += 1;
+                }
             }
         }
         result
@@ -362,9 +462,9 @@ mod set_and_mark {
     }
 
     /// [433. 最小基因变化](https://leetcode.cn/problems/minimum-genetic-mutation/)
-    /// 
+    ///
     /// BFS 和层序遍历有些相似, 需要记录自己在第几层
-    /// 
+    ///
     /// 可以利用set去重, 用map缓存数据去除重复计算
     pub fn min_mutation(start: String, end: String, bank: Vec<String>) -> i32 {
         use std::collections::HashMap;
@@ -432,10 +532,8 @@ mod set_and_mark {
             visited.insert(curr);
             bank.iter()
                 .filter(|&s| {
-                    if differ.diff(s, curr) <= 1 {
-                        if !visited.contains(&s) {
-                            return true;
-                        }
+                    if differ.diff(s, curr) <= 1 && !visited.contains(&s) {
+                        return true;
                     }
                     false
                 })
@@ -449,9 +547,130 @@ mod set_and_mark {
         -1
     }
 
+    /// [890. 查找和替换模式](https://leetcode.cn/problems/find-and-replace-pattern/)
+    ///
+    /// 记录替换规则, 如果发现旧的替换规则不符合, 判定为不能替换
+    /// 注意是一一映射
+    pub fn find_and_replace_pattern(words: Vec<String>, pattern: String) -> Vec<String> {
+        use std::collections::HashMap;
+
+        words
+            .into_iter()
+            .filter(|word| {
+                let mut ft = HashMap::with_capacity(26); // 旧 -> 新
+                let mut tf = HashMap::with_capacity(26); // 新 -> 旧
+                for (raw, target) in word.chars().zip(pattern.chars()) {
+                    let entry = tf.entry(target).or_insert(raw);
+                    if !raw.eq(entry) {
+                        return false;
+                    }
+                    let entry = ft.entry(raw).or_insert(target);
+                    if !target.eq(entry) {
+                        return false;
+                    }
+                }
+                true
+            })
+            .collect()
+    }
+
+    /// [41. 缺失的第一个正数](https://leetcode.cn/problems/first-missing-positive/)
+    ///
+    /// nums 最多能有 [1, nums.len()]
+    /// 因此可以利用nums自身作为hash表, 记录出现与否, 比如将数字对应位置变为负数
+    /// 由于存在负数, 因此可以将原本的负数 置为 Len + 1
+    ///
+    pub fn first_missing_positive(nums: Vec<i32>) -> i32 {
+        let l = nums.len();
+        let mut nums = nums;
+
+        nums.iter_mut().for_each(|x| {
+            if *x <= 0 {
+                *x = l as i32 + 1
+            }
+        });
+
+        for i in 0..l {
+            let pos = nums.get(i).copied().unwrap().unsigned_abs() as usize;
+            if pos > l {
+                continue;
+            }
+            let num = nums.get_mut(pos - 1).unwrap();
+            *num = 0 - num.abs();
+        }
+
+        for i in 0..l {
+            if *nums.get(i).unwrap() > 0 {
+                return i as i32 + 1;
+            }
+        }
+
+        l as i32 + 1
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_first_missing_positive() {
+            struct TestCase {
+                name: &'static str,
+                nums: &'static [i32],
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic 1",
+                    nums: &[1, 2, 0],
+                    expect: 3,
+                },
+                TestCase {
+                    name: "basic 2",
+                    nums: &[3, 4, -1, 1],
+                    expect: 2,
+                },
+                TestCase {
+                    name: "basic 3",
+                    nums: &[7, 8, 9, 11, 12],
+                    expect: 1,
+                },
+                TestCase {
+                    name: "fix 1",
+                    nums: &[1],
+                    expect: 2,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = first_missing_positive(testcase.nums.to_vec());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_find_and_replace_pattern() {
+            struct TestCase {
+                name: &'static str,
+                words: &'static [&'static str],
+                pattern: &'static str,
+                expect: &'static [&'static str],
+            }
+
+            vec![TestCase {
+                name: "basic 1",
+                words: &["abc", "deq", "mee", "aqq", "dkd", "ccc"],
+                pattern: "abb",
+                expect: &["mee", "aqq"],
+            }]
+            .iter()
+            .for_each(|testcase| {
+                let words = testcase.words.iter().map(|s| s.to_string()).collect();
+                let actual = find_and_replace_pattern(words, testcase.pattern.to_string());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_min_mutation() {

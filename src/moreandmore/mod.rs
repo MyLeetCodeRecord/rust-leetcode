@@ -13,6 +13,7 @@
 //!     * [942. 增减字符串匹配](di_string_match)
 //! * 中等
 //!     * [376. 摆动序列](wiggle_max_length)
+//!     * [55. 跳跃游戏](can_jump)
 //!
 
 /// [455. 分发饼干](https://leetcode-cn.com/problems/assign-cookies/)
@@ -119,9 +120,76 @@ pub fn di_string_match(s: String) -> Vec<i32> {
     ans
 }
 
+/// [55. 跳跃游戏](https://leetcode.cn/problems/jump-game/)
+///
+/// 因为给出了最大长度, 因此
+/// 每次直接跳跃拉满, 然后记录已经走过的节点
+/// 如果发现超过了终点, 也就是能到达,
+pub fn can_jump(_nums: Vec<i32>) -> bool {
+    // if nums.len() <= 1{
+    //     return true;
+    // }
+    // use std::collections::HashSet;
+
+    // let mut visited = HashSet::new();
+    false
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_can_jump() {
+        struct TestCase {
+            name: &'static str,
+            nums: &'static [i32],
+            expect: bool,
+        }
+
+        vec![
+            // TestCase {
+            //     name: "basic",
+            //     nums: &[2, 3, 1, 1, 4],
+            //     expect: true,
+            // },
+            // TestCase {
+            //     name: "basic 2",
+            //     nums: &[3, 2, 1, 0, 4],
+            //     expect: false,
+            // },
+            // TestCase{
+            //     name: "fix 1",
+            //     nums: &[0],
+            //     expect: true
+            // },
+            // TestCase{
+            //     name: "fix 2",
+            //     nums: &[0, 2,3],
+            //     expect: false
+            // },
+            // TestCase{
+            //     name: "basic 3",
+            //     nums: &[2,0,1],
+            //     expect: true
+            // },
+            // TestCase{
+            //     name: "fix 3",
+            //     nums: &[1,0,1,0],
+            //     expect: false
+            // },
+            TestCase{
+                name: "fix 4",
+                nums: &[3,0,8,2,0,0,1],
+                expect: false
+            }
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let actual = can_jump(testcase.nums.to_vec());
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
 
     #[test]
     fn test_di_string_match() {
