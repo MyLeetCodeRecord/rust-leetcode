@@ -1,3 +1,15 @@
+//! # 二维数组旋转
+//!
+//! ## 题目
+//! * 简单
+//!     * [剑指 Offer 58 - II. 左旋转字符串](reverse_left_words)
+//! * 中等
+//!     * [48. 旋转图像](rotate)
+//!     * [54. 螺旋矩阵](spiral_order)
+//!     * [59. 螺旋矩阵 II](generate_matrix)
+//!     * [498. 对角线遍历](find_diagonal_order)
+//! * 困难
+//!
 
 /// [剑指 Offer 58 - II. 左旋转字符串](https://leetcode-cn.com/problems/zuo-xuan-zhuan-zi-fu-chuan-lcof/)
 ///
@@ -140,9 +152,93 @@ pub fn generate_matrix(n: i32) -> Vec<Vec<i32>> {
     result
 }
 
+/// [498. 对角线遍历](https://leetcode.cn/problems/diagonal-traverse/)
+pub fn find_diagonal_order(mat: Vec<Vec<i32>>) -> Vec<i32> {
+    let (m, n) = (mat.len(), mat.first().unwrap().len());
+
+    let (mut x, mut y) = (0, 0);
+    let mut up = true;
+    let mut result = Vec::with_capacity(m * n);
+    while result.len() < m * n {
+        result.push(mat.get(x).unwrap().get(y).copied().unwrap());
+        // 矩阵不保证是方阵
+        // 向上, 可能到达上边, 也可能是右边
+        // 向下, 可能到达下边, 也可能是左边
+        if up {
+            // 原本向上
+            if x == 0 {
+                // 触到上边
+                if y + 1 < n {
+                    // 切换后还在上边
+                    y += 1;
+                } else {
+                    x += 1;
+                }
+                up = false;
+            } else if y == n - 1 {
+                // 触到右边
+                x += 1;
+                up = false;
+            } else {
+                x -= 1;
+                y += 1;
+            }
+        } else {
+            // 原本向下
+            if y == 0 {
+                // 触到左边
+                if x + 1 < m {
+                    // 切换后还在左边
+                    x += 1;
+                } else {
+                    y += 1;
+                }
+                up = true;
+            } else if x == m - 1 {
+                // 触到下边
+                y += 1;
+                up = true;
+            } else {
+                x += 1;
+                y -= 1;
+            }
+        }
+    }
+
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_find_diagonal_order() {
+        struct TestCase {
+            name: &'static str,
+            mat: &'static [&'static [i32]],
+            expect: &'static [i32],
+        }
+
+        vec![
+            TestCase {
+                name: "basic 1",
+                mat: &[&[1, 2, 3], &[4, 5, 6], &[7, 8, 9]],
+                expect: &[1, 2, 4, 7, 5, 3, 6, 8, 9],
+            },
+            TestCase {
+                name: "basic 2",
+                mat: &[&[1, 2, 3], &[4, 5, 6], &[7, 8, 9]],
+                expect: &[1, 2, 4, 7, 5, 3, 6, 8, 9],
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let mat = testcase.mat.iter().map(|line| line.to_vec()).collect();
+            let actual = find_diagonal_order(mat);
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
 
     #[test]
     fn test_generate_matrix() {

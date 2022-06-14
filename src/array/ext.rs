@@ -1,13 +1,3 @@
-/// # 二维数组旋转
-///
-/// ## 题目
-/// * 简单
-///     * [剑指 Offer 58 - II. 左旋转字符串](reverse_left_words)
-/// * 中等
-///     * [48. 旋转图像](rotate)
-///     * [54. 螺旋矩阵](spiral_order)
-///     * [59. 螺旋矩阵 II](generate_matrix)
-/// * 困难
 pub mod rotate;
 
 /// # 随机

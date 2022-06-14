@@ -15,6 +15,8 @@
 //! ## 题目
 //! * 简单
 //!     * [509. 斐波那契数](fib)
+//! * 中等
+//!     * [926. 将字符串翻转到单调递增](min_flips_mono_incr)
 //! * 困难
 //!     * [473. 火柴拼正方形](makesquare)
 //!
@@ -59,7 +61,9 @@ pub fn find_substring_in_wrapround_string(p: String) -> i32 {
             let prev = pb.get(i - 1).unwrap();
             // 一般都是 abc这种
             // 出现反复的, 只有 za
-            if (prev < curr && curr - prev == 1) || (*prev > *curr && *prev == b'z' && *curr == b'a') {
+            if (prev < curr && curr - prev == 1)
+                || (*prev > *curr && *prev == b'z' && *curr == b'a')
+            {
                 k += 1;
             }
         }
@@ -70,50 +74,50 @@ pub fn find_substring_in_wrapround_string(p: String) -> i32 {
 }
 
 /// [473. 火柴拼正方形](https://leetcode.cn/problems/matchsticks-to-square/)
-/// 
+///
 /// 思路: dp
 /// 题目要求每个都用上. 因此选与不选, 2**n种情况
-/// 
+///
 /// 状态压缩方式: 数位
 pub fn makesquare(matchsticks: Vec<i32>) -> bool {
     // 一些预检查
-    if matchsticks.len() < 4{
+    if matchsticks.len() < 4 {
         return false;
     }
 
     let mut matchsticks = matchsticks;
 
-    let sum : i32 = matchsticks.iter().sum();
-    if sum % 4 != 0{
+    let sum: i32 = matchsticks.iter().sum();
+    if sum % 4 != 0 {
         return false;
     }
 
-    let len = sum/4;
+    let len = sum / 4;
 
     matchsticks.sort();
-    if matchsticks.last().copied().unwrap() > len{
+    if matchsticks.last().copied().unwrap() > len {
         return false;
     }
 
     // 总共有 2**n个可能
     // dp的索引枚举, 就变成了 全0, 到全1 (位数为n)
     // 对应数位, 0表示不选, 1表示选择
-    let mut dp = vec![-1; 1<<matchsticks.len()]; 
+    let mut dp = vec![-1; 1 << matchsticks.len()];
     // 初始都没选, 边长为0
     dp[0] = 0;
 
-    for s in 1..dp.len(){
+    for s in 1..dp.len() {
         // s 为第几种组合
-        for (k, &v) in matchsticks.iter().enumerate(){
-            if s & (1<<k) == 0{
+        for (k, &v) in matchsticks.iter().enumerate() {
+            if s & (1 << k) == 0 {
                 // 表示 已经 去掉第k根火柴
                 continue;
             }
             // 去掉第k根火柴
-            let s1 = s & (!(1<<k));
+            let s1 = s & (!(1 << k));
             // 加上第k根, 也不超过正方形边长
             // 同时 通过 `dp[s1] >= 0`保证火柴的选取顺序
-            if dp[s1] >= 0 && dp[s1] + v <= len{
+            if dp[s1] >= 0 && dp[s1] + v <= len {
                 dp[s] = (dp[s1] + v) % len; // 取余
                 break;
             }
@@ -122,34 +126,103 @@ pub fn makesquare(matchsticks: Vec<i32>) -> bool {
     dp.last().copied().unwrap() == 0
 }
 
+/// [926. 将字符串翻转到单调递增](https://leetcode.cn/problems/flip-string-to-monotone-increasing/)
+///
+/// 每个位置, 其实有两种选择, 一个是0, 一个是1
+/// 总共有 2**n中可能.
+/// 和 [473. 火柴拼正方形](makesquare) 相似
+/// 但很多状态不符合要求, 因此如果按照 473 的套路, 还需要剪枝
+///
+/// 记 dp[i-1] = (x, y) 分别为 第i-1为0, 为1需要的变化次数
+/// dp[i].x = x + 1 如果 s[i]为1, 否则为 x
+/// dp[i].y = min(dp[i].x, dp[i].y) + 1 如果s[i]为0, 否则为 min(dp[i].x, dp[i].y)
+///
+/// 最终 min(x, y)
+pub fn min_flips_mono_incr(s: String) -> i32 {
+    let mut dp = vec![(0, 0); s.len()];
+    let bs = s.as_bytes();
+    if bs[0] == b'0' {
+        dp[0].1 = 1; // 原本为1, 变为0, 需要次数加1
+    } else {
+        dp[0].0 = 1; // 反之
+    }
+
+    bs.iter().enumerate().skip(1).for_each(|(i, &c)| {
+        let prev = dp.get(i - 1).copied().unwrap();
+        let d = dp.get_mut(i).unwrap();
+        if c == b'0' {
+            d.0 = prev.0; // 自身为0, 要求前面也为0才能递增, 当前为0, 不用变化, 不用加次数
+            d.1 = std::cmp::min(prev.0, prev.1) + 1; // 自身为1, 前面可以是0, 也可以是1, 都递增. 当前为0, 变为1, 加次数1
+        } else {
+            d.0 = prev.0 + 1; // 原本为1, 变为0, 次数加1. 同时要求前面一个只能为0
+            d.1 = std::cmp::min(prev.0, prev.1); // 自身为1, 不用变. 同时前面是0是1都可
+        }
+    });
+    let last = dp.last().unwrap();
+    std::cmp::min(last.0, last.1)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_makesquare(){
-        struct TestCase{
+    fn test_min_flips_mono_incr() {
+        struct TestCase {
             name: &'static str,
-            matchsticks: &'static[i32],
-            expect: bool
+            s: &'static str,
+            expect: i32,
         }
 
         vec![
-            TestCase{
+            TestCase {
                 name: "basic 1",
-                matchsticks: &[1,1,2,2,2],
+                s: "00110",
+                expect: 1,
+            },
+            TestCase {
+                name: "basic 2",
+                s: "010110",
+                expect: 2,
+            },
+            TestCase {
+                name: "basic 3",
+                s: "00011000",
+                expect: 2,
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let actual = min_flips_mono_incr(testcase.s.to_string());
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
+
+    #[test]
+    fn test_makesquare() {
+        struct TestCase {
+            name: &'static str,
+            matchsticks: &'static [i32],
+            expect: bool,
+        }
+
+        vec![
+            TestCase {
+                name: "basic 1",
+                matchsticks: &[1, 1, 2, 2, 2],
                 expect: true,
             },
-            TestCase{
+            TestCase {
                 name: "basic 2",
-                matchsticks: &[3,3,3,3,4],
+                matchsticks: &[3, 3, 3, 3, 4],
                 expect: false,
             },
-        ].iter().for_each(|testcase|{
+        ]
+        .iter()
+        .for_each(|testcase| {
             let actual = makesquare(testcase.matchsticks.to_vec());
             assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
         });
-
     }
 
     #[test]
