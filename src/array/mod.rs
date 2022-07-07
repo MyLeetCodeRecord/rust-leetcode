@@ -847,7 +847,8 @@ pub mod binary_search {
 ///     * [870. 优势洗牌](advantage_count)
 ///     * [186. 翻转字符串里的单词 II](reverse_words)
 ///     * [151. 颠倒字符串中的单词](reverse_words_1)
-///     * * [面试题 17.11. 单词距离](find_closest)
+///     * [面试题 17.11. 单词距离](find_closest)
+///     * [1089. 复写零](duplicate_zeros)
 /// * 困难:
 ///     * [23. 合并K个升序链表](merge_k_lists)
 /// * 没有rust模版的题:
@@ -979,7 +980,7 @@ pub mod two_pointers {
                 Ordering::Less => right -= 1,
             }
         }
-        return vec![left as i32, right as i32];
+        vec![left as i32, right as i32]
     }
 
     /// [344. 反转字符串](https://leetcode-cn.com/problems/reverse-string/)
@@ -1518,10 +1519,88 @@ pub mod two_pointers {
         ret
     }
 
-    
+    /// [1089. 复写零](https://leetcode.cn/problems/duplicate-zeros/)
+    ///
+    /// 先确认原数组中哪个位置变成了新数组的结尾
+    /// 有三种情况
+    /// 1. 以一个非0数据结尾, 也就是加上这一个, 长度达到
+    /// 2. 以一个原始0结尾, 也就是加上一个0, 长度达到,
+    /// 3. 以一个补充0结尾, 也就是加上两个0, 长度达到
+    ///
+    /// 对于情况2, 由于每次0补两个, 因此长度会超过一个
+    pub fn duplicate_zeros(arr: &mut Vec<i32>) {
+        let mut top = 0usize;
+        let mut last = 0;
+        for (idx, &num) in arr.iter().enumerate() {
+            top += 1;
+            if num == 0 {
+                top += 1;
+            }
+            if top >= arr.len() {
+                last = idx;
+                break;
+            }
+        }
+
+        let mut end = arr.len(); // 填充位置, 为防止溢出, 这里取 索引+1
+        if top > arr.len() {
+            // 结尾是0, 命中情况2
+            *arr.last_mut().unwrap() = 0;
+            end -= 1;
+            last -= 1; // 消耗掉一个
+        }
+
+        for cur in (0..=last).rev() {
+            let num = arr.get(cur).copied().unwrap();
+            if num == 0 {
+                *arr.get_mut(end - 1).unwrap() = 0;
+                *arr.get_mut(end - 2).unwrap() = 0;
+                end -= 2;
+                //end = end.checked_sub(2).unwrap_or(0);
+            } else {
+                *arr.get_mut(end - 1).unwrap() = num;
+                end -= 1;
+                //end = end.checked_sub(1).unwrap_or(0);
+            }
+        }
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_duplicate_zeros() {
+            struct TestCase {
+                name: &'static str,
+                arr: &'static [i32],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic 1",
+                    arr: &[1, 0, 2, 3, 0, 4, 5, 0],
+                    expect: &[1, 0, 0, 2, 3, 0, 0, 4],
+                },
+                TestCase {
+                    name: "basic 2",
+                    arr: &[1, 2, 3],
+                    expect: &[1, 2, 3],
+                },
+                TestCase {
+                    name: "fix 1",
+                    arr: &[0, 0, 0, 0, 0, 0, 0],
+                    expect: &[0, 0, 0, 0, 0, 0, 0],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let mut arr = testcase.arr.to_vec();
+                duplicate_zeros(&mut arr);
+                assert_eq!(testcase.expect, arr, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_find_closest() {
@@ -2132,7 +2211,7 @@ pub mod two_pointers {
                 let lists: Vec<Option<Box<ListNode>>> = testcase
                     .lists
                     .iter()
-                    .map(|l| build_list_from_slice(*l))
+                    .map(|l| build_list_from_slice(l))
                     .collect();
                 let expect = build_list_from_slice(testcase.expect);
                 let actual = merge_k_lists(lists);
@@ -2221,7 +2300,7 @@ pub mod two_pointers {
 /// * 简单
 ///     * [944. 删列造序](min_deletion_size)
 ///     * [961. 在长度 2N 的数组中找出重复 N 次的元素](repeated_n_times)
-///     *
+///     * [1200. 最小绝对差](minimum_abs_difference)
 /// * 中等
 ///     * [2024. 考试的最大困扰度](max_consecutive_answers)
 ///     * [1004. 最大连续1的个数 III](longest_ones)
@@ -2779,6 +2858,42 @@ pub mod windows {
             else if b==d { return b; }
         }
         unreachable!()
+    }
+
+    /// [30. 串联所有单词的子串](https://leetcode.cn/problems/substring-with-concatenation-of-all-words/)
+    ///
+    /// 题目要求中的关键:
+    ///     1. 长度相同的单词 (窗口大小)
+    ///     2. 中间不能有其他字符 + 不需要考虑串联顺序 (匹配数量)
+    ///
+    /// 因此按照单词大小分割原字符串, 并记录每个单词的出现位置.
+    /// 窗口大小即为单词个数(如果是看长度, 就是所有单词拼起来的长度)
+    pub fn find_substring(_s: String, _words: Vec<String>) -> Vec<i32> {
+        unimplemented!()
+    }
+
+    /// [1200. 最小绝对差](https://leetcode.cn/problems/minimum-absolute-difference/)
+    pub fn minimum_abs_difference(arr: Vec<i32>) -> Vec<Vec<i32>> {
+        use std::cmp::Ordering;
+        let mut arr = arr;
+        arr.sort();
+        let mut ret = vec![];
+        let mut min_diff = i32::MAX;
+        arr.windows(2).for_each(|win| {
+            let [a, b] = <[i32; 2]>::try_from(win).ok().unwrap();
+            let diff = (a - b).abs();
+            match diff.cmp(&min_diff) {
+                Ordering::Equal => ret.push(vec![a, b]),
+                Ordering::Less => {
+                    ret.clear();
+                    min_diff = diff;
+                    ret.push(vec![a, b]);
+                }
+                _ => {}
+            }
+        });
+
+        ret
     }
 
     #[cfg(test)]
@@ -3494,6 +3609,7 @@ pub mod pre_sum {
     }
 }
 
-
 /// 一些周边题目
 pub mod ext;
+
+pub mod ser;

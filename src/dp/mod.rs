@@ -162,9 +162,60 @@ pub fn min_flips_mono_incr(s: String) -> i32 {
     std::cmp::min(last.0, last.1)
 }
 
+/// [256. 粉刷房子](https://leetcode.cn/problems/paint-house/)
+///
+/// 每个房子最终只有三种状态. 取最后一个房子的三种状态中额最小值, 即为答案
+///
+/// 同时这三种状态均只由前面一个房子即可推断出(要求相邻不相同)
+///
+/// 因此可以简化状态存储.
+pub fn min_cost(costs: Vec<Vec<i32>>) -> i32 {
+    let [mut a, mut b, mut c] = <[i32; 3]>::try_from(costs.first().unwrap().as_slice())
+        .expect("unpack array");
+
+    for cost in costs.into_iter().skip(1) {
+        let [ax, bx, cx] = <[i32; 3]>::try_from(cost.as_slice())
+            .expect("unpack array");
+
+        let at = std::cmp::min(b, c) + ax;
+        let bt = std::cmp::min(a, c) + bx;
+        let ct = std::cmp::min(a, b) + cx;
+
+        a = at; b = bt; c = ct; 
+    }
+
+    [a, b, c].into_iter().min().expect("result")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_min_cost(){
+        struct TestCase{
+            name: &'static str,
+            costs: &'static[&'static [i32]],
+            expect: i32
+        }
+
+        vec![
+            TestCase{
+                name: "basic 1",
+                costs: &[&[17,2,17],&[16,16,5],&[14,3,19]],
+                expect: 10
+            },
+            TestCase{
+                name: "basic 2",
+                costs: &[&[7,6,2]],
+                expect: 2
+            }
+        ].iter().for_each(|testcase|{
+            let costs = testcase.costs.iter().map(|c| c.to_vec()).collect();
+            let actual = min_cost(costs);
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        })
+    }
 
     #[test]
     fn test_min_flips_mono_incr() {

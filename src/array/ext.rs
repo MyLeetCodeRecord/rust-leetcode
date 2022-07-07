@@ -20,8 +20,6 @@ pub mod random;
 pub mod quick;
 
 
-pub mod n_sum;
-
 pub mod kmp;
 
 /// 数学相关题目
@@ -32,3 +30,6 @@ pub mod rng;
 pub mod stack;
 // 拓扑排序
 // pub mod topological;
+
+// 字典树
+pub mod trie;

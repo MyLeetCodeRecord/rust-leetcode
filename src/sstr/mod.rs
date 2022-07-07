@@ -60,9 +60,62 @@ pub fn valid_ip_address(query_ip: String) -> String {
     "Neither".to_string()
 }
 
+/// [532. 数组中的 k-diff 数对](https://leetcode.cn/problems/k-diff-pairs-in-an-array/)
+pub fn find_pairs(nums: Vec<i32>, k: i32) -> i32 {
+    use std::collections::HashSet;
+
+    let (mut visited, mut res) = (HashSet::new(), HashSet::new());
+    for num in nums{
+        if visited.contains(&(num-k)){
+            res.insert(num-k);
+        }
+        if visited.contains(&(num+k)){
+            res.insert(num);
+        }
+        visited.insert(num);
+    }
+    res.len() as i32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_find_pairs() {
+        struct TestCase {
+            name: &'static str,
+            nums: &'static [i32],
+            k: i32,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                name: "basic 1",
+                nums: &[3, 1, 4, 1, 5],
+                k: 2,
+                expect: 2,
+            },
+            TestCase {
+                name: "basic 1",
+                nums: &[1, 2, 3, 4, 5],
+                k: 1,
+                expect: 4,
+            },
+            TestCase {
+                name: "basic 1",
+                nums: &[1, 3, 1, 5, 4],
+                k: 0,
+                expect: 1,
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let actual = find_pairs(testcase.nums.to_vec(), testcase.k);
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
 
     #[test]
     fn test_valid_ip_address() {
