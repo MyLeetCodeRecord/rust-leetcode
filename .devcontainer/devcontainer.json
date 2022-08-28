@@ -1,0 +1,16 @@
+{
+  // https://code.visualstudio.com/docs/remote/containers
+  "name": "rust-leetcode",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "rust",
+  "workspaceFolder": "/project/rust-leetcode",
+  "shutdownAction": "stopCompose",
+  "extensions": [
+    "be5invis.toml",
+    "eamodio.gitlens",
+    "rust-lang.rust-analyzer",
+    "vadimcn.vscode-lldb",
+    "ryanluker.vscode-coverage-gutters"
+  ],
+  //"postStartCommand": "bash "
+}

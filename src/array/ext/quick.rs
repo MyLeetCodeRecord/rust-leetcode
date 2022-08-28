@@ -1,4 +1,48 @@
 /// [912. 排序数组](https://leetcode-cn.com/problems/sort-an-array/)
+/// **快排** 主要思路是 分治, 分治可以用递归实现.
+/// 步骤: 1. 确认 *轴*; 2. 根据 *轴*, 将数组切分; 3. 根据轴的位置, 递归处理每个新数组
+/// 步骤一可变性不强, 可以选开头, 结尾, 中间, 随机, 方式很多不过没啥难度和技巧; 步骤三同理
+/// 步骤2, 将小于x的放在x左边, 将大于x的放x右边.
+///
+/// 方式1: 使用额外数组, 挑数, 挑出来, 然后拼接在一起
+/// 方式2: 快慢指针
+/// ```rust
+/// fn partition(nums: &mut [i32], left: usize, right: usize, pivot: usize) -> usize {
+///     nums.swap(pivot, right);
+///     let mut insert_idx = left;
+///     for curr in left..right {
+///         if nums[curr] <= nums[right] {
+///             nums.swap(insert_idx, curr);
+///             insert_idx += 1;
+///         }
+///     }
+///     nums.swap(insert_idx, right);
+///     insert_idx
+/// }
+/// ```
+/// 方式3: 左右指针,
+/// 但是rust的强类型约束, 加减导致边界会出现溢出, 不像其他语言是用`int`做索引
+/// ```rust
+/// fn partition(nums: &mut [i32], left: usize, right: usize, pivot: usize) -> usize {
+///     let(mut l, mut r) = (left, right);
+///     loop{
+///         while l <= r && nums[l] <= nums[pivot]{
+///             l += 1;
+///         }
+///         while l <= r && nums[r] >= nums[pivot]{
+///             r -= 1;
+///         }
+///         if l >= r{
+///             break;
+///         }
+///         nums.swap(l, r);
+///     }
+///     nums.swap(r, pivot);
+///     return r;
+/// }
+/// ```
+/// 不过思路和方式2的快慢指针是一样的, 只是用加了预处理, 将左右边界上明显不符合交换的元素, 做了跳过
+///
 pub fn sort_array(nums: Vec<i32>) -> Vec<i32> {
     fn partition(nums: &mut [i32], left: usize, right: usize, pivot: usize) -> usize {
         nums.swap(pivot, right);
@@ -10,7 +54,6 @@ pub fn sort_array(nums: Vec<i32>) -> Vec<i32> {
             }
         }
         nums.swap(insert_idx, right);
-
         insert_idx
     }
 
@@ -123,7 +166,7 @@ mod tests {
                 expect: &[&[1, 6], &[8, 10], &[15, 18]],
             },
             TestCase {
-                name: "basic",
+                name: "basic 2",
                 intervals: &[&[1, 4], &[4, 5]],
                 expect: &[&[1, 5]],
             },

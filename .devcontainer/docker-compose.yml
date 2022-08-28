@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+    rust:
+        build:
+          context: .
+          dockerfile: Dockerfile
+        volumes:
+            - type: bind
+              consistency: delegated
+              source: ../
+              target: /project/rust-leetcode
+        cap_add:
+            - SYS_PTRACE
+        security_opt:
+            - seccomp:unconfined
+        command: /bin/sh -c "while sleep 1000; do :; done"

@@ -1,0 +1,4 @@
+[build]
+rustflags = ["-Cinstrument-coverage",]
+[env]
+LLVM_PROFILE_FILE = "target/coverage/grcov.profraw"

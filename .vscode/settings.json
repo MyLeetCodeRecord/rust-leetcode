@@ -1,0 +1,10 @@
+{
+    "coverage-gutters.showGutterCoverage": true,
+    "coverage-gutters.showLineCoverage": true,
+    
+    "rust-analyzer.procMacro.enable": true,
+    "rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
+    "rust-analyzer.debug.openDebugPane": true,
+    "rust-analyzer.inlayHints.typeHints.hideNamedConstructor": true,
+
+}
