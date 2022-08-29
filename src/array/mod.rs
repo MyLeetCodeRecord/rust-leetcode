@@ -463,9 +463,133 @@ pub mod binary_search {
         -1
     }
 
+    /// [172. 阶乘后的零](https://leetcode.cn/problems/factorial-trailing-zeroes/)
+    ///
+    /// 0 只会由 2 * 5 产生, 数量为 min{count(2), count(5)}
+    ///
+    /// 由于 `n/5 < n/2`, 因此 min{count(2), count(5)} ==> count(5)
+    ///
+    /// 1..15 其实有 3 个可以做因子的5, 一个来自5, 一个来自 10, 一个来自15
+    /// 1..25 其实有 5+1个可以做因子的5, 除了1..15的三个, 还有一个来自20 , 两个来自25
+    ///
+    /// 同样, 125可以贡献三个, 525可以贡献四个.
+    ///
+    pub fn trailing_zeroes(n: i32) -> i32 {
+        let mut cnt = 0;
+        let mut n = n;
+
+        loop {
+            if n == 0 {
+                break;
+            }
+            n = n / 5;
+            cnt += n;
+        }
+        cnt
+    }
+
+    /// [793. 阶乘函数后 K 个零](https://leetcode.cn/problems/preimage-size-of-factorial-zeroes-function/)
+    ///
+    /// 相对与[172. 阶乘后的零](trailing_zeroes), *172*是给定阶乘求结尾有几个0, *793*是给定数量, 求有多少个阶乘
+    /// 
+    /// 由 *172*可知, 一段范围内的阶乘, 0的数量不变, 即存在相等, 求边界
+    ///
+    /// 题目 k 的范围是`[0, 10**9]`, 对应的阶乘范围很大, 可以检测 `i32::MAX` 的0的数量大于 10**9, 因此可以作为右边界
+    /// 但是实测, 用 `i32::MAX` 会超时. 
+    /// 
+    /// 通过 *172* 可以得到, 右边界可以用 5*k 
+    /// 
+    pub fn preimage_size_fzf(k: i32) -> i32 {
+
+        fn left_bound(k: i32) -> i32{
+            let (mut left, mut right) = (0, 5*k);
+            while left <= right{
+                let mid = left + (right-left)/2;
+                let count = trailing_zeroes(mid);
+                if count >= k{
+                    right = mid-1;
+                } else {
+                    left = mid+1;
+                }
+            }
+            return right+1;
+        }
+
+        left_bound(k+1) - left_bound(k)
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_preimage_size_fzf() {
+            struct TestCase {
+                name: &'static str,
+                k: i32,
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic",
+                    k: 0,
+                    expect: 5,
+                },
+                TestCase {
+                    name: "basic 2",
+                    k: 5,
+                    expect: 0,
+                },
+                TestCase {
+                    name: "basic 3",
+                    k: 3,
+                    expect: 5,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = preimage_size_fzf(testcase.k);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            })
+        }
+
+        #[test]
+        fn test_trailing_zeroes() {
+            struct TestCase {
+                name: &'static str,
+                n: i32,
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic 1",
+                    n: 3,
+                    expect: 0,
+                },
+                TestCase {
+                    name: "basic 2",
+                    n: 5,
+                    expect: 1,
+                },
+                TestCase {
+                    name: "basic 3",
+                    n: 0,
+                    expect: 0,
+                },
+                TestCase {
+                    name: "fix 1",
+                    n: 10,
+                    expect: 2,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = trailing_zeroes(testcase.n);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            })
+        }
 
         #[test]
         fn test_search_2() {

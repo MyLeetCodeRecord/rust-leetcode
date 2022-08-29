@@ -170,18 +170,19 @@ pub fn min_flips_mono_incr(s: String) -> i32 {
 ///
 /// 因此可以简化状态存储.
 pub fn min_cost(costs: Vec<Vec<i32>>) -> i32 {
-    let [mut a, mut b, mut c] = <[i32; 3]>::try_from(costs.first().unwrap().as_slice())
-        .expect("unpack array");
+    let [mut a, mut b, mut c] =
+        <[i32; 3]>::try_from(costs.first().unwrap().as_slice()).expect("unpack array");
 
     for cost in costs.into_iter().skip(1) {
-        let [ax, bx, cx] = <[i32; 3]>::try_from(cost.as_slice())
-            .expect("unpack array");
+        let [ax, bx, cx] = <[i32; 3]>::try_from(cost.as_slice()).expect("unpack array");
 
         let at = std::cmp::min(b, c) + ax;
         let bt = std::cmp::min(a, c) + bx;
         let ct = std::cmp::min(a, b) + cx;
 
-        a = at; b = bt; c = ct; 
+        a = at;
+        b = bt;
+        c = ct;
     }
 
     [a, b, c].into_iter().min().expect("result")
@@ -192,25 +193,27 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_min_cost(){
-        struct TestCase{
+    fn test_min_cost() {
+        struct TestCase {
             name: &'static str,
-            costs: &'static[&'static [i32]],
-            expect: i32
+            costs: &'static [&'static [i32]],
+            expect: i32,
         }
 
         vec![
-            TestCase{
+            TestCase {
                 name: "basic 1",
-                costs: &[&[17,2,17],&[16,16,5],&[14,3,19]],
-                expect: 10
+                costs: &[&[17, 2, 17], &[16, 16, 5], &[14, 3, 19]],
+                expect: 10,
             },
-            TestCase{
+            TestCase {
                 name: "basic 2",
-                costs: &[&[7,6,2]],
-                expect: 2
-            }
-        ].iter().for_each(|testcase|{
+                costs: &[&[7, 6, 2]],
+                expect: 2,
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
             let costs = testcase.costs.iter().map(|c| c.to_vec()).collect();
             let actual = min_cost(costs);
             assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
