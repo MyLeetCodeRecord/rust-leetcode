@@ -3,6 +3,8 @@
 /// * 简单
 ///     * [20. 有效的括号](is_valid)
 ///     * [1021. 删除最外层的括号](remove_outer_parentheses)
+/// * 中等
+///     * [946. 验证栈序列](validate_stack_sequences)
 pub mod simple {
     /// [20. 有效的括号](https://leetcode.cn/problems/valid-parentheses/)
     ///
@@ -17,7 +19,10 @@ pub mod simple {
             }
             let mut mat: bool = false;
             if let Some(last) = stack.last() {
-                if (b')'.eq(b) && b'('.eq(last)) || (b']'.eq(b) && b'['.eq(last)) || (b'}'.eq(b) && b'{'.eq(last)) {
+                if (b')'.eq(b) && b'('.eq(last))
+                    || (b']'.eq(b) && b'['.eq(last))
+                    || (b'}'.eq(b) && b'{'.eq(last))
+                {
                     stack.pop();
                     mat = true;
                 }
@@ -58,9 +63,111 @@ pub mod simple {
         s
     }
 
+    /// [946. 验证栈序列](https://leetcode.cn/problems/validate-stack-sequences/)
+    ///
+    /// 模拟入栈和出栈
+    ///
+    pub fn validate_stack_sequences(pushed: Vec<i32>, popped: Vec<i32>) -> bool {
+        let mut popped = popped.iter().peekable();
+        let mut stack = Vec::with_capacity(pushed.len());
+        for num in pushed.into_iter() {
+            stack.push(num);
+            while let Some(&peak) = stack.last() {
+                if peak != **popped.peek().unwrap() {
+                    break;
+                }
+
+                stack.pop();
+                popped.next();
+            }
+        }
+        stack.is_empty()
+    }
+
+    /// [1475. 商品折扣后的最终价格](https://leetcode.cn/problems/final-prices-with-a-special-discount-in-a-shop/)
+    pub fn final_prices(prices: Vec<i32>) -> Vec<i32> {
+        let mut stack: Vec<(usize, i32)> = Vec::with_capacity(prices.len());
+        let mut result = prices.clone();
+
+        for (idx, price) in prices.into_iter().enumerate() {
+            while let Some((i, l)) = stack.last() {
+                if price > *l {
+                    break;
+                }
+                *result.get_mut(*i).unwrap() = l - price;
+                stack.pop();
+            }
+            stack.push((idx, price));
+        }
+        return result;
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_final_prices() {
+            struct TestCase {
+                name: &'static str,
+                prices: &'static [i32],
+                expect: &'static [i32],
+            }
+
+            vec![
+                TestCase {
+                    name: "basic 1",
+                    prices: &[8, 4, 6, 2, 3],
+                    expect: &[4, 2, 4, 2, 3],
+                },
+                TestCase {
+                    name: "basic 2",
+                    prices: &[1, 2, 3, 4, 5],
+                    expect: &[1, 2, 3, 4, 5],
+                },
+                TestCase {
+                    name: "basic 3",
+                    prices: &[8, 4, 6, 2, 3],
+                    expect: &[4, 2, 4, 2, 3],
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual = final_prices(testcase.prices.to_vec());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
+
+        #[test]
+        fn test_validate_stack_sequences() {
+            struct TestCase {
+                name: &'static str,
+                pushed: &'static [i32],
+                popped: &'static [i32],
+                expect: bool,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic 1",
+                    pushed: &[1, 2, 3, 4, 5],
+                    popped: &[4, 5, 3, 2, 1],
+                    expect: true,
+                },
+                TestCase {
+                    name: "basic 2",
+                    pushed: &[1, 2, 3, 4, 5],
+                    popped: &[4, 3, 5, 1, 2],
+                    expect: false,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let actual =
+                    validate_stack_sequences(testcase.pushed.to_vec(), testcase.popped.to_vec());
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            })
+        }
 
         #[test]
         fn test_remove_outer_parentheses() {
