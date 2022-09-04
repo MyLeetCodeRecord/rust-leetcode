@@ -1,3 +1,3 @@
 [toolchain]
 channel = "nightly"
-components = [ "llvm-tools-preview" ]
+components = [ "llvm-tools-preview", "rust-analyzer"]

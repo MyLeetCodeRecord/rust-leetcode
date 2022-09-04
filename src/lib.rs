@@ -12,3 +12,4 @@ pub mod moreandmore;
 pub mod dp;
 pub mod sstr;
 pub mod tree;
+pub mod backtrack;

@@ -14,6 +14,8 @@
 //! * 中等
 //!     * [376. 摆动序列](wiggle_max_length)
 //!     * [55. 跳跃游戏](can_jump)
+//!     * [646. 最长数对链](find_longest_chain)
+//!     * [300. 最长递增子序列](length_of_lis)
 //!
 
 /// [455. 分发饼干](https://leetcode-cn.com/problems/assign-cookies/)
@@ -122,22 +124,232 @@ pub fn di_string_match(s: String) -> Vec<i32> {
 
 /// [55. 跳跃游戏](https://leetcode.cn/problems/jump-game/)
 ///
-/// 因为给出了最大长度, 因此
-/// 每次直接跳跃拉满, 然后记录已经走过的节点
-/// 如果发现超过了终点, 也就是能到达,
-pub fn can_jump(_nums: Vec<i32>) -> bool {
-    // if nums.len() <= 1{
-    //     return true;
-    // }
-    // use std::collections::HashSet;
+/// 从 nums[i] 出发最远到达的距离：
+/// `x`在`[nums[i], nums[i]+i]`内的 `nums[x]+x`的最大值
+///
+/// 这样就扩展了最远距离， 但不是下一轮的起点
+/// 
+/// 精简版：
+/// ```rust
+/// pub fn can_jump(nums: Vec<i32>) -> bool {
+///     let mut right_most = 0;
+///     for (i, n) in nums.iter().enumerate() {
+///         if i <= right_most {
+///             right_most = right_most.max(i + *n as usize);
+///             if right_most >= nums.len() - 1 { // 终点是最后一个元素, 因此 等于 nums.len() - 1 也可
+///                 return true;
+///             }
+///         }
+///         // 如果出现了i > right_most 说明出现了断层
+///     }
+///     false
+/// }
+/// ```
+///
+pub fn can_jump(nums: Vec<i32>) -> bool {
+    if nums.is_empty() {
+        return true;
+    }
+    let length = nums.len() as i32;
 
-    // let mut visited = HashSet::new();
-    false
+    let mut start = 0;
+    let mut end = 0;
+    loop {
+        let mut step = nums.get(start as usize).copied().unwrap();
+        end = end.max(start + step);
+        if end >= length - 1 {
+            return true;
+        }
+        if start == end {
+            return false;
+        }
+
+        let mut tmp = end;
+        for i in start..end {
+            step = nums.get(i as usize).copied().unwrap();
+            tmp = tmp.max(i + step);
+        }
+        start = end;
+        end = tmp;
+
+        if start >= length - 1 {
+            return true;
+        }
+    }
 }
 
+/// [646. 最长数对链](https://leetcode.cn/problems/maximum-length-of-pair-chain/)
+///
+/// 题目保证 **第一个数字总是比第二个数字小**
+/// 因此按照第二个数字排序
+///
+/// 之后取第二个数字最小的， 这样链路可以尽可能的长
+/// 
+/// [DP解法](crate::dp::ser::longest_sub::find_longest_chain)
+///
+pub fn find_longest_chain(pairs: Vec<Vec<i32>>) -> i32 {
+    let mut pairs = pairs;
+    pairs.sort_by(|a, b| a[1].cmp(&b[1]));
+
+    let mut curr = i32::MIN;
+    let mut cnt = 0;
+
+    for pair in pairs {
+        if pair[0] > curr {
+            curr = pair[1];
+            cnt += 1;
+        }
+    }
+    cnt
+}
+
+/// [435. 无重叠区间](https://leetcode.cn/problems/non-overlapping-intervals/)
+/// 
+/// [DP解法](crate::dp::ser::longest_sub::erase_overlap_intervals)
+pub fn erase_overlap_intervals(intervals: Vec<Vec<i32>>) -> i32 {
+    let mut pairs = intervals;
+    pairs.sort_by(|a, b| a[1].cmp(&b[1]));
+
+    let mut curr = i32::MIN;
+    let mut cnt = 0;
+
+    for pair in pairs.iter() {
+        if pair[0] >= curr {
+            curr = pair[1];
+            cnt += 1;
+        }
+    }
+    pairs.len() as i32 - cnt
+}
+
+/// [300. 最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/)
+/// 
+/// [DP解法](crate::dp::ser::longest_sub::length_of_lis)
+/// 
+/// 序列增长的越慢， 最终的长度可能越长
+/// 
+///  d[i], 表示长度为 i 的最长上升子序列的末尾元素的最小值
+/// 
+pub fn length_of_lis(nums: Vec<i32>) -> i32 {
+    if nums.is_empty(){ return 0; }
+
+    let mut d = Vec::with_capacity(nums.len()+1);
+    for &num in nums.iter(){
+        let last = d.last().copied().unwrap_or(i32::MIN);
+        // 如果比结尾大，无疑需要延展一个
+        if num > last{
+            d.push(num);
+            continue;
+        }
+        // 如果不比结尾大， 找个位置安置, 有可能是替换掉了结尾， 这样也就达到了 减速 的效果
+        // 如果不是替换的结尾, 不影响后续延展
+        // 替换后会影响后续判断过程
+        // 不能直接使用 binary_search， 存在相等元素时， 只能替换最早的那个
+        let(mut left, mut right) = (1, d.len());
+        while left <= right{
+            let mid = left + (right-left)/2;
+            if d[mid-1] >= num{
+                right = mid-1;
+            } else{
+                left = mid + 1;
+            }
+        }
+        d[left-1] = num;
+    }
+    d.len() as i32
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_length_of_lis(){
+        struct TestCase{
+            name: &'static str,
+            nums: &'static [i32],
+            expect: i32
+        }
+
+        vec![
+            TestCase{
+                name:"basic 1",
+                nums: &[10,9,2,5,3,7,101,18],
+                expect: 4
+            },
+            TestCase{
+                name:"basic 2",
+                nums: &[0,1,0,3,2,3],
+                expect: 4
+            },
+            TestCase{
+                name:"basic 3",
+                nums: &[7,7,7,7,7,7,7],
+                expect: 1
+            },
+            TestCase{
+                name: "fix 1",
+                nums: &[10,9,2,5,3,4],
+                expect: 3
+            }
+        ].iter().for_each(|testcase|{
+            let actual = length_of_lis(testcase.nums.to_vec());
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
+
+    #[test]
+    fn test_erase_overlap_intervals() {
+        struct TestCase {
+            name: &'static str,
+            intervals: &'static [[i32; 2]],
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                name: "basic 1",
+                intervals: &[[1, 2], [2, 3], [3, 4], [1, 3]],
+                expect: 1,
+            },
+            TestCase {
+                name: "basic 2",
+                intervals: &[[1, 2], [1, 2], [1, 2]],
+                expect: 2,
+            },
+            TestCase {
+                name: "basic 1",
+                intervals: &[[1, 2], [2, 3]],
+                expect: 0,
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let intervals = testcase.intervals.iter().map(|p| p.to_vec()).collect();
+            let actual = erase_overlap_intervals(intervals);
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
+
+    #[test]
+    fn test_find_longest_chain() {
+        struct TestCase {
+            name: &'static str,
+            pair: &'static [(i32, i32)],
+            expect: i32,
+        }
+
+        vec![TestCase {
+            name: "basic 1",
+            pair: &[(1, 2), (2, 3), (3, 4)],
+            expect: 2,
+        }]
+        .iter()
+        .for_each(|testcase| {
+            let pair = testcase.pair.iter().map(|p| vec![p.0, p.1]).collect();
+            let actual = find_longest_chain(pair);
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
 
     #[test]
     fn test_can_jump() {
@@ -148,41 +360,46 @@ mod tests {
         }
 
         vec![
-            // TestCase {
-            //     name: "basic",
-            //     nums: &[2, 3, 1, 1, 4],
-            //     expect: true,
-            // },
-            // TestCase {
-            //     name: "basic 2",
-            //     nums: &[3, 2, 1, 0, 4],
-            //     expect: false,
-            // },
-            // TestCase{
-            //     name: "fix 1",
-            //     nums: &[0],
-            //     expect: true
-            // },
-            // TestCase{
-            //     name: "fix 2",
-            //     nums: &[0, 2,3],
-            //     expect: false
-            // },
-            // TestCase{
-            //     name: "basic 3",
-            //     nums: &[2,0,1],
-            //     expect: true
-            // },
-            // TestCase{
-            //     name: "fix 3",
-            //     nums: &[1,0,1,0],
-            //     expect: false
-            // },
-            TestCase{
+            TestCase {
+                name: "basic",
+                nums: &[2, 3, 1, 1, 4],
+                expect: true,
+            },
+            TestCase {
+                name: "basic 2",
+                nums: &[3, 2, 1, 0, 4],
+                expect: false,
+            },
+            TestCase {
+                name: "fix 1",
+                nums: &[0],
+                expect: true,
+            },
+            TestCase {
+                name: "fix 2",
+                nums: &[0, 2, 3],
+                expect: false,
+            },
+            TestCase {
+                name: "basic 3",
+                nums: &[2, 0, 1],
+                expect: true,
+            },
+            TestCase {
+                name: "fix 3",
+                nums: &[1, 0, 1, 0],
+                expect: false,
+            },
+            TestCase {
                 name: "fix 4",
-                nums: &[3,0,8,2,0,0,1],
-                expect: false
-            }
+                nums: &[3, 0, 8, 2, 0, 0, 1],
+                expect: true,
+            },
+            TestCase {
+                name: "fix 5",
+                nums: &[5, 9, 3, 2, 1, 0, 2, 3, 3, 1, 0, 0],
+                expect: true,
+            },
         ]
         .iter()
         .for_each(|testcase| {

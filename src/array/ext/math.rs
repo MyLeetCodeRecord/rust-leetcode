@@ -1,3 +1,4 @@
+
 /// [462. 最少移动次数使数组元素相等 II](https://leetcode.cn/problems/minimum-moves-to-equal-array-elements-ii/)
 ///
 /// 直觉是平均数, 甚至题目的两个示例都是平均数.
@@ -56,9 +57,95 @@ pub fn shuffle(nums: Vec<i32>, n: i32) -> Vec<i32> {
     nums
 }
 
+/// [1582. 二进制矩阵中的特殊位置](https://leetcode.cn/problems/special-positions-in-a-binary-matrix/)
+pub fn num_special(mat: Vec<Vec<i32>>) -> i32 {
+    if mat.is_empty() {
+        return 0;
+    }
+    let (h, w) = (mat.len(), mat.first().unwrap().len());
+
+    use std::collections::HashSet;
+    let mut visited_row = HashSet::new();
+    let mut visited_col = HashSet::new();
+
+    fn valid(mat: &[Vec<i32>], r: usize, c: usize, h: usize, w: usize) -> bool {
+        for i in 0..h {
+            if mat[i][c] == 1 && i != r {
+                return false;
+            }
+        }
+        for i in 0..w {
+            if mat[r][i] == 1 && i != c {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    let mut cnt = 0;
+
+    for (r, line) in mat.iter().enumerate() {
+        if visited_row.contains(&r) {
+            continue;
+        }
+        for (c, e) in line.iter().enumerate() {
+            if visited_col.contains(&c) {
+                continue;
+            }
+
+            if *e == 0 {
+                continue;
+            }
+
+            if valid(mat.as_slice(), r, c, h, w) {
+                cnt += 1;
+            }
+
+            visited_col.insert(c);
+            visited_row.insert(r);
+
+            break;
+        }
+    }
+    cnt
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_num_special() {
+        struct TestCase {
+            name: &'static str,
+            mat: &'static [&'static [i32]],
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                name: "basic 1",
+                mat: &[&[1, 0, 0], &[0, 0, 1], &[1, 0, 0]],
+                expect: 1,
+            },
+            TestCase {
+                name: "basic 2",
+                mat: &[&[1, 0, 0], &[0, 1, 0], &[0, 0, 1]],
+                expect: 3,
+            },
+            TestCase {
+                name: "basic 3",
+                mat: &[&[0, 0, 0, 1], &[1, 0, 0, 0], &[0, 1, 1, 0], &[0, 0, 0, 0]],
+                expect: 2,
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let mat = testcase.mat.iter().map(|line| line.to_vec()).collect();
+            let actual = num_special(mat);
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
 
     #[test]
     fn test_shuffle() {

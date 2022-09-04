@@ -1,10 +1,20 @@
 //! 爬楼梯系列
 //!
 //! ## 题目
+//! * [509. 斐波那契数](fib)
 //! * [70. 爬楼梯](climb_stairs)
 //! * [6058. 统计打字方案数](count_texts)
 //! * [746. 使用最小花费爬楼梯](min_cost_climbing_stairs)
 //!
+
+/// [509. 斐波那契数](https://leetcode.cn/problems/fibonacci-number/)
+pub fn fib(n: i32) -> i32 {
+    let (mut a, mut b) = (0, 1);
+    for _ in 0..n {
+        (a, b) = (b, a + b);
+    }
+    a
+}
 
 /// [70. 爬楼梯](https://leetcode.cn/problems/climbing-stairs/)
 ///
@@ -205,6 +215,38 @@ mod tests {
         .for_each(|testcase| {
             let acutal = climb_stairs(testcase.n);
             assert_eq!(testcase.expect, acutal, "{} failed", testcase.name);
+        });
+    }
+
+    #[test]
+    fn test_fib() {
+        struct TestCase {
+            name: &'static str,
+            n: i32,
+            expect: i32,
+        }
+
+        vec![
+            TestCase{
+                name: "basic 1",
+                n: 2,
+                expect: 1
+            },
+            TestCase{
+                name: "basic 2",
+                n: 3,
+                expect: 2
+            },
+            TestCase{
+                name: "basic 3",
+                n: 4,
+                expect: 3
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let actual = fib(testcase.n);
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
         });
     }
 }
