@@ -188,9 +188,64 @@ pub fn min_cost(costs: Vec<Vec<i32>>) -> i32 {
     [a, b, c].into_iter().min().expect("result")
 }
 
+/// [828. 统计子串中的唯一字符](https://leetcode.cn/problems/count-unique-characters-of-all-substrings-of-a-given-string/)
+pub fn unique_letter_string(s: String) -> i32 {
+    let (mut prev, mut prev_diff) = ([-1; 26], [0; 26]);
+    let mut ans = 0;
+
+    for (i, &b) in s.as_bytes().iter().enumerate() {
+        let (i, c) = (i as i32, (b - b'A') as usize);
+
+        // 出现多次的
+        ans = ans + prev_diff[c] * (i - prev[c]);
+        prev_diff[c] = i - prev[c];
+        prev[c] = i;
+    }
+
+    let length = s.len() as i32;
+    // 对于只出现一次的， 需要补齐
+    ans + prev
+        .into_iter()
+        .zip(prev_diff.into_iter())
+        .map(|(a, b)| b * (length - a))
+        .sum::<i32>()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_unique_letter_string() {
+        struct TestCase {
+            name: &'static str,
+            s: &'static str,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                name: "basic 1",
+                s: "ABC",
+                expect: 10,
+            },
+            TestCase {
+                name: "basic 2",
+                s: "ABA",
+                expect: 8,
+            },
+            TestCase {
+                name: "basic 3",
+                s: "LEETCODE",
+                expect: 92,
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let actual = unique_letter_string(testcase.s.to_string());
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
 
     #[test]
     fn test_min_cost() {

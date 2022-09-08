@@ -65,11 +65,11 @@ pub fn find_pairs(nums: Vec<i32>, k: i32) -> i32 {
     use std::collections::HashSet;
 
     let (mut visited, mut res) = (HashSet::new(), HashSet::new());
-    for num in nums{
-        if visited.contains(&(num-k)){
-            res.insert(num-k);
+    for num in nums {
+        if visited.contains(&(num - k)) {
+            res.insert(num - k);
         }
-        if visited.contains(&(num+k)){
+        if visited.contains(&(num + k)) {
             res.insert(num);
         }
         visited.insert(num);
@@ -77,9 +77,104 @@ pub fn find_pairs(nums: Vec<i32>, k: i32) -> i32 {
     res.len() as i32
 }
 
+/// [1592. 重新排列单词间的空格](https://leetcode.cn/problems/rearrange-spaces-between-words/)
+pub fn reorder_spaces(text: String) -> String {
+    const SPACE: u8 = b' ';
+
+    enum State {
+        NotInWord,
+        InWord,
+    }
+
+    let mut words = vec![];
+    let mut space_cnt = 0;
+    let mut state = State::NotInWord;
+
+    let mut tmp = vec![];
+    for &c in text.as_bytes() {
+        if c == SPACE {
+            space_cnt += 1;
+            match state {
+                State::InWord => {
+                    words.push(tmp.clone());
+                    tmp.clear();
+                    state = State::NotInWord;
+                }
+                State::NotInWord => {}
+            }
+        } else {
+            tmp.push(c);
+            match state {
+                State::InWord => {}
+                State::NotInWord => {
+                    state = State::InWord;
+                }
+            }
+        }
+    }
+    if !tmp.is_empty(){
+        words.push(tmp.clone());
+        tmp.clear();
+    }
+    
+    let mut split = 0;
+    let mut result = vec![];
+    if words.len() > 1 {
+        split = space_cnt / (words.len() - 1);
+    }
+
+    for word in words {
+        result.extend(word);
+        if space_cnt >= split {
+            result.extend(vec![b' '; split]);
+            space_cnt -= split;
+        }
+    }
+    result.extend(vec![b' '; space_cnt]);
+
+    unsafe { String::from_utf8_unchecked(result) }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_reorder_spaces() {
+        struct TestCase {
+            name: &'static str,
+            text: &'static str,
+            expect: &'static str,
+        }
+
+        vec![
+            TestCase {
+                name: "basic 1",
+                text: "  this   is  a sentence ",
+                expect: "this   is   a   sentence",
+            },
+            TestCase {
+                name: "basic 2",
+                text: " practice   makes   perfect",
+                expect: "practice   makes   perfect ",
+            },
+            TestCase {
+                name: "basic 3",
+                text: "hello   world",
+                expect: "hello   world",
+            },
+            TestCase {
+                name: "basic 4",
+                text: "  walks  udp package   into  bar a",
+                expect: "walks  udp  package  into  bar  a ",
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let actual = reorder_spaces(testcase.text.to_string());
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
 
     #[test]
     fn test_find_pairs() {

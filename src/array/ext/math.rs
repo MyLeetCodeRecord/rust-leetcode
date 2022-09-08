@@ -1,4 +1,3 @@
-
 /// [462. 最少移动次数使数组元素相等 II](https://leetcode.cn/problems/minimum-moves-to-equal-array-elements-ii/)
 ///
 /// 直觉是平均数, 甚至题目的两个示例都是平均数.
@@ -110,9 +109,54 @@ pub fn num_special(mat: Vec<Vec<i32>>) -> i32 {
     cnt
 }
 
+/// [667. 优美的排列 II](https://leetcode.cn/problems/beautiful-arrangement-ii/)
+pub fn construct_array(n: i32, k: i32) -> Vec<i32> {
+    let mut result = (1..(n - k)).collect::<Vec<i32>>();
+    let (mut i, mut j) = (n - k, n);
+    while i <= j {
+        result.push(i);
+        if i != j {
+            result.push(j);
+        }
+        i += 1;
+        j -= 1;
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_construct_array() {
+        struct TestCase {
+            name: &'static str,
+            n: i32,
+            k: i32,
+            expect: &'static [i32],
+        }
+
+        vec![
+            TestCase {
+                name: "basic 1",
+                n: 3,
+                k: 1,
+                expect: &[1, 2, 3],
+            },
+            TestCase {
+                name: "basic 1",
+                n: 3,
+                k: 2,
+                expect: &[1, 3, 2],
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let acutal = construct_array(testcase.n, testcase.k);
+            assert_eq!(testcase.expect, acutal, "{} failed", testcase.name);
+        });
+    }
 
     #[test]
     fn test_num_special() {
