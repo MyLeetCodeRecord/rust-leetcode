@@ -1,7 +1,3 @@
 /target
 Cargo.lock
-.vscode/
-.cargo/
-
-rust-toolchain*
 *.profraw

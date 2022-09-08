@@ -5,13 +5,13 @@
             "label": "watch coverage",
             "type": "shell",
             "isBackground": true,
-            "command": "~/.cargo/bin/watchexec",
+            "command": "watchexec",
             "args": [
                 "--no-vcs-ignore",
                 "-w", "target/coverage/grcov.profraw",
                 "-e", "profraw",
                 "--restart",
-                "~/.cargo/bin/grcov target/coverage/grcov.profraw --branch --ignore-not-existing --binary-path ./target/debug/ -s . -t lcov --ignore \"/*\" -o target/coverage/lcov.info"
+                "grcov target/coverage/grcov.profraw --branch --ignore-not-existing --binary-path ./target/debug/ -s . -t lcov --ignore \"/*\" -o target/coverage/lcov.info"
             ],
             "problemMatcher": {
                 "pattern":[

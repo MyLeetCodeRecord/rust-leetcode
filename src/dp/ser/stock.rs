@@ -196,7 +196,7 @@ pub fn max_profit_5(prices: Vec<i32>, fee: i32) -> i32 {
 /// 同
 /// 只能交易一次, 因此最低价买入, 最高价卖出即可.
 pub fn max_profit_6(prices: Vec<i32>) -> i32 {
-    if prices.is_empty(){
+    if prices.is_empty() {
         return 0;
     }
     let mut min = prices.first().copied().unwrap();
@@ -232,11 +232,11 @@ mod tests {
                 prices: &[7, 6, 4, 3, 1],
                 expect: 0,
             },
-            TestCase{
+            TestCase {
                 name: "fix 1",
                 prices: &[],
-                expect: 0
-            }
+                expect: 0,
+            },
         ]
         .iter()
         .for_each(|testcase| {

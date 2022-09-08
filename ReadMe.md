@@ -28,6 +28,9 @@
 
 - 一些题目, [LeetCode][leetcode]不支持[Rust][rust]
 - 链表, 树的题目用 [Rust] 写也确实费劲
+  - 费劲的有两个, 一个是 [`Rc`](https://doc.rust-lang.org/stable/std/rc/struct.Rc.html) 和 [`RefCell`](https://doc.rust-lang.org/stable/std/cell/struct.RefCell.html) 包装后操作确实不方便; 一个是测试用例写起来太啰唆了
+  - 第一个避免不了, 解题代码就是需要
+  - 所幸 [Procedural Macros](https://doc.rust-lang.org/reference/procedural-macros.html) 强大, 用来构建测试用例还算方便
 
 ## 参考
 

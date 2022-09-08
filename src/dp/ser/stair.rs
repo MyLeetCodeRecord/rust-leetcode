@@ -227,20 +227,20 @@ mod tests {
         }
 
         vec![
-            TestCase{
+            TestCase {
                 name: "basic 1",
                 n: 2,
-                expect: 1
+                expect: 1,
             },
-            TestCase{
+            TestCase {
                 name: "basic 2",
                 n: 3,
-                expect: 2
+                expect: 2,
             },
-            TestCase{
+            TestCase {
                 name: "basic 3",
                 n: 4,
-                expect: 3
+                expect: 3,
             },
         ]
         .iter()

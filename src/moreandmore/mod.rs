@@ -375,7 +375,7 @@ mod tests {
                 nums: &[7, 7, 7, 7, 7, 7, 7],
                 expect: 1,
             },
-            TestCase {
+            TestCase  {
                 name: "fix 1",
                 nums: &[10, 9, 2, 5, 3, 4],
                 expect: 3,

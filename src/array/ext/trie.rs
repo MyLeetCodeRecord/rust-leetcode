@@ -148,8 +148,7 @@ pub fn replace_words(dictionary: Vec<String>, sentence: String) -> String {
     }
 
     let mut result_tmp = vec![];
-    'NextWord:
-    for part in sentence.split_ascii_whitespace() {
+    'NextWord: for part in sentence.split_ascii_whitespace() {
         let mut curr = &trie_tree.root; // 保存当前起点下, 对应的层级.
         for (i, chr) in part.chars().enumerate() {
             match curr.child_nodes.get(&chr) {

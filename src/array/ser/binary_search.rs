@@ -1,5 +1,5 @@
 /// # 二分查找
-/// 
+///
 /// 特点:
 /// 1. 数组(连续内存, 或可用索引随机访问) + 有序
 /// 2. 时间复杂度O(logn)
@@ -12,7 +12,7 @@
 ///
 /// 之所以有区间的写法问题, 是因为口语上的左边一半右边一半, 没有描述清边界问题.
 /// 但其实把握住: 终止条件为 **搜索区间内没有元素** 这一条就可以了.
-/// 
+///
 /// 下面所有的情况讨论都是基于升序的.
 ///
 /// 关于`left`和`right`, 有以下几种取法:
@@ -495,31 +495,30 @@ pub mod binary_search {
     /// [793. 阶乘函数后 K 个零](https://leetcode.cn/problems/preimage-size-of-factorial-zeroes-function/)
     ///
     /// 相对与[172. 阶乘后的零](trailing_zeroes), *172*是给定阶乘求结尾有几个0, *793*是给定数量, 求有多少个阶乘
-    /// 
+    ///
     /// 由 *172*可知, 一段范围内的阶乘, 0的数量不变, 即存在相等, 求边界
     ///
     /// 题目 k 的范围是`[0, 10**9]`, 对应的阶乘范围很大, 可以检测 `i32::MAX` 的0的数量大于 10**9, 因此可以作为右边界
-    /// 但是实测, 用 `i32::MAX` 会超时. 
-    /// 
-    /// 通过 *172* 可以得到, 右边界可以用 5*k 
-    /// 
+    /// 但是实测, 用 `i32::MAX` 会超时.
+    ///
+    /// 通过 *172* 可以得到, 右边界可以用 5*k
+    ///
     pub fn preimage_size_fzf(k: i32) -> i32 {
-
-        fn left_bound(k: i32) -> i32{
-            let (mut left, mut right) = (0, 5*k);
-            while left <= right{
-                let mid = left + (right-left)/2;
+        fn left_bound(k: i32) -> i32 {
+            let (mut left, mut right) = (0, 5 * k);
+            while left <= right {
+                let mid = left + (right - left) / 2;
                 let count = trailing_zeroes(mid);
-                if count >= k{
-                    right = mid-1;
+                if count >= k {
+                    right = mid - 1;
                 } else {
-                    left = mid+1;
+                    left = mid + 1;
                 }
             }
-            return right+1;
+            return right + 1;
         }
 
-        left_bound(k+1) - left_bound(k)
+        left_bound(k + 1) - left_bound(k)
     }
 
     #[cfg(test)]

@@ -1,0 +1,18 @@
+[package]
+name = "macros"
+version = "0.1.0"
+edition = "2021"
+description = ""
+
+[lib]
+proc_macro=true
+
+[[test]]
+name = "tests"
+path = "tests/proc.rs"
+
+[dev-dependencies]
+trybuild = { version = "1.0", features = ["diff"] }
+
+[dependencies]
+proc-macro2 = "1.0"
