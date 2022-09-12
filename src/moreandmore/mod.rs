@@ -128,7 +128,7 @@ pub fn di_string_match(s: String) -> Vec<i32> {
 /// `x`在`[nums[i], nums[i]+i]`内的 `nums[x]+x`的最大值
 ///
 /// 这样就扩展了最远距离， 但不是下一轮的起点
-/// 
+///
 /// 精简版：
 /// ```rust
 /// pub fn can_jump(nums: Vec<i32>) -> bool {
@@ -184,7 +184,7 @@ pub fn can_jump(nums: Vec<i32>) -> bool {
 /// 因此按照第二个数字排序
 ///
 /// 之后取第二个数字最小的， 这样链路可以尽可能的长
-/// 
+///
 /// [DP解法](crate::dp::ser::longest_sub::find_longest_chain)
 ///
 pub fn find_longest_chain(pairs: Vec<Vec<i32>>) -> i32 {
@@ -204,7 +204,7 @@ pub fn find_longest_chain(pairs: Vec<Vec<i32>>) -> i32 {
 }
 
 /// [435. 无重叠区间](https://leetcode.cn/problems/non-overlapping-intervals/)
-/// 
+///
 /// [DP解法](crate::dp::ser::longest_sub::erase_overlap_intervals)
 pub fn erase_overlap_intervals(intervals: Vec<Vec<i32>>) -> i32 {
     let mut pairs = intervals;
@@ -223,21 +223,23 @@ pub fn erase_overlap_intervals(intervals: Vec<Vec<i32>>) -> i32 {
 }
 
 /// [300. 最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/)
-/// 
+///
 /// [DP解法](crate::dp::ser::longest_sub::length_of_lis)
-/// 
+///
 /// 序列增长的越慢， 最终的长度可能越长
-/// 
+///
 ///  d[i], 表示长度为 i 的最长上升子序列的末尾元素的最小值
-/// 
+///
 pub fn length_of_lis(nums: Vec<i32>) -> i32 {
-    if nums.is_empty(){ return 0; }
+    if nums.is_empty() {
+        return 0;
+    }
 
-    let mut d = Vec::with_capacity(nums.len()+1);
-    for &num in nums.iter(){
+    let mut d = Vec::with_capacity(nums.len() + 1);
+    for &num in nums.iter() {
         let last = d.last().copied().unwrap_or(i32::MIN);
         // 如果比结尾大，无疑需要延展一个
-        if num > last{
+        if num > last {
             d.push(num);
             continue;
         }
@@ -245,53 +247,142 @@ pub fn length_of_lis(nums: Vec<i32>) -> i32 {
         // 如果不是替换的结尾, 不影响后续延展
         // 替换后会影响后续判断过程
         // 不能直接使用 binary_search， 存在相等元素时， 只能替换最早的那个
-        let(mut left, mut right) = (1, d.len());
-        while left <= right{
-            let mid = left + (right-left)/2;
-            if d[mid-1] >= num{
-                right = mid-1;
-            } else{
+        let (mut left, mut right) = (1, d.len());
+        while left <= right {
+            let mid = left + (right - left) / 2;
+            if d[mid - 1] >= num {
+                right = mid - 1;
+            } else {
                 left = mid + 1;
             }
         }
-        d[left-1] = num;
+        d[left - 1] = num;
     }
     d.len() as i32
 }
+
+/// [670. 最大交换](https://leetcode.cn/problems/maximum-swap/)
+///
+/// 思路: 找到第一个比9小的, 尝试之后有没有比它大的, 找出其中最大的, 交换过来
+///
+/// 且需要取最低位的
+///
+pub fn maximum_swap(num: i32) -> i32 {
+    let mut num = num;
+    let mut part = vec![];
+    while num > 0 {
+        part.push(num % 10);
+        num = num / 10;
+    }
+
+    'SWAP: for j in (1..part.len()).rev() {
+        let a = part.get(j).copied().unwrap();
+        if a < 9 {
+            let m = part
+                .iter()
+                .copied()
+                .enumerate()
+                .take(j)
+                .max_by(|a, b| {
+                    if a.1 != b.1 {
+                        a.1.cmp(&b.1)
+                    } else {
+                        if a.0 < b.0 {
+                            std::cmp::Ordering::Greater // 小序号优先
+                        } else {
+                            std::cmp::Ordering::Less
+                        }
+                    }
+                })
+                .unwrap();
+
+            if m.1 > a {
+                part.swap(j, m.0);
+                break 'SWAP;
+            }
+        }
+    }
+
+    let mut result = 0;
+    for n in part.into_iter().rev() {
+        result = result * 10 + n
+    }
+    result
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_length_of_lis(){
-        struct TestCase{
+    fn test_maximum_swap() {
+        struct TestCase {
             name: &'static str,
-            nums: &'static [i32],
-            expect: i32
+            num: i32,
+            expect: i32,
         }
 
         vec![
-            TestCase{
-                name:"basic 1",
-                nums: &[10,9,2,5,3,7,101,18],
-                expect: 4
+            TestCase {
+                name: "basic 1",
+                num: 2736,
+                expect: 7236,
             },
-            TestCase{
-                name:"basic 2",
-                nums: &[0,1,0,3,2,3],
-                expect: 4
+            TestCase {
+                name: "basic 2",
+                num: 9973,
+                expect: 9973,
             },
-            TestCase{
-                name:"basic 3",
-                nums: &[7,7,7,7,7,7,7],
-                expect: 1
-            },
-            TestCase{
+            TestCase {
                 name: "fix 1",
-                nums: &[10,9,2,5,3,4],
-                expect: 3
-            }
-        ].iter().for_each(|testcase|{
+                num: 98368,
+                expect: 98863,
+            },
+            TestCase {
+                name: "fix 2",
+                num: 1993,
+                expect: 9913,
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let actual = maximum_swap(testcase.num);
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
+
+    #[test]
+    fn test_length_of_lis() {
+        struct TestCase {
+            name: &'static str,
+            nums: &'static [i32],
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                name: "basic 1",
+                nums: &[10, 9, 2, 5, 3, 7, 101, 18],
+                expect: 4,
+            },
+            TestCase {
+                name: "basic 2",
+                nums: &[0, 1, 0, 3, 2, 3],
+                expect: 4,
+            },
+            TestCase {
+                name: "basic 3",
+                nums: &[7, 7, 7, 7, 7, 7, 7],
+                expect: 1,
+            },
+            TestCase {
+                name: "fix 1",
+                nums: &[10, 9, 2, 5, 3, 4],
+                expect: 3,
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
             let actual = length_of_lis(testcase.nums.to_vec());
             assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
         });

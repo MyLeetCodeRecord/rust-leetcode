@@ -102,9 +102,56 @@ pub mod simple {
         return result;
     }
 
+    /// [1598. 文件夹操作日志搜集器](https://leetcode.cn/problems/crawler-log-folder/)
+    pub fn min_operations(logs: Vec<String>) -> i32 {
+        let mut cnt = 0;
+        for cd in logs {
+            if cd == "../" {
+                cnt = std::cmp::max(0, cnt - 1);
+            } else if cd == "./" {
+            } else {
+                cnt += 1;
+            }
+        }
+        cnt
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
+
+        #[test]
+        fn test_min_operations() {
+            struct TestCase {
+                name: &'static str,
+                logs: &'static [&'static str],
+                expect: i32,
+            }
+
+            vec![
+                TestCase {
+                    name: "basic 1",
+                    logs: &["d1/", "d2/", "../", "d21/", "./"],
+                    expect: 2,
+                },
+                TestCase {
+                    name: "basic 2",
+                    logs: &["d1/", "d2/", "./", "d3/", "../", "d31/"],
+                    expect: 3,
+                },
+                TestCase {
+                    name: "basic 3",
+                    logs: &["d1/", "../", "../", "../"],
+                    expect: 0,
+                },
+            ]
+            .iter()
+            .for_each(|testcase| {
+                let logs = testcase.logs.iter().map(|s| s.to_string()).collect();
+                let actual = min_operations(logs);
+                assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            });
+        }
 
         #[test]
         fn test_final_prices() {
