@@ -75,8 +75,6 @@ pub mod merge {
         ans
     }
 
-
-
     /// [758. 字符串中的加粗单词](https://leetcode.cn/problems/bold-words-in-string/)
     ///
     /// 相对[616. 给字符串添加加粗标签](add_bold_tag) 只是将字符范围缩小到了仅英文字母

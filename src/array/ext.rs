@@ -9,16 +9,15 @@ pub mod rotate;
 pub mod random;
 
 /// # 快排相关
-/// 
+///
 /// 特点: 每论能确定一个元素的最终位置
-/// 
+///
 /// ## 题目
 /// * 简单
 /// * 中等
 ///     * [912. 排序数组](sort_array)
 ///     * [56. 合并区间](merge)
 pub mod quick;
-
 
 pub mod kmp;
 

@@ -112,11 +112,11 @@ pub fn reorder_spaces(text: String) -> String {
             }
         }
     }
-    if !tmp.is_empty(){
+    if !tmp.is_empty() {
         words.push(tmp.clone());
         tmp.clear();
     }
-    
+
     let mut split = 0;
     let mut result = vec![];
     if words.len() > 1 {

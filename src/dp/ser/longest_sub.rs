@@ -48,7 +48,7 @@ pub fn find_longest_chain(pairs: Vec<Vec<i32>>) -> i32 {
 /// [435. 无重叠区间](https://leetcode.cn/problems/non-overlapping-intervals/)
 ///
 /// [646. 最长数对链](find_longest_chain) 的变种问法， 能组成最长的递增序列， 也就需要剔除的最少
-/// 
+///
 /// dp的复杂度是 `O(n^2)`, 会超时, [贪心算法](crate::moreandmore::erase_overlap_intervals)时间ok
 ///
 pub fn erase_overlap_intervals(intervals: Vec<Vec<i32>>) -> i32 {
@@ -66,7 +66,7 @@ pub fn erase_overlap_intervals(intervals: Vec<Vec<i32>>) -> i32 {
             }
         }
     }
-    let max =dp.iter().max().copied().unwrap_or(0);
+    let max = dp.iter().max().copied().unwrap_or(0);
 
     pairs.len() as i32 - max
 }

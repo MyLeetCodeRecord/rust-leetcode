@@ -175,23 +175,23 @@ pub fn four_sum(nums: Vec<i32>, target: i32) -> Vec<Vec<i32>> {
                 match sum.cmp(&target) {
                     std::cmp::Ordering::Equal => {
                         result.push(vec![
-                        nums[a] as i32,
-                        nums[b] as i32,
-                        nums[c] as i32,
-                        nums[d] as i32,
-                    ]);
-                    while c < d && nums[c] == nums[c + 1] {
+                            nums[a] as i32,
+                            nums[b] as i32,
+                            nums[c] as i32,
+                            nums[d] as i32,
+                        ]);
+                        while c < d && nums[c] == nums[c + 1] {
+                            c += 1;
+                        }
                         c += 1;
-                    }
-                    c += 1;
-                    while c < d && nums[d] == nums[d - 1] {
+                        while c < d && nums[d] == nums[d - 1] {
+                            d -= 1;
+                        }
                         d -= 1;
                     }
-                    d -= 1;
-                    },
                     std::cmp::Ordering::Greater => {
                         d -= 1;
-                    },
+                    }
                     std::cmp::Ordering::Less => {
                         c += 1;
                     }

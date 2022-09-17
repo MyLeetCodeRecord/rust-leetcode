@@ -1,4 +1,3 @@
-
 /// # 随机
 ///
 /// 特点: 概率, 知道总长度
@@ -587,21 +586,20 @@ pub mod random3 {
                     Self { n, blacklist }
                 }
 
-                
                 fn pick(&self) -> i32 {
                     let length = self.blacklist.len();
                     let x = rand::random::<i32>().abs() % (self.n - length as i32);
 
-                    let(mut lo, mut hi) = (0, self.blacklist.len()-1);
-                    while lo < hi{
-                        let mid = (lo+hi+1)/2;
-                        if x.gt(self.blacklist.get(mid).unwrap()){
-                            hi = mid -1;
+                    let (mut lo, mut hi) = (0, self.blacklist.len() - 1);
+                    while lo < hi {
+                        let mid = (lo + hi + 1) / 2;
+                        if x.gt(self.blacklist.get(mid).unwrap()) {
+                            hi = mid - 1;
                         } else {
                             lo = mid;
                         }
                     }
-                    if lo == hi && *self.blacklist.get(lo).unwrap()-lo as i32 <= x{
+                    if lo == hi && *self.blacklist.get(lo).unwrap() - lo as i32 <= x {
                         x + lo as i32 + 1
                     } else {
                         x

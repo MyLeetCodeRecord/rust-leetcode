@@ -7,6 +7,10 @@ edition = "2021"
 
 [dependencies]
 rand = "0.8"
+macros = {path="./macros"}
 
 [package.metadata.docs.rs]
 rustdoc-args = [ "--html-in-header", "./src/docs-header.html" ]
+
+[workspace]
+members = ["macros"]
