@@ -1,3 +1,5 @@
+//! 数学相关题目
+
 /// [462. 最少移动次数使数组元素相等 II](https://leetcode.cn/problems/minimum-moves-to-equal-array-elements-ii/)
 ///
 /// 直觉是平均数, 甚至题目的两个示例都是平均数.
