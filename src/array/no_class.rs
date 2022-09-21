@@ -106,9 +106,65 @@ pub fn largest_island(grid: Vec<Vec<i32>>) -> i32 {
     max_area
 }
 
+/// [1636. 按照频率将数组升序排序](https://leetcode.cn/problems/sort-array-by-increasing-frequency/)
+pub fn frequency_sort(nums: Vec<i32>) -> Vec<i32> {
+    use std::collections::HashMap;
+    let mut counter = {
+        let mut tmp: HashMap<i32, usize> = HashMap::new();
+        nums.iter().for_each(|num| {
+            let entry = tmp.entry(*num).or_default();
+            *entry += 1;
+        });
+        tmp.into_iter().collect::<Vec<(i32, usize)>>()
+    };
+    counter.sort_by(|a, b| {
+        let cc = a.1.cmp(&b.1);
+        match cc {
+            std::cmp::Ordering::Equal => a.0.cmp(&b.0).reverse(),
+            _ => cc,
+        }
+    });
+
+    let mut result = Vec::with_capacity(nums.len());
+    for (k, v) in counter {
+        result.extend(vec![k; v]);
+    }
+
+    result
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_frequency_sort() {
+        struct Testcase {
+            nums: Vec<i32>,
+            expect: Vec<i32>,
+        }
+
+        vec![
+            Testcase {
+                nums: vec![1, 1, 2, 2, 2, 3],
+                expect: vec![3, 1, 1, 2, 2, 2],
+            },
+            Testcase {
+                nums: vec![2, 3, 1, 3, 2],
+                expect: vec![1, 3, 3, 2, 2],
+            },
+            Testcase {
+                nums: vec![-1, 1, -6, 4, 5, -6, 1, 4, 1],
+                expect: vec![5, -1, 4, 4, -6, -6, 1, 1, 1],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase { nums, expect } = testcase;
+            let actual = frequency_sort(nums);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_largest_island() {
