@@ -7,7 +7,7 @@
 //!     * [98. 验证二叉搜索树](is_valid_bst_2)
 //! * 困难
 
-use crate::tree::TreeNode;
+use datastructure::TreeNode;
 
 use std::cell::RefCell;
 use std::rc::Rc;

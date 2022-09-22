@@ -10,7 +10,6 @@ pub mod math;
 
 pub mod rng;
 
-pub mod stack;
 // 拓扑排序
 // pub mod topological;
 

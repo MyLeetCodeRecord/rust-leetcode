@@ -3,7 +3,7 @@
 //! * 简单
 //!     * [144. 二叉树的前序遍历](preorder_traversal)
 
-use crate::tree::TreeNode;
+use datastructure::TreeNode;
 
 use std::cell::RefCell;
 use std::rc::Rc;
