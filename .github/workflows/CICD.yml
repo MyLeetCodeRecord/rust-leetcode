@@ -44,10 +44,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - gcc: 10
-            clang: 11
-          - gcc: 11
-            clang: 12
+          # - gcc: 10
+          #   clang: 11
+          # - gcc: 11
+          #   clang: 12
           - gcc: 11
             clang: 13
     env:
@@ -62,8 +62,8 @@ jobs:
           curl -o- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
           # Add extra APT repos
           sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-          sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-11 main'
-          sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main'
+          # sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-11 main'
+          # sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-12 main'
           sudo add-apt-repository 'deb http://apt.llvm.org/focal/ llvm-toolchain-focal-13 main'
           # Install toolchains
           sudo apt-get update

@@ -124,72 +124,65 @@ mod tests {
     #[test]
     fn test_min_operations() {
         struct TestCase {
-            name: &'static str,
             logs: &'static [&'static str],
             expect: i32,
         }
 
         vec![
             TestCase {
-                name: "basic 1",
                 logs: &["d1/", "d2/", "../", "d21/", "./"],
                 expect: 2,
             },
             TestCase {
-                name: "basic 2",
                 logs: &["d1/", "d2/", "./", "d3/", "../", "d31/"],
                 expect: 3,
             },
             TestCase {
-                name: "basic 3",
                 logs: &["d1/", "../", "../", "../"],
                 expect: 0,
             },
         ]
-        .iter()
-        .for_each(|testcase| {
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
             let logs = testcase.logs.iter().map(|s| s.to_string()).collect();
             let actual = min_operations(logs);
-            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            assert_eq!(testcase.expect, actual, "case {} failed", idx);
         });
     }
 
     #[test]
     fn test_final_prices() {
         struct TestCase {
-            name: &'static str,
             prices: &'static [i32],
             expect: &'static [i32],
         }
 
         vec![
             TestCase {
-                name: "basic 1",
                 prices: &[8, 4, 6, 2, 3],
                 expect: &[4, 2, 4, 2, 3],
             },
             TestCase {
-                name: "basic 2",
                 prices: &[1, 2, 3, 4, 5],
                 expect: &[1, 2, 3, 4, 5],
             },
             TestCase {
-                name: "basic 3",
                 prices: &[8, 4, 6, 2, 3],
                 expect: &[4, 2, 4, 2, 3],
             },
         ]
-        .iter()
-        .for_each(|testcase| {
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
             let actual = final_prices(testcase.prices.to_vec());
-            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            assert_eq!(testcase.expect, actual, "case {} failed", idx);
         });
     }
 
     #[test]
     fn test_validate_stack_sequences() {
         struct TestCase {
-            name: &'static str,
             pushed: &'static [i32],
             popped: &'static [i32],
             expect: bool,
@@ -197,97 +190,90 @@ mod tests {
 
         vec![
             TestCase {
-                name: "basic 1",
                 pushed: &[1, 2, 3, 4, 5],
                 popped: &[4, 5, 3, 2, 1],
                 expect: true,
             },
             TestCase {
-                name: "basic 2",
                 pushed: &[1, 2, 3, 4, 5],
                 popped: &[4, 3, 5, 1, 2],
                 expect: false,
             },
         ]
-        .iter()
-        .for_each(|testcase| {
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
             let actual =
                 validate_stack_sequences(testcase.pushed.to_vec(), testcase.popped.to_vec());
-            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            assert_eq!(testcase.expect, actual, "case {} failed", idx);
         })
     }
 
     #[test]
     fn test_remove_outer_parentheses() {
         struct TestCase {
-            name: &'static str,
             s: &'static str,
             expect: &'static str,
         }
 
         vec![
             TestCase {
-                name: "basic 1",
                 s: "(()())(())",
                 expect: "()()()",
             },
             TestCase {
-                name: "basic 2",
                 s: "(()())(())(()(()))",
                 expect: "()()()()(())",
             },
             TestCase {
-                name: "basic 3",
                 s: "()()",
                 expect: "",
             },
         ]
-        .iter()
-        .for_each(|testcase| {
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
             let actual = remove_outer_parentheses(testcase.s.to_string());
-            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            assert_eq!(testcase.expect, actual, "case {} failed", idx);
         });
     }
 
     #[test]
     fn test_is_valid() {
         struct TestCase {
-            name: &'static str,
             s: &'static str,
             expect: bool,
         }
 
         vec![
             TestCase {
-                name: "basic",
                 s: "()",
                 expect: true,
             },
             TestCase {
-                name: "basic 2",
                 s: "()[]{}",
                 expect: true,
             },
             TestCase {
-                name: "basic 3",
                 s: "(]",
                 expect: false,
             },
             TestCase {
-                name: "basic 4",
                 s: "([)]",
                 expect: false,
             },
             TestCase {
-                name: "basic 5",
                 s: "{[]}",
                 expect: true,
             },
         ]
-        .iter()
-        .for_each(|testcase| {
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
             let actual = is_valid(testcase.s.to_string());
-            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            assert_eq!(testcase.expect, actual, "case {} failed", idx);
         });
     }
 }
+
+pub mod calculator;
