@@ -1,4 +1,5 @@
-//! [827. 最大人工岛](largest_island)
+//! * [827. 最大人工岛](largest_island)
+//! * [1636. 按照频率将数组升序排序](frequency_sort)
 
 /// [827. 最大人工岛](https://leetcode.cn/problems/making-a-large-island/)
 pub fn largest_island(grid: Vec<Vec<i32>>) -> i32 {
@@ -132,9 +133,40 @@ pub fn frequency_sort(nums: Vec<i32>) -> Vec<i32> {
 
     result
 }
+
+
+
+/// [1672. 最富有客户的资产总量](https://leetcode.cn/problems/richest-customer-wealth/)
+pub fn maximum_wealth(accounts: Vec<Vec<i32>>) -> i32 {
+    accounts
+        .into_iter()
+        .map(|acc| acc.into_iter().sum::<i32>())
+        .max()
+        .unwrap()
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::vec2;
+
+    #[test]
+    fn test_maximum_wealth(){
+        struct Testcase{
+            accounts: Vec<Vec<i32>>,
+            expect: i32
+        }
+
+        vec![
+            Testcase{accounts: vec2![[1,2,3],[3,2,1]], expect:6},
+            Testcase{accounts: vec2![[1,5],[7,3],[3,5]], expect:10},
+            Testcase{accounts: vec2![[2,8,7],[7,1,3],[1,9,5]], expect:17},
+        ].into_iter().enumerate().for_each(|(idx, testcase)|{
+            let Testcase{accounts, expect} = testcase;
+            let actual = maximum_wealth(accounts);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
 
     #[test]
     fn test_frequency_sort() {

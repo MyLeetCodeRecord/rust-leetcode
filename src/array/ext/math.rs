@@ -1,4 +1,12 @@
-//! 数学相关题目
+//! # 数学相关题目
+//!
+//! ## 题目
+//! * 简单
+//!     * [1470. 重新排列数组](shuffle)
+//!     * [1582. 二进制矩阵中的特殊位置](num_special)
+//! * 中等
+//!     * [462. 最小操作次数使数组元素相等 II](min_moves2)
+//!     * [667. 优美的排列 II](construct_array)
 
 /// [462. 最少移动次数使数组元素相等 II](https://leetcode.cn/problems/minimum-moves-to-equal-array-elements-ii/)
 ///
@@ -126,9 +134,117 @@ pub fn construct_array(n: i32, k: i32) -> Vec<i32> {
     result
 }
 
+/// [412. Fizz Buzz](https://leetcode.cn/problems/fizz-buzz/)
+pub fn fizz_buzz(n: i32) -> Vec<String> {
+    (1..=n)
+        .into_iter()
+        .map(|num| {
+            if num % 3 == 0 && num % 5 == 0 {
+                "FizzBuzz".to_string()
+            } else if num % 5 == 0 {
+                "Buzz".to_string()
+            } else if num % 3 == 0 {
+                "Fizz".to_string()
+            } else {
+                num.to_string()
+            }
+        })
+        .collect()
+}
+
+/// [1342. 将数字变成 0 的操作次数](https://leetcode.cn/problems/number-of-steps-to-reduce-a-number-to-zero/)
+///
+/// 思路1: 模拟
+/// ```
+/// pub fn number_of_steps(num: i32) -> i32 {
+///     let mut num = num;
+///     let mut cnt = 0;
+///     while num > 0 {
+///         if num % 2 == 0 {
+///             num = num / 2;
+///         } else {
+///             num = num - 1;
+///         }
+///         cnt += 1;
+///     }
+///     cnt
+/// }
+/// ```
+///
+/// 思路2: 计算
+/// 将num用用二进制表示, 则每次减1， 实际对应为 低位的 1变0， 每次除2, 实际对应为 整体右移一位
+/// 也就是总的操作数为可以视为 将最高位1变为0 的步数
+///
+/// 其中右移总共 `31 - (leading_zero)` (有符号数, 第一位为符号位, 忽略)
+/// 减1 次数, 即为1的个数
+/// 
+/// 注意: 如果原本为0， 这时 `31 - (leading_zero)`可能有溢出
+///
+pub fn number_of_steps(num: i32) -> i32 {
+    (num.count_ones() + 31u32.checked_sub(num.leading_zeros()).unwrap_or(0)) as i32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_number_of_steps() {
+        struct TestCase {
+            num: i32,
+            expect: i32,
+        }
+
+        vec![
+            TestCase { num: 14, expect: 6 },
+            TestCase { num: 8, expect: 4 },
+            TestCase {
+                num: 123,
+                expect: 12,
+            },
+            TestCase{num: 0, expect: 0}
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { num, expect } = testcase;
+            let actual = number_of_steps(num);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_fizz_buzz() {
+        struct TestCase {
+            n: i32,
+            expect: Vec<&'static str>,
+        }
+
+        vec![
+            TestCase {
+                n: 3,
+                expect: vec!["1", "2", "Fizz"],
+            },
+            TestCase {
+                n: 5,
+                expect: vec!["1", "2", "Fizz", "4", "Buzz"],
+            },
+            TestCase {
+                n: 15,
+                expect: vec![
+                    "1", "2", "Fizz", "4", "Buzz", "Fizz", "7", "8", "Fizz", "Buzz", "11", "Fizz",
+                    "13", "14", "FizzBuzz",
+                ],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { n, expect } = testcase;
+            let actual = fizz_buzz(n);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_construct_array() {

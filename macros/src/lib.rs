@@ -8,14 +8,14 @@ use proc_macro::TokenStream;
 mod tree_impl;
 mod list_impl;
 
-/// tree!(tree-define)
+/// tree!(tree-define) => Option<Rc<RefCell<TreeNode>>>
 /// tree-define: {val: int, [left: tree-define], [right: tree-define] }
 #[proc_macro]
 pub fn tree(input: TokenStream) -> TokenStream {
     tree_impl::tree(input.into()).into()
 }
 
-/// list!(1,2,3,4)
+/// list!(1,2,3,4) => Option<Box<ListNode>>
 /// list!([1,2,3,4])
 #[proc_macro]
 pub fn list(input: TokenStream) -> TokenStream{

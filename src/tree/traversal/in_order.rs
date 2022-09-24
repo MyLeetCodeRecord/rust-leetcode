@@ -96,17 +96,17 @@ mod tests {
 
         vec![
             Testcase {
-                tree: Some(Rc::new(RefCell::new(tree!({2, left: {1}, right:{3}})))),
+                tree: tree!({2, left: {1}, right:{3}}),
                 expect: true,
             },
             Testcase {
-                tree: Some(Rc::new(RefCell::new(
+                tree: 
                     tree!({5, left: {1}, right:{4, left: {3}, right:{6} }}),
-                ))),
+                
                 expect: false,
             },
             Testcase {
-                tree: Some(Rc::new(RefCell::new(tree!({ 2147483647 })))),
+                tree: tree!({ 2147483647 }),
                 expect: true,
             },
         ]
@@ -128,13 +128,13 @@ mod tests {
 
         vec![
             Testcase {
-                tree: Some(Rc::new(RefCell::new(tree!({2, left: {1}, right:{3}})))),
+                tree: tree!({2, left: {1}, right:{3}}),
                 expect: true,
             },
             Testcase {
-                tree: Some(Rc::new(RefCell::new(
+                tree: 
                     tree!({5, left: {1}, right:{4, left: {3}, right:{6} }}),
-                ))),
+                
                 expect: false,
             },
         ]
@@ -150,33 +150,30 @@ mod tests {
     #[test]
     fn test_inorder_traversal() {
         struct Testcase {
-            name: &'static str,
             tree: Option<Rc<RefCell<TreeNode>>>,
-            expect: &'static [i32],
+            expect:Vec<i32>,
         }
 
         vec![
             Testcase {
-                name: "basic 1",
-                tree: Some(Rc::new(RefCell::new(tree!({1, right:{2, left: {3}}})))),
-                expect: &[1, 3, 2],
+                tree: tree!({1, right:{2, left: {3}}}),
+                expect: vec![1, 3, 2],
             },
             Testcase {
-                name: "basic 2",
                 tree: None,
-                expect: &[],
+                expect: vec![],
             },
             Testcase {
-                name: "basic 3",
-                tree: Some(Rc::new(RefCell::new(tree!({ 1 })))),
-                expect: &[1],
+                tree: tree!({ 1 }),
+                expect: vec![1],
             },
         ]
         .into_iter()
-        .for_each(|testcase| {
-            let Testcase { name, tree, expect } = testcase;
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase {tree, expect } = testcase;
             let acutal = inorder_traversal(tree);
-            assert_eq!(expect, acutal, "{} failed", name);
+            assert_eq!(expect, acutal, "case {} failed", idx);
         });
     }
 }
