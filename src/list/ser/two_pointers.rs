@@ -402,7 +402,7 @@ mod test {
 
         vec![
             TestCase {
-                head: list!([1, 2, 3, 4, 5, 6]),
+                head: list!([1, 2, 3, 4, 5]),
                 expect: list!([3, 4, 5]),
             },
             TestCase {
