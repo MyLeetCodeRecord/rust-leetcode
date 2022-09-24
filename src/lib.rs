@@ -14,3 +14,16 @@ pub mod moreandmore;
 pub mod sstr;
 pub mod tree;
 pub mod list;
+
+#[macro_export]
+macro_rules! vec2 {
+    ( $( $x:expr ),* ) => {
+        {
+            let mut temp_vec = Vec::new();
+            $(
+                temp_vec.push($x.to_vec());
+            )*
+            temp_vec
+        }
+    };
+}

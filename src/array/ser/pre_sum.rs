@@ -5,6 +5,7 @@
 //! ## 题目
 //! * 简单
 //!     * [303. 区域和检索 - 数组不可变](NumArray)
+//!     * [1480. 一维数组的动态和](running_sum)
 //! * 中等
 //!     * [304. 二维区域和检索 - 矩阵不可变](NumMatrix)
 //!     * [560. 和为 K 的子数组](subarray_sum)
@@ -106,20 +107,13 @@ pub fn subarray_sum(nums: Vec<i32>, k: i32) -> i32 {
     ret as i32
 }
 
-pub fn two_sum(nums: Vec<i32>, target: i32) -> Vec<i32> {
-    use std::collections::HashMap;
-
-    let mut counter: HashMap<i32, Vec<usize>> = HashMap::new();
-    for (idx, &num) in nums.iter().enumerate() {
-        let other = target - num;
-        if let Some(v) = counter.get(&other) {
-            return vec![v[0] as i32, idx as i32];
-        }
-        let entry = counter.entry(num).or_insert(Vec::<usize>::new());
-        entry.push(idx);
+/// [1480. 一维数组的动态和](https://leetcode.cn/problems/running-sum-of-1d-array/)
+pub fn running_sum(nums: Vec<i32>) -> Vec<i32> {
+    let mut nums = nums;
+    for i in 1..nums.len() {
+        nums[i] = nums[i] + nums[i - 1];
     }
-
-    vec![]
+    nums
 }
 
 #[cfg(test)]
@@ -127,9 +121,38 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_running_sum() {
+        struct TestCase {
+            nums: Vec<i32>,
+            expect: Vec<i32>,
+        }
+
+        vec![
+            TestCase {
+                nums: vec![1, 2, 3, 4],
+                expect: vec![1, 3, 6, 10],
+            },
+            TestCase {
+                nums: vec![1, 1, 1, 1, 1],
+                expect: vec![1, 2, 3, 4, 5],
+            },
+            TestCase {
+                nums: vec![3, 1, 2, 10, 1],
+                expect: vec![3, 4, 6, 16, 17],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { nums, expect } = testcase;
+            let actual = running_sum(nums);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
     fn test_subarray_sum() {
         struct TestCase {
-            name: &'static str,
             nums: &'static [i32],
             k: i32,
             expect: i32,
@@ -137,34 +160,31 @@ mod tests {
 
         vec![
             TestCase {
-                name: "basic",
                 nums: &[1, 1, 1],
                 k: 2,
                 expect: 2,
             },
             TestCase {
-                name: "basic 2",
                 nums: &[1, 2, 3],
                 k: 3,
                 expect: 2,
             },
             TestCase {
-                name: "fix 1",
                 nums: &[1],
                 k: 0,
                 expect: 0,
             },
             TestCase {
-                name: "fix 2",
                 nums: &[-1, -1, 1],
                 k: 0,
                 expect: 1,
             },
         ]
-        .iter()
-        .for_each(|testcase| {
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
             let actual = subarray_sum(testcase.nums.to_vec(), testcase.k);
-            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+            assert_eq!(testcase.expect, actual, "case {} failed", idx);
         })
     }
 

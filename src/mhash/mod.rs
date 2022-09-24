@@ -5,7 +5,7 @@
 /// ## 题目
 /// * 简单
 ///     * [242. 有效的字母异位词](is_anagram)
-///     8 [383. 赎金信](can_construct)
+///     * [383. 赎金信](can_construct)
 /// * 中等
 ///     * [49. 字母异位词分组](group_anagrams)
 pub mod just_equal {

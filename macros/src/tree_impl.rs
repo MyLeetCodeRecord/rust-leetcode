@@ -3,8 +3,13 @@ use std::str::FromStr;
 
 
 pub fn tree(input: TokenStream) -> TokenStream {
-    let tree = TreeNode::from(input);
-    TokenStream::from_str(format!("{}", tree).as_str()).unwrap()
+    if input.is_empty(){
+        TokenStream::from_str("None").unwrap()
+    } else {
+        let tree = TreeNode::from(input);
+        TokenStream::from_str(format!("Some(::std::rc::Rc::new(::std::cell::RefCell::new({})))", tree).as_str()).unwrap()
+    }
+    
 }
 
 #[derive(Debug)]

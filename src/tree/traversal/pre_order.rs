@@ -41,7 +41,7 @@ mod tests {
 
         vec![
             Testcase {
-                tree: Some(Rc::new(RefCell::new(tree!({1, right:{2, left: {3}}})))),
+                tree: tree!({1, right:{2, left: {3}}}),
                 expect: &[1, 2, 3],
             },
             Testcase {
@@ -49,15 +49,15 @@ mod tests {
                 expect: &[],
             },
             Testcase {
-                tree: Some(Rc::new(RefCell::new(tree!({ 1 })))),
+                tree: tree!({ 1 }),
                 expect: &[1],
             },
             Testcase {
-                tree: Some(Rc::new(RefCell::new(tree!({1, left: {2}})))),
+                tree: tree!({1, left: {2}}),
                 expect: &[1, 2],
             },
             Testcase {
-                tree: Some(Rc::new(RefCell::new(tree!({1, right:{2}})))),
+                tree: tree!({1, right:{2}}),
                 expect: &[1, 2],
             },
         ]

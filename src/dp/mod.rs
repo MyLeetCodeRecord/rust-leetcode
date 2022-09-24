@@ -14,38 +14,13 @@
 //!
 //! ## 题目
 //! * 简单
-//!     * [509. 斐波那契数](fib)
 //! * 中等
 //!     * [926. 将字符串翻转到单调递增](min_flips_mono_incr)
 //! * 困难
 //!     * [473. 火柴拼正方形](makesquare)
 //!
 
-/// 系列题目
-///
-/// * [股票买卖系列](stock)
-/// * [爬楼梯系列](stair)
 pub mod ser;
-
-/// [509. 斐波那契数](https://leetcode.cn/problems/fibonacci-number/)
-///
-/// 数列的定义就是用递推关系说明的. 即自带状态转移方程.
-/// 由于递推关系中其实只需要前面两项, 因此可以只存前面两项
-///
-/// 初始为 (0, 1)
-/// 后续为 (1, 1), (1, 2), (2, 3)
-///
-/// 初始值不用计算, 后面每个迭代一次, 因此`1..=n` 即可
-pub fn fib(n: i32) -> i32 {
-    let (mut a, mut b) = (0, 1);
-    for _ in 1..=n {
-        // 运算n次
-        let tmp = a + b;
-        a = b;
-        b = tmp;
-    }
-    a
-}
 
 /// [467. 环绕字符串中唯一的子字符串](https://leetcode.cn/problems/unique-substrings-in-wraparound-string/)
 pub fn find_substring_in_wrapround_string(p: String) -> i32 {
@@ -211,9 +186,71 @@ pub fn unique_letter_string(s: String) -> i32 {
         .sum::<i32>()
 }
 
+/// [221. 最大正方形](https://leetcode.cn/problems/maximal-square/)
+pub fn maximal_square(matrix: Vec<Vec<char>>) -> i32 {
+    let (m, n) = (matrix.len(), matrix.first().unwrap().len());
+    // 给整体加一层， 用来处理溢出的问题
+    // 这样 matrix[row][col] => dp[row+1][col+1]
+    let mut dp = vec![vec![0; n + 1]; m + 1];
+
+    let mut mc = 0;
+
+    for row in 0..m {
+        for col in 0..n {
+            if matrix[row][col] == '1' {
+                dp[row + 1][col + 1] = [dp[row + 1][col], dp[row][col + 1], dp[row][col]]
+                    .into_iter()
+                    .min() // leetcode版本太低， 这里还需要 .copied()
+                    .unwrap_or(0)
+                    + 1; // 这里是边长
+            } else {
+                dp[row + 1][col + 1] = 0;
+            }
+            mc = std::cmp::max(mc, dp[row + 1][col + 1]);
+        }
+    }
+    mc * mc
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::vec2;
+
+    #[test]
+    fn test_maximal_square() {
+        struct TestCase {
+            matrix: Vec<Vec<char>>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                matrix: vec2![
+                    ['1', '0', '1', '0', '0'],
+                    ['1', '0', '1', '1', '1'],
+                    ['1', '1', '1', '1', '1'],
+                    ['1', '0', '0', '1', '0']
+                ],
+                expect: 4,
+            },
+            TestCase {
+                matrix: vec2![['0', '1'], ['1', '0']],
+                expect: 1,
+            },
+            TestCase {
+                matrix: vec2![['0']],
+                expect: 0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { matrix, expect } = testcase;
+            let actual = maximal_square(matrix);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_unique_letter_string() {
@@ -364,37 +401,5 @@ mod tests {
             let actual = find_substring_in_wrapround_string(testcase.p.to_string());
             assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
         })
-    }
-
-    #[test]
-    fn test_fib() {
-        struct TestCase {
-            name: &'static str,
-            n: i32,
-            expect: i32,
-        }
-
-        vec![
-            TestCase {
-                name: "basic",
-                n: 2,
-                expect: 1,
-            },
-            TestCase {
-                name: "basic 2",
-                n: 3,
-                expect: 2,
-            },
-            TestCase {
-                name: "basic 3",
-                n: 4,
-                expect: 3,
-            },
-        ]
-        .iter()
-        .for_each(|testcase| {
-            let acutal = fib(testcase.n);
-            assert_eq!(testcase.expect, acutal, "{} failed", testcase.name);
-        });
     }
 }
