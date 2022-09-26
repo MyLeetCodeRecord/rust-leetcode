@@ -135,9 +135,174 @@ pub fn reorder_spaces(text: String) -> String {
     unsafe { String::from_utf8_unchecked(result) }
 }
 
+/// [830. 较大分组的位置](https://leetcode.cn/problems/positions-of-large-groups/)
+/// ```
+/// pub fn large_group_positions(s: String) -> Vec<Vec<i32>> {
+///     let s = s.as_bytes();
+///     if s.len() < 3 {
+///         return vec![];
+///     }
+///
+///     let mut ret: Vec<Vec<i32>> = vec![];
+///
+///     let (mut start, mut cursor) = (0, 1);
+///     let mut curr = s[0];
+///
+///     while cursor < s.len() {
+///         if s[cursor] == curr {
+///             if cursor - start + 1 >= 3 {
+///                 match ret.last_mut() {
+///                     Some(last) if last[0] == start as i32 => {
+///                         last[1] = cursor as i32;
+///                         cursor += 1;
+///                         continue;
+///                     }
+///                     _ => {}
+///                 }
+///                 ret.push(vec![start as i32, cursor as i32]);
+///             }
+///         } else {
+///             start = cursor;
+///             curr = s[cursor];
+///         }
+///         cursor += 1;
+///     }
+///
+///     ret
+/// }
+/// ```
+pub fn large_group_positions(s: String) -> Vec<Vec<i32>> {
+    let s = s.as_bytes();
+    let mut ret: Vec<Vec<i32>> = vec![];
+    let mut cnt = 1;
+    for i in 0..s.len() {
+        if i == s.len() - 1 || s[i] != s[i + 1] {
+            if cnt >= 3 {
+                // 必须是 `i + 1 - cnt`, 不能是 `i - cnt + 1`, 会溢出
+                ret.push(vec![(i + 1 - cnt) as i32, i as i32]);
+            }
+            cnt = 1;
+        } else {
+            cnt += 1;
+        }
+    }
+    ret
+}
+
+/// [831. 隐藏个人信息](https://leetcode.cn/problems/masking-personal-information/)
+pub fn mask_pii(s: String) -> String {
+    let (mut is_email, mut at_pos) = (false, 0);
+
+    let mut chrs = vec![];
+    for &(mut b) in s.as_bytes() {
+        if b == b'+' || b == b'-' || b == b'(' || b == b')' || b == b' ' {
+            continue;
+        }
+        if b == b'@' {
+            is_email = true;
+            at_pos = chrs.len();
+        } else if b >= b'A' && b <= b'Z' {
+            b = b - b'A' + b'a';
+        }
+        chrs.push(b);
+    }
+
+    let mut ret = vec![];
+    if is_email {
+        ret.push(chrs[0]);
+        ret.extend_from_slice("*****".as_bytes());
+        ret.extend_from_slice(&chrs[at_pos - 1..]);
+    } else {
+        if chrs.len() == 13 {
+            ret.extend_from_slice("+***-***-***-".as_bytes());
+        } else if chrs.len() == 12 {
+            ret.extend_from_slice("+**-***-***-".as_bytes());
+        } else if chrs.len() == 11 {
+            ret.extend_from_slice("+*-***-***-".as_bytes());
+        } else {
+            ret.extend_from_slice("***-***-".as_bytes());
+        }
+        ret.extend_from_slice(&chrs[chrs.len() - 4..]);
+    }
+    String::from_utf8(ret).unwrap()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::vec2;
+
+    #[test]
+    fn test_mask_pii() {
+        struct TestCase {
+            s: &'static str,
+            expect: &'static str,
+        }
+
+        vec![
+            TestCase {
+                s: "LeetCode@LeetCode.com",
+                expect: "l*****e@leetcode.com",
+            },
+            TestCase {
+                s: "AB@qq.com",
+                expect: "a*****b@qq.com",
+            },
+            TestCase {
+                s: "1(234)567-890",
+                expect: "***-***-7890",
+            },
+            TestCase {
+                s: "86-(10)12345678",
+                expect: "+**-***-***-5678",
+            },
+            TestCase{
+                s: "+86(88)1513-7-74",
+                expect: "+*-***-***-3774"
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { s, expect } = testcase;
+            let actual = mask_pii(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_large_group_positions() {
+        struct TestCase {
+            s: &'static str,
+            expect: Vec<Vec<i32>>,
+        }
+
+        vec![
+            // TestCase {
+            //     s: "abbxxxxzzy",
+            //     expect: vec2![[3, 6]],
+            // },
+            // TestCase {
+            //     s: "abc",
+            //     expect: vec2![],
+            // },
+            // TestCase {
+            //     s: "abcdddeeeeaabbbcd",
+            //     expect: vec2![[3,5],[6,9],[12,14]],
+            // },
+            TestCase {
+                s: "aaa",
+                expect: vec2![[0, 2]],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { s, expect } = testcase;
+            let actual = large_group_positions(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_reorder_spaces() {
