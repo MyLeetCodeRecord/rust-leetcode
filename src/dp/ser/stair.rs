@@ -7,6 +7,7 @@
 //! * [746. 使用最小花费爬楼梯](min_cost_climbing_stairs)
 //!
 
+
 /// [509. 斐波那契数](https://leetcode.cn/problems/fibonacci-number/)
 pub fn fib(n: i32) -> i32 {
     let (mut a, mut b) = (0, 1);
@@ -123,9 +124,116 @@ pub fn min_cost_climbing_stairs(cost: Vec<i32>) -> i32 {
     curr
 }
 
+/// [837. 新 21 点](https://leetcode.cn/problems/new-21-game/)
+///
+/// 信息:
+/// 1. 获得 k 分 或更多分 时，停止抽取数字
+///     * 因此最终停止的分数范围为 `[k, k-1+max_pts]`
+/// 2. 用 dp[i] 存下从 i 变成 [K, K-1+max_pts] 内, 不超过n的概率
+///     * 可以倒着看, 跳跃的台阶数从1到max_pts都可能
+///     * 最终目标变成了求 dp[0]
+/// 3. 假设跳跃一步之后到达j, 则 dp[i] = sum( dp[j] * 1/max_pts)
+///     * 不同的链路之间是概率加和关系
+///     * 同一条链路是乘法关系
+/// 4. 初始状态:
+///     * dp[k..=n..min(k-1+max_pts)] = 1.0
+///
+/// 实现1: 复杂度 O(n + k * max_pts), 会超时
+/// ```rust
+/// pub fn new21_game(n: i32, k: i32, max_pts: i32) -> f64 {
+///     if k == 0 {
+///         return 1.0f64;
+///     }
+///     let mut dp = vec![0.0f64; (k + max_pts) as usize];
+///     for i in k..=n.min(k+max_pts-1){
+///         dp[i as usize] = 1.0;
+///     }
+///
+///     for i in (0..k as usize).rev() {
+///         for j in 1..=max_pts as usize {
+///             dp[i] += dp[i + j] / (max_pts as f64);
+///         }
+///     }
+///     dp[0]
+/// }
+/// ```
+///
+/// 实现2: 将上面的累加 做差, 可以计算出相邻两项的递推关系
+///
+pub fn new21_game(n: i32, k: i32, max_pts: i32) -> f64 {
+    if k == 0 {
+        return 1.0f64;
+    }
+    let mut dp = vec![0f64; (k + max_pts) as usize];
+    for i in k..=n.min(k - 1 + max_pts) {
+        dp[i as usize] = 1.0f64;
+    }
+    dp[k as usize - 1] = (max_pts.min(n - k + 1) as f64) / (max_pts as f64); // O(1) 计算 dp[k-1]
+    for i in (0..k - 1).rev() {
+        let i = i as usize;
+        dp[i] = dp[i + 1] - (dp[i + max_pts as usize + 1] - dp[i + 1]) / (max_pts as f64);
+    }
+    dp[0]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_new21_game() {
+        struct TestCase {
+            n: i32,
+            k: i32,
+            max_pts: i32,
+            expect: f64,
+        }
+
+        vec![
+            TestCase {
+                n: 10,
+                k: 1,
+                max_pts: 10,
+                expect: 1.0000,
+            },
+            TestCase {
+                n: 6,
+                k: 1,
+                max_pts: 10,
+                expect: 0.6,
+            },
+            TestCase {
+                n: 21,
+                k: 17,
+                max_pts: 10,
+                expect: 0.73278,
+            },
+            TestCase {
+                n: 0,
+                k: 0,
+                max_pts: 1,
+                expect: 1.0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase {
+                n,
+                k,
+                max_pts,
+                expect,
+            } = testcase;
+            let actual = new21_game(n, k, max_pts);
+            assert!(
+                (actual - expect).abs() <= 0.00001,
+                "case {} failed, expect {}, got {}",
+                idx,
+                expect,
+                actual
+            );
+        });
+    }
 
     #[test]
     fn test_min_cost_climbing_stairs() {

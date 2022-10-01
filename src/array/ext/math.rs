@@ -177,16 +177,411 @@ pub fn fizz_buzz(n: i32) -> Vec<String> {
 ///
 /// 其中右移总共 `31 - (leading_zero)` (有符号数, 第一位为符号位, 忽略)
 /// 减1 次数, 即为1的个数
-/// 
+///
 /// 注意: 如果原本为0， 这时 `31 - (leading_zero)`可能有溢出
 ///
 pub fn number_of_steps(num: i32) -> i32 {
     (num.count_ones() + 31u32.checked_sub(num.leading_zeros()).unwrap_or(0)) as i32
 }
 
+/// [829. 连续整数求和](https://leetcode.cn/problems/consecutive-numbers-sum/)
+///
+/// 根据[等差数列的公式](https://en.wikipedia.org/wiki/Arithmetic_progression)
+///
+/// ```
+/// pub fn consecutive_numbers_sum(n: i32) -> i32 {
+///     fn is_k_consecutive(n: i32, k: i32) -> bool {
+///         if k % 2 == 1 {
+///             return n % k == 0;
+///         }
+///         return n % k > 0 && 2 * n % k == 0;
+///     }
+///     let mut ans = 0;
+///     let mut k = 1;
+///     while k * (k + 1) <= n * 2 {
+///         if is_k_consecutive(n, k) {
+///             ans += 1;
+///         }
+///         k += 1
+///     }
+///     return ans;
+/// }
+/// ```
+/// 根据[等差数列的公式](https://en.wikipedia.org/wiki/Arithmetic_progression), 可以得到以下推导,  
+/// 假定起始项为$a$, 差$d$为1 项数$k$, 和为$n$, 则
+/// $$
+/// n = \frac{k \times (a+a+(k-1))}{2}
+/// $$
+///
+/// 等式变化可以得到
+///
+/// $n = \frac{k \times (a+a+(k-1))}{2} \Rightarrow 2n = k(2a+(k-1)) \Rightarrow \frac{2n}{k} = 2a + k - 1$
+///
+/// 由于题目要求起始项需要为*正整数*, 也就是$2a + k - 1$为正整数, 因此 `2 * n % k == 0`
+///
+/// 同时有$2a \ge 2$, 所以 $2a + k - 1 \ge k + 1 \Rightarrow \frac{2n}{k} \ge k + 1$
+///
+/// 综上, $k$为$2n$的约数, 且是较小的那个.
+///
+/// 因此在$[1, \sqrt{2n}]$的范围内找$k$即可.
+pub fn consecutive_numbers_sum(n: i32) -> i32 {
+    let mut ans = 0;
+    let n = 2 * n;
+    let mut k = 1;
+
+    while k * k < n {
+        if n % k != 0 {
+            k += 1;
+            continue;
+        }
+        if (n / k - (k - 1)) % 2 == 0 {
+            ans += 1;
+        }
+        k += 1;
+    }
+    ans
+}
+
+/// [828. 统计子串中的唯一字符](https://leetcode.cn/problems/count-unique-characters-of-all-substrings-of-a-given-string/)
+///
+/// 按照题意, 很容易写入如下枚举的方式, 时间复杂度 $O(n^3 + c \times n^2)$  
+/// 枚举边界 $n^2$, 内层统计个数 $n + C$  
+/// 最后超时
+/// ```
+/// pub fn unique_letter_string(s: String) -> i32 {
+///     fn count_unique_chars(s: &str) -> usize {
+///         use std::collections::HashMap;
+///         let mut counter = HashMap::new();
+///         for chr in s.chars() {
+///             *counter.entry(chr).or_insert(0) += 1;
+///         }
+///         counter.into_iter().filter(|(_, v)| *v == 1).count()
+///     }
+///     let mut cnt = 0;
+///     for i in 0..s.len() {
+///         for j in i..s.len() {
+///             cnt += count_unique_chars(s.get(i..=j).unwrap());
+///         }
+///     }
+///     cnt as i32
+/// }
+/// ```
+///
+/// 优化方向: 将内层的遍历换成类似"滑动窗口", 不做重复统计
+/// ```
+/// pub fn unique_letter_string(s: String) -> i32 {
+///     use std::collections::HashMap;
+///
+///     let s = s.as_bytes();
+///
+///     let mut cnt = 0;
+///     for i in 0..s.len() {
+///         let mut counter = HashMap::new();
+///         for j in i..s.len() {
+///             {
+///                 *counter.entry(s[j]).or_insert(0) += 1;
+///             }
+///             cnt += counter.iter().filter(|(_, &v)| v == 1).count();
+///         }
+///     }
+///     cnt as i32
+/// }
+/// ```
+/// 时间复杂度 $O(n^2 + c \times n^2)$, 仍然超时
+///
+/// 其他思路:
+/// 对于字串 `BCADEF`, 假定其前后都是`A`, 即`(A)BCADEF(A)`, 含统计字符`A`的唯一串有
+/// `BCA, BCAD, BCADE, BCADEF,  CA, CAD, CADE, CADEF, A, AD, ADE, ADEF`
+/// 站在`BC`的角度看, 后面有4种选择, `(), D, DE, DEF`
+/// 站在`DEF`的角度看, 前面有3种选择, `BC, C, ()`
+///
+/// 所以这个段内, 含统计`A`字符的唯一串有 3 * 4 = 12, 即 (2+1) * (3+1),
+/// 2为当前A到前一个A之间字符个数, 3为当前A到后一个A之间字符个数
+///
+/// 基于此, 可以对任意一个`(A)..A..(A)`进行计算, 最终加和即为结果
+///
+/// 边界情况: 字符只出现一次
+///
+pub fn unique_letter_string(s: String) -> i32 {
+    let s = s.as_bytes();
+
+    let mut last_pos = vec![-1; 26];
+    let mut curr_pos = vec![-1; 26];
+
+    let mut ans = 0;
+
+    for (pos, &b) in s.iter().enumerate() {
+        let i = (b - b'A') as usize;
+        let pos = pos as i32;
+        if curr_pos[i] > -1 {
+            // 这个字符之前出现过, 这时的pos对应上述推导中的后一个
+            ans = ans + (pos - curr_pos[i]) * (curr_pos[i] - last_pos[i]);
+        }
+        last_pos[i] = curr_pos[i];
+        curr_pos[i] = pos;
+    }
+    // 对于只出现过一次的字符, 上面循环统计不到, 即等效 后一个 的位置为字符结尾
+    for (last, curr) in last_pos.into_iter().zip(curr_pos.into_iter()) {
+        if curr > -1 {
+            ans = ans + (curr - last) * (s.len() as i32 - curr);
+        }
+    }
+    ans
+}
+
+/// [835. 图像重叠](https://leetcode.cn/problems/image-overlap/)
+pub fn largest_overlap(img1: Vec<Vec<i32>>, img2: Vec<Vec<i32>>) -> i32 {
+    use std::collections::HashMap;
+    let n = img1.len();
+    let mut delta = HashMap::new();
+    for i in 0..img1.len() {
+        for j in 0..img1.len() {
+            if img1[i][j] != 1 {
+                continue;
+            }
+            for i2 in 0..img2.len() {
+                for j2 in 0..img2.len() {
+                    if img2[i2][j2] != 1 {
+                        continue;
+                    }
+                    *delta.entry((i + n - i2, j + n - j2)).or_insert(0) += 1;
+                }
+            }
+        }
+    }
+    delta.values().into_iter().max().copied().unwrap_or(0)
+}
+
+/// [836. 矩形重叠](https://leetcode.cn/problems/rectangle-overlap/)
+/// 题目的矩形, 是靠 左下角/右上角 两个顶点确定的, 因此必然是垂直于X轴/Y轴的
+///
+/// 思路1: 排除法, 将没有交叠的情况枚举出来, 取反
+/// ```
+/// pub fn is_rectangle_overlap(rec1: Vec<i32>, rec2: Vec<i32>) -> bool {
+///     use std::convert::TryFrom;
+///     let [x1, y1, x2, y2] = <[i32; 4]>::try_from(rec1).ok().unwrap();
+///     let [a1, b1, a2, b2] = <[i32; 4]>::try_from(rec2).ok().unwrap();
+///     if x1 == x2 || y1 == y2 || a1 == a2 || b1 == b2 {
+///         return false;
+///     }
+///     // 排除法
+///     !(
+///         x1 >= a2 || // rec1 在 rec2 的右边
+///         x2 <= a1 || // rec1 在 rec2 的左边
+///         y1 >= b2 || // rec1 在 rec2 的上方
+///         y2 <= b1    // rec1 在 rec2 的下方
+///     )
+/// }
+/// ```
+/// 
+/// 思路2: 投影
+/// 如果有交叠, 投影到X轴的后, 两线段应该相交, 同理投影Y轴
+#[rustfmt::skip]
+pub fn is_rectangle_overlap(rec1: Vec<i32>, rec2: Vec<i32>) -> bool {
+    use std::convert::TryFrom;
+    use std::cmp::{min, max};
+    let [x1, y1, x2, y2] = <[i32; 4]>::try_from(rec1).ok().unwrap();
+    let [a1, b1, a2, b2] = <[i32; 4]>::try_from(rec2).ok().unwrap();
+    
+    min(x2, a2) > max(x1, a1) && min(y2, b2) > max(y1, b1)
+}
+
+/// [840. 矩阵中的幻方](https://leetcode.cn/problems/magic-squares-in-grid/)
+///
+/// 垃圾题?
+#[rustfmt::skip]
+pub fn num_magic_squares_inside(grid: Vec<Vec<i32>>) -> i32 {
+    let (_r, _c) = (grid.len(), grid.first().unwrap().len());
+    if _r < 3 || _c < 3 {
+        return 0;
+    }
+
+    fn magic(a: i32, b: i32, c: i32, d: i32, e: i32, f: i32, g: i32, h: i32, i: i32) -> bool {
+        let mut x = [a, b, c, d, e, f, g, h, i];
+        x.sort();
+        if !x.eq(&[1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+            return false;
+        }
+        [
+            a + b + c, d + e + f, g + h + i,
+            a + d + g, b + e + h, c + f + i,
+            a + e + i, c + e + g,
+        ]
+        .iter()
+        .all(|&x| x == 15)
+    }
+
+    let mut ans = 0;
+    for r in 0.._r - 2 {
+        for c in 0.._c - 2 {
+            if grid[r + 1][c + 1] != 5 {
+                continue;
+            }
+            if magic(
+                grid[r][c], grid[r][c + 1], grid[r][c + 2],
+                grid[r + 1][c], grid[r + 1][c + 1], grid[r + 1][c + 2],
+                grid[r + 2][c], grid[r + 2][c + 1], grid[r + 2][c + 2],
+            ) {
+                ans += 1;
+            }
+        }
+    }
+    ans
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::vec2;
+
+    #[test]
+    fn test_num_magic_squares_inside() {
+        struct Testcase {
+            grid: Vec<Vec<i32>>,
+            expect: i32,
+        }
+
+        vec![
+            Testcase {
+                grid: vec2![[4, 3, 8, 4], [9, 5, 1, 9], [2, 7, 6, 2]],
+                expect: 1,
+            },
+            Testcase {
+                grid: vec2![[8]],
+                expect: 0,
+            },
+            Testcase {
+                grid: vec2![[5, 5, 5], [5, 5, 5], [5, 5, 5]],
+                expect: 0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase { grid, expect } = testcase;
+            let acutal = num_magic_squares_inside(grid);
+            assert_eq!(expect, acutal, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_is_rectangle_overlap() {
+        struct TestCase {
+            rec1: Vec<i32>,
+            rec2: Vec<i32>,
+            expect: bool,
+        }
+
+        vec![
+            TestCase {
+                rec1: vec![0, 0, 2, 2],
+                rec2: vec![1, 1, 3, 3],
+                expect: true,
+            },
+            TestCase {
+                rec1: vec![0, 0, 1, 1],
+                rec2: vec![1, 0, 2, 1],
+                expect: false,
+            },
+            TestCase {
+                rec1: vec![0, 0, 1, 1],
+                rec2: vec![2, 2, 3, 3],
+                expect: false,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { rec1, rec2, expect } = testcase;
+            let actual = is_rectangle_overlap(rec1, rec2);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_largest_overlap() {
+        struct TestCase {
+            img1: Vec<Vec<i32>>,
+            img2: Vec<Vec<i32>>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                img1: vec2![[1, 1, 0], [0, 1, 0], [0, 1, 0]],
+                img2: vec2![[0, 0, 0], [0, 1, 1], [0, 0, 1]],
+                expect: 3,
+            },
+            TestCase {
+                img1: vec2![[1]],
+                img2: vec2![[1]],
+                expect: 1,
+            },
+            TestCase {
+                img1: vec2![[0]],
+                img2: vec2![[0]],
+                expect: 0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { img1, img2, expect } = testcase;
+            let actual = largest_overlap(img1, img2);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_unique_letter_string() {
+        struct TestCase {
+            s: &'static str,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                s: "ABC",
+                expect: 10,
+            },
+            TestCase {
+                s: "ABA",
+                expect: 8,
+            },
+            TestCase {
+                s: "LEETCODE",
+                expect: 92,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { s, expect } = testcase;
+            let actual = unique_letter_string(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_consecutive_numbers_sum() {
+        struct TestCase {
+            n: i32,
+            expect: i32,
+        }
+
+        vec![
+            TestCase { n: 5, expect: 2 },
+            TestCase { n: 9, expect: 3 },
+            TestCase { n: 15, expect: 4 },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { n, expect } = testcase;
+            let actual = consecutive_numbers_sum(n);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_number_of_steps() {
@@ -202,7 +597,7 @@ mod tests {
                 num: 123,
                 expect: 12,
             },
-            TestCase{num: 0, expect: 0}
+            TestCase { num: 0, expect: 0 },
         ]
         .into_iter()
         .enumerate()

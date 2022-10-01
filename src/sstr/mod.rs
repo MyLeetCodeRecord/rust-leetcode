@@ -135,9 +135,265 @@ pub fn reorder_spaces(text: String) -> String {
     unsafe { String::from_utf8_unchecked(result) }
 }
 
+/// [830. 较大分组的位置](https://leetcode.cn/problems/positions-of-large-groups/)
+/// ```
+/// pub fn large_group_positions(s: String) -> Vec<Vec<i32>> {
+///     let s = s.as_bytes();
+///     if s.len() < 3 {
+///         return vec![];
+///     }
+///
+///     let mut ret: Vec<Vec<i32>> = vec![];
+///
+///     let (mut start, mut cursor) = (0, 1);
+///     let mut curr = s[0];
+///
+///     while cursor < s.len() {
+///         if s[cursor] == curr {
+///             if cursor - start + 1 >= 3 {
+///                 match ret.last_mut() {
+///                     Some(last) if last[0] == start as i32 => {
+///                         last[1] = cursor as i32;
+///                         cursor += 1;
+///                         continue;
+///                     }
+///                     _ => {}
+///                 }
+///                 ret.push(vec![start as i32, cursor as i32]);
+///             }
+///         } else {
+///             start = cursor;
+///             curr = s[cursor];
+///         }
+///         cursor += 1;
+///     }
+///
+///     ret
+/// }
+/// ```
+pub fn large_group_positions(s: String) -> Vec<Vec<i32>> {
+    let s = s.as_bytes();
+    let mut ret: Vec<Vec<i32>> = vec![];
+    let mut cnt = 1;
+    for i in 0..s.len() {
+        if i == s.len() - 1 || s[i] != s[i + 1] {
+            if cnt >= 3 {
+                // 必须是 `i + 1 - cnt`, 不能是 `i - cnt + 1`, 会溢出
+                ret.push(vec![(i + 1 - cnt) as i32, i as i32]);
+            }
+            cnt = 1;
+        } else {
+            cnt += 1;
+        }
+    }
+    ret
+}
+
+/// [831. 隐藏个人信息](https://leetcode.cn/problems/masking-personal-information/)
+pub fn mask_pii(s: String) -> String {
+    let (mut is_email, mut at_pos) = (false, 0);
+
+    let mut chrs = vec![];
+    for &(mut b) in s.as_bytes() {
+        if b == b'+' || b == b'-' || b == b'(' || b == b')' || b == b' ' {
+            continue;
+        }
+        if b == b'@' {
+            is_email = true;
+            at_pos = chrs.len();
+        } else if b >= b'A' && b <= b'Z' {
+            b = b - b'A' + b'a';
+        }
+        chrs.push(b);
+    }
+
+    let mut ret = vec![];
+    if is_email {
+        ret.push(chrs[0]);
+        ret.extend_from_slice("*****".as_bytes());
+        ret.extend_from_slice(&chrs[at_pos - 1..]);
+    } else {
+        if chrs.len() == 13 {
+            ret.extend_from_slice("+***-***-***-".as_bytes());
+        } else if chrs.len() == 12 {
+            ret.extend_from_slice("+**-***-***-".as_bytes());
+        } else if chrs.len() == 11 {
+            ret.extend_from_slice("+*-***-***-".as_bytes());
+        } else {
+            ret.extend_from_slice("***-***-".as_bytes());
+        }
+        ret.extend_from_slice(&chrs[chrs.len() - 4..]);
+    }
+    String::from_utf8(ret).unwrap()
+}
+
+/// [833. 字符串中的查找与替换](https://leetcode.cn/problems/find-and-replace-in-string/)
+///
+/// 输入`indices`不保证有序, 因此需要整体组合后排序, 否则会产生互相影响.
+///
+pub fn find_replace_string(
+    s: String,
+    indices: Vec<i32>,
+    sources: Vec<String>,
+    targets: Vec<String>,
+) -> String {
+    let mut ops = vec![];
+    for i in 0..indices.len() {
+        ops.push((
+            indices[i] as usize,
+            sources[i].as_str(),
+            targets[i].as_str(),
+        ));
+    }
+    ops.sort_by(|a, b| a.0.cmp(&b.0));
+
+    let mut ans = String::new();
+
+    let mut cursor = 0;
+    for (start, source, target) in ops {
+        if start > cursor {
+            // 如果中间存在不需要替换的, 跳过的, 需要补齐
+            ans.push_str(s.get(cursor..start).unwrap());
+            cursor = start; // 游标向前, cursor 始终是 s 种的需要判定的起始(字符)
+        }
+        if s.get(start..).unwrap().starts_with(source) {
+            ans.push_str(target);
+            cursor += source.len(); // cursor是相对s的, 注意替换的长度
+        }
+    }
+    // 需要补齐剩余
+    if cursor < s.len() {
+        ans.push_str(s.get(cursor..).unwrap());
+    }
+    ans
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::vec2;
+
+    #[test]
+    fn test_find_replace_string() {
+        struct TestCase {
+            s: &'static str,
+            indices: Vec<i32>,
+            sources: Vec<&'static str>,
+            targets: Vec<&'static str>,
+            expect: &'static str,
+        }
+
+        vec![
+            TestCase {
+                s: "abcd",
+                indices: vec![0, 2],
+                sources: vec!["a", "cd"],
+                targets: vec!["eee", "ffff"],
+                expect: "eeebffff",
+            },
+            TestCase {
+                s: "abcd",
+                indices: vec![0, 2],
+                sources: vec!["ab", "ec"],
+                targets: vec!["eee", "ffff"],
+                expect: "eeecd",
+            },
+            TestCase {
+                s: "vmokgggqzp",
+                indices: vec![3, 5, 1],
+                sources: vec!["kg", "ggq", "mo"],
+                targets: vec!["s", "so", "bfr"],
+                expect: "vbfrssozp",
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase {
+                s,
+                indices,
+                sources,
+                targets,
+                expect,
+            } = testcase;
+            let sources = sources.into_iter().map(str::to_string).collect();
+            let targets = targets.into_iter().map(str::to_string).collect();
+            let acutal = find_replace_string(s.to_string(), indices, sources, targets);
+            assert_eq!(expect, acutal, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_mask_pii() {
+        struct TestCase {
+            s: &'static str,
+            expect: &'static str,
+        }
+
+        vec![
+            TestCase {
+                s: "LeetCode@LeetCode.com",
+                expect: "l*****e@leetcode.com",
+            },
+            TestCase {
+                s: "AB@qq.com",
+                expect: "a*****b@qq.com",
+            },
+            TestCase {
+                s: "1(234)567-890",
+                expect: "***-***-7890",
+            },
+            TestCase {
+                s: "86-(10)12345678",
+                expect: "+**-***-***-5678",
+            },
+            TestCase {
+                s: "+86(88)1513-7-74",
+                expect: "+*-***-***-3774",
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { s, expect } = testcase;
+            let actual = mask_pii(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_large_group_positions() {
+        struct TestCase {
+            s: &'static str,
+            expect: Vec<Vec<i32>>,
+        }
+
+        vec![
+            // TestCase {
+            //     s: "abbxxxxzzy",
+            //     expect: vec2![[3, 6]],
+            // },
+            // TestCase {
+            //     s: "abc",
+            //     expect: vec2![],
+            // },
+            // TestCase {
+            //     s: "abcdddeeeeaabbbcd",
+            //     expect: vec2![[3,5],[6,9],[12,14]],
+            // },
+            TestCase {
+                s: "aaa",
+                expect: vec2![[0, 2]],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { s, expect } = testcase;
+            let actual = large_group_positions(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_reorder_spaces() {

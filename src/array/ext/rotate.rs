@@ -208,9 +208,52 @@ pub fn find_diagonal_order(mat: Vec<Vec<i32>>) -> Vec<i32> {
     result
 }
 
+/// [832. 翻转图像](https://leetcode.cn/problems/flipping-an-image/)
+#[rustfmt::skip]
+pub fn flip_and_invert_image(image: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+    let mut image = image;
+    image.iter_mut().for_each(|line| {
+        let (mut l, mut r) = (1, line.len());
+        while l <= r {
+            let (left, right) = (line[l - 1], line[r - 1]);
+            if left == 0 { line[r-1] = 1; } else { line[r-1] = 0; }
+            if right == 0 {line[l-1] = 1; } else { line[l-1] = 0; }
+            l += 1; r -= 1;
+        }
+    });
+    image
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::vec2;
+
+    #[test]
+    fn test_flip_and_invert_image() {
+        struct TestCase {
+            image: Vec<Vec<i32>>,
+            expect: Vec<Vec<i32>>,
+        }
+
+        vec![
+            TestCase {
+                image: vec2![[1, 1, 0], [1, 0, 1], [0, 0, 0]],
+                expect: vec2![[1, 0, 0], [0, 1, 0], [1, 1, 1]],
+            },
+            TestCase {
+                image: vec2![[1, 1, 0, 0], [1, 0, 0, 1], [0, 1, 1, 1], [1, 0, 1, 0]],
+                expect: vec2![[1, 1, 0, 0], [0, 1, 1, 0], [0, 0, 0, 1], [1, 0, 1, 0]],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { image, expect } = testcase;
+            let actual = flip_and_invert_image(image);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_find_diagonal_order() {
