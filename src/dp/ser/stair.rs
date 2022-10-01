@@ -7,7 +7,6 @@
 //! * [746. 使用最小花费爬楼梯](min_cost_climbing_stairs)
 //!
 
-use std::ops::Div;
 
 /// [509. 斐波那契数](https://leetcode.cn/problems/fibonacci-number/)
 pub fn fib(n: i32) -> i32 {
@@ -152,7 +151,7 @@ pub fn min_cost_climbing_stairs(cost: Vec<i32>) -> i32 {
 ///
 ///     for i in (0..k as usize).rev() {
 ///         for j in 1..=max_pts as usize {
-///             dp[i] += dp[i + j].div(max_pts as f64);
+///             dp[i] += dp[i + j] / (max_pts as f64);
 ///         }
 ///     }
 ///     dp[0]
@@ -172,7 +171,7 @@ pub fn new21_game(n: i32, k: i32, max_pts: i32) -> f64 {
     dp[k as usize - 1] = (max_pts.min(n - k + 1) as f64) / (max_pts as f64); // O(1) 计算 dp[k-1]
     for i in (0..k - 1).rev() {
         let i = i as usize;
-        dp[i] = dp[i + 1] - (dp[i + max_pts as usize + 1] - dp[i + 1]).div(max_pts as f64);
+        dp[i] = dp[i + 1] - (dp[i + max_pts as usize + 1] - dp[i + 1]) / (max_pts as f64);
     }
     dp[0]
 }
