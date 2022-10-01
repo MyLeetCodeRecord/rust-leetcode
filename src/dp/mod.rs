@@ -403,3 +403,5 @@ mod tests {
         })
     }
 }
+
+pub mod no_class;

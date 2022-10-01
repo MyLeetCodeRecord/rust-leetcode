@@ -227,10 +227,101 @@ pub fn mask_pii(s: String) -> String {
     String::from_utf8(ret).unwrap()
 }
 
+/// [833. 字符串中的查找与替换](https://leetcode.cn/problems/find-and-replace-in-string/)
+///
+/// 输入`indices`不保证有序, 因此需要整体组合后排序, 否则会产生互相影响.
+///
+pub fn find_replace_string(
+    s: String,
+    indices: Vec<i32>,
+    sources: Vec<String>,
+    targets: Vec<String>,
+) -> String {
+    let mut ops = vec![];
+    for i in 0..indices.len() {
+        ops.push((
+            indices[i] as usize,
+            sources[i].as_str(),
+            targets[i].as_str(),
+        ));
+    }
+    ops.sort_by(|a, b| a.0.cmp(&b.0));
+
+    let mut ans = String::new();
+
+    let mut cursor = 0;
+    for (start, source, target) in ops {
+        if start > cursor {
+            // 如果中间存在不需要替换的, 跳过的, 需要补齐
+            ans.push_str(s.get(cursor..start).unwrap());
+            cursor = start; // 游标向前, cursor 始终是 s 种的需要判定的起始(字符)
+        }
+        if s.get(start..).unwrap().starts_with(source) {
+            ans.push_str(target);
+            cursor += source.len(); // cursor是相对s的, 注意替换的长度
+        }
+    }
+    // 需要补齐剩余
+    if cursor < s.len() {
+        ans.push_str(s.get(cursor..).unwrap());
+    }
+    ans
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_find_replace_string() {
+        struct TestCase {
+            s: &'static str,
+            indices: Vec<i32>,
+            sources: Vec<&'static str>,
+            targets: Vec<&'static str>,
+            expect: &'static str,
+        }
+
+        vec![
+            TestCase {
+                s: "abcd",
+                indices: vec![0, 2],
+                sources: vec!["a", "cd"],
+                targets: vec!["eee", "ffff"],
+                expect: "eeebffff",
+            },
+            TestCase {
+                s: "abcd",
+                indices: vec![0, 2],
+                sources: vec!["ab", "ec"],
+                targets: vec!["eee", "ffff"],
+                expect: "eeecd",
+            },
+            TestCase {
+                s: "vmokgggqzp",
+                indices: vec![3, 5, 1],
+                sources: vec!["kg", "ggq", "mo"],
+                targets: vec!["s", "so", "bfr"],
+                expect: "vbfrssozp",
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase {
+                s,
+                indices,
+                sources,
+                targets,
+                expect,
+            } = testcase;
+            let sources = sources.into_iter().map(str::to_string).collect();
+            let targets = targets.into_iter().map(str::to_string).collect();
+            let acutal = find_replace_string(s.to_string(), indices, sources, targets);
+            assert_eq!(expect, acutal, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_mask_pii() {
@@ -256,9 +347,9 @@ mod tests {
                 s: "86-(10)12345678",
                 expect: "+**-***-***-5678",
             },
-            TestCase{
+            TestCase {
                 s: "+86(88)1513-7-74",
-                expect: "+*-***-***-3774"
+                expect: "+*-***-***-3774",
             },
         ]
         .into_iter()

@@ -447,23 +447,23 @@ pub fn reverse_words_1(s: String) -> String {
     /// nums1 有后缀填充的0
     /// 如果正向(从小到大)的合并, 由于插入, 需要有shift操作.
     /// 因此需要从大到小的merge
-    #[rustfmt::skip]
-    #[allow(clippy::ptr_arg)]
-    pub fn merge(nums1: &mut Vec<i32>, m: i32, nums2: &mut Vec<i32>, n: i32) {
-        let mut insert_position = (nums1.len() - 1) as isize;
-        let (mut p0, mut p1) = (m as usize, n as usize);
-        while insert_position >= 0 {
-            let x = { if p0 == 0 { i32::MIN } else { nums1.get(p0 - 1).copied().unwrap() } };
-            let y = { if p1 == 0 { i32::MIN } else { nums2.get(p1 - 1).copied().unwrap() } };
+#[rustfmt::skip]
+#[allow(clippy::ptr_arg)]
+pub fn merge(nums1: &mut Vec<i32>, m: i32, nums2: &mut Vec<i32>, n: i32) {
+    let mut insert_position = (nums1.len() - 1) as isize;
+    let (mut p0, mut p1) = (m as usize, n as usize);
+    while insert_position >= 0 {
+        let x = { if p0 == 0 { i32::MIN } else { nums1.get(p0 - 1).copied().unwrap() } };
+        let y = { if p1 == 0 { i32::MIN } else { nums2.get(p1 - 1).copied().unwrap() } };
 
-            nums1[insert_position as usize] = std::cmp::max(x, y);
-            insert_position -= 1;
-            match x.cmp(&y) {
-                std::cmp::Ordering::Greater => { p0 -= 1; }
-                _ => { p1 -= 1; }
-            }
+        nums1[insert_position as usize] = std::cmp::max(x, y);
+        insert_position -= 1;
+        match x.cmp(&y) {
+            std::cmp::Ordering::Greater => { p0 -= 1; }
+            _ => { p1 -= 1; }
         }
     }
+}
 
 /// [面试题 17.11. 单词距离](https://leetcode.cn/problems/find-closest-lcci/)
 pub fn find_closest(words: Vec<String>, word1: String, word2: String) -> i32 {
@@ -554,9 +554,143 @@ pub fn duplicate_zeros(arr: &mut Vec<i32>) {
     }
 }
 
+/// [838. 推多米诺](https://leetcode.cn/problems/push-dominoes/)
+///
+/// 思路1: 复杂度 O2
+/// ```rust
+/// pub fn push_dominoes(dominoes: String) -> String {
+///     let mut dominoes = dominoes;
+///     let s = unsafe { dominoes.as_bytes_mut() };
+///     // 只需要关注前面最后一个向右倒的, 以及后面最早一个向左倒的
+///     // 其他组合不会影响当前的状态, 可以不记录
+///     let (mut last_right, mut next_left): (Option<usize>, Option<usize>) = (None, None);
+///
+///     let mut cursor = 0;
+///     while cursor < s.len() {
+///         if s[cursor] == b'R' {
+///             last_right.replace(cursor);
+///         } else if s[cursor] == b'L' {
+///             last_right.take();
+///         } else if s[cursor] == b'.' {
+///             next_left.take();
+///             for j in cursor + 1..s.len() {
+///                 if s[j] == b'L' {
+///                     next_left.replace(j);
+///                     break;
+///                 } else if s[j] == b'R' {
+///                     break;
+///                 }
+///             }
+///             if last_right.is_none() && next_left.is_none() {
+///                 // 不变
+///             } else if last_right.is_none() {
+///                 s[cursor] = b'L';
+///             } else if next_left.is_none() {
+///                 s[cursor] = b'R';
+///             } else {
+///                 let (r, l) = (last_right.unwrap(), next_left.unwrap());
+///                 match (cursor - r).cmp(&(l - cursor)) {
+///                     std::cmp::Ordering::Equal => {}
+///                     std::cmp::Ordering::Greater => {
+///                         s[cursor] = b'L';
+///                     }
+///                     std::cmp::Ordering::Less => {
+///                         s[cursor] = b'R';
+///                     }
+///                 }
+///             }
+///
+///             // last_right.take();
+///             // if s[cursor] == b'R' {
+///             //     last_right.replace(cursor);
+///             // }
+///         }
+///         cursor += 1;
+///     }
+///     dominoes
+/// }
+/// ```
+///
+pub fn push_dominoes(dominoes: String) -> String {
+    let mut dominoes = dominoes;
+    let s = unsafe { dominoes.as_bytes_mut() };
+
+    let (mut cursor, mut last) = (0, None::<u8>);
+
+    while cursor < s.len() {
+        if s[cursor] == b'R' || s[cursor] == b'L' {
+            last.replace(s[cursor]);
+            cursor += 1;
+            continue;
+        }
+
+        let mut end = cursor;
+        while end + 1 < s.len() && s[end + 1] == b'.' {
+            end += 1;
+        }
+
+        let tmp = end + 1; // 暂存
+        let next = s.get(tmp).copied();
+        // cursor, end
+        match (last, next) {
+            (Some(b'R'), Some(b'L')) => {
+                while cursor < end {
+                    s[cursor] = b'R';
+                    s[end] = b'L';
+
+                    cursor += 1;
+                    end -= 1;
+                }
+            }
+            (_, Some(b'L')) => {
+                for i in cursor..tmp {
+                    s[i] = b'L';
+                }
+            }
+            (Some(b'R'), _) => {
+                for i in cursor..tmp {
+                    s[i] = b'R';
+                }
+            }
+            _ => {}
+        }
+        cursor = tmp;
+    }
+    dominoes
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_push_dominoes() {
+        struct TestCase {
+            dominoes: &'static str,
+            expect: &'static str,
+        }
+
+        vec![
+            TestCase {
+                dominoes: "RR.L",
+                expect: "RR.L",
+            },
+            TestCase {
+                dominoes: ".L.R...LR..L..",
+                expect: "LL.RR.LLRRLL..",
+            },
+            TestCase {
+                dominoes: "R.R.L",
+                expect: "RRR.L",
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { dominoes, expect } = testcase;
+            let actual = push_dominoes(dominoes.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_duplicate_zeros() {

@@ -17,6 +17,9 @@ pub mod list;
 
 #[macro_export]
 macro_rules! vec2 {
+    () => (
+        Vec::new()
+    );
     ( $( $x:expr ),* ) => {
         {
             let mut temp_vec = Vec::new();

@@ -17,6 +17,8 @@
   - [LeetCode][leetcode]
 - 语言: [Rust][rust]
 - IDE: [我的 IDE 配置][我的ide 配置]
+- 一些辅助工具
+  - [LaTeX公式编辑器](https://www.latexlive.com/##)
 
 ### 内容
 
