@@ -64,18 +64,18 @@ mod tests {
         }
 
         vec![
-            // TestCase {
-            //     name: "basic 1",
-            //     nums: &[1, 3, 1],
-            //     k: 1,
-            //     expect: 0,
-            // },
-            // TestCase {
-            //     name: "basic 1",
-            //     nums: &[1, 1, 1],
-            //     k: 2,
-            //     expect: 0,
-            // },
+            TestCase {
+                name: "basic 1",
+                nums: &[1, 3, 1],
+                k: 1,
+                expect: 0,
+            },
+            TestCase {
+                name: "basic 1",
+                nums: &[1, 1, 1],
+                k: 2,
+                expect: 0,
+            },
             TestCase {
                 name: "basic 1",
                 nums: &[1, 6, 1],

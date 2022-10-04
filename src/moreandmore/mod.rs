@@ -310,9 +310,79 @@ pub fn maximum_swap(num: i32) -> i32 {
     result
 }
 
+/// [846. 一手顺子](https://leetcode.cn/problems/hand-of-straights/)
+///
+///
+pub fn is_n_straight_hand(hand: Vec<i32>, group_size: i32) -> bool {
+    use std::collections::HashMap;
+    if (hand.len() as i32) % group_size != 0 {
+        // 张数不对
+        return false;
+    }
+    let mut hand = hand;
+    hand.sort();
+
+    let mut counter = HashMap::new();
+    for &card in hand.iter(){
+        *counter.entry(card).or_insert(0) += 1;
+    }
+
+    for i in 0..hand.len(){
+        let start = hand[i];
+        let e= counter.entry(start).or_default();
+        if *e ==0 {
+            // 跳过, 下一个
+            continue;
+        }
+        *e -= 1;
+        for i in 1..group_size{
+            // 开始假设枚举
+            let e = counter.entry(start+i).or_default();
+            if *e == 0{
+                return false;
+            }
+            *e -= 1;
+        }
+    }
+    true
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_is_n_straight_hand() {
+        struct TestCase {
+            hand: Vec<i32>,
+            group_size: i32,
+            expect: bool,
+        }
+
+        vec![
+            TestCase {
+                hand: vec![1, 2, 3, 6, 2, 3, 4, 7, 8],
+                group_size: 3,
+                expect: true,
+            },
+            TestCase {
+                hand: vec![1, 2, 3, 4, 5],
+                group_size: 4,
+                expect: false,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase {
+                hand,
+                group_size,
+                expect,
+            } = testcase;
+            let actual = is_n_straight_hand(hand, group_size);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_maximum_swap() {
@@ -375,7 +445,7 @@ mod tests {
                 nums: &[7, 7, 7, 7, 7, 7, 7],
                 expect: 1,
             },
-            TestCase  {
+            TestCase {
                 name: "fix 1",
                 nums: &[10, 9, 2, 5, 3, 4],
                 expect: 3,

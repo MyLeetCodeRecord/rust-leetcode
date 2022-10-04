@@ -268,10 +268,78 @@ pub fn find_replace_string(
     ans
 }
 
+/// [1694. 重新格式化电话号码](https://leetcode.cn/problems/reformat-phone-number/)
+pub fn reformat_number(number: String) -> String {
+    let nums: Vec<u8> = number
+        .as_bytes()
+        .into_iter()
+        .filter_map(|&x| {
+            if x >= b'0' && x <= b'9' {
+                Some(x)
+            } else {
+                None
+            }
+        })
+        .collect();
+    let mut ans = Vec::new();
+    let mut cursor = 0;
+    while nums.len() - cursor > 4 {
+        ans.extend_from_slice(nums.get(cursor..cursor + 3).unwrap());
+        ans.push(b'-');
+        cursor += 3;
+    }
+    match nums.len() - cursor {
+        4 => {
+            ans.extend_from_slice(nums.get(cursor..cursor + 2).unwrap());
+            ans.push(b'-');
+            ans.extend_from_slice(nums.get(cursor + 2..).unwrap());
+        }
+        _ => ans.extend_from_slice(nums.get(cursor..).unwrap()),
+    }
+    unsafe { String::from_utf8_unchecked(ans) }
+}
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_reformat_number() {
+        struct Testcase {
+            number: &'static str,
+            expect: &'static str,
+        }
+
+        vec![
+            Testcase {
+                number: "1-23-45 6",
+                expect: "123-456",
+            },
+            Testcase {
+                number: "123 4-567",
+                expect: "123-45-67",
+            },
+            Testcase {
+                number: "123 4-5678",
+                expect: "123-456-78",
+            },
+            Testcase {
+                number: "12",
+                expect: "12",
+            },
+            Testcase {
+                number: "--17-5 229 35-39475 ",
+                expect: "175-229-353-94-75",
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase { number, expect } = testcase;
+            let actual = reformat_number(number.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_find_replace_string() {

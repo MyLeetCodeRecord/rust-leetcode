@@ -117,9 +117,61 @@ pub fn min_operations(logs: Vec<String>) -> i32 {
     cnt
 }
 
+/// [844. 比较含退格的字符串](https://leetcode.cn/problems/backspace-string-compare/)
+/// 双指针版本 [844. 比较含退格的字符串](crate::array::ser::two_pointers::backspace_compare)
+pub fn backspace_compare(s: String, t: String) -> bool {
+    fn sss(s: &str) -> Vec<u8> {
+        let mut tmp = vec![];
+        for b in s.as_bytes() {
+            if *b == b'#' {
+                tmp.pop();
+            } else {
+                tmp.push(*b);
+            }
+        }
+        return tmp;
+    }
+
+    sss(s.as_str()).eq(&sss(t.as_str()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_backspace_compare() {
+        struct TestCase {
+            s: &'static str,
+            t: &'static str,
+            expect: bool,
+        }
+
+        vec![
+            TestCase {
+                s: "ab#c",
+                t: "ad#c",
+                expect: true,
+            },
+            TestCase {
+                s: "ab##",
+                t: "c#d#",
+                expect: true,
+            },
+            TestCase {
+                s: "a#c",
+                t: "b",
+                expect: false,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { s, t, expect } = testcase;
+            let actual = backspace_compare(s.to_string(), t.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_min_operations() {
