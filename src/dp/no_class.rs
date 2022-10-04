@@ -1,115 +1,31 @@
-/// [834. 树中距离之和](https://leetcode.cn/problems/sum-of-distances-in-tree/)
-/// 标签: 树形DP
-///
-/// 思路1:
-/// 每加入一个边, 就扫描整个图, 更新由这个边联通的节点之间的距离, 复杂度 $O(n^3)$, 然后超时
-/// ```
-/// pub fn sum_of_distances_in_tree(n: i32, edges: Vec<Vec<i32>>) -> Vec<i32> {
-///     let n = n as usize;
-///     let mut dp = vec![vec![i32::MAX; n]; n];
-///     for edge in edges {
-///         let (start, end) = (edge[0], edge[1]);
-///         let (start, end) = (start as usize, end as usize);
-///         dp[start][end] = 1;
-///         dp[end][start] = 1;
-///         for i in 0..n {
-///             if i == start || i == end {
-///                 continue;
-///             }
-///             // 两端并不一定相同, 这个地方会有遗漏, 比如 x -> start -> end -> y 的就更新不到, 导致节点连不起来
-///             // start --> end --> i or start --> i
-///             let end2i = dp[end][i];
-///             let start2i = dp[start][i];
-///             dp[start][i] = start2i.min(end2i.checked_add(1).unwrap_or(i32::MAX));
-///             dp[i][start] = dp[start][i];
-///             // end --> start --> i or end --> i
-///             dp[end][i] = end2i.min(start2i.checked_add(1).unwrap_or(i32::MAX));
-///             dp[i][end] = dp[end][i];
-///
-///             for j in 0..n {
-///                 if i == j || j == start || j == end {
-///                     continue;
-///                 }
-///                 // i -> start -> end -> y
-///                 let (i2start, start2j) = (dp[i][start], dp[start][j]);
-///                 let (i2end, end2j) = (dp[i][end], dp[end][j]);
-///
-///                 dp[i][j] = dp[i][j]
-///                     .min(
-///                         i2start.checked_add(start2j).unwrap_or(i32::MAX), // i --> start --> j
-///                     )
-///                     .min(
-///                         i2end.checked_add(end2j).unwrap_or(i32::MAX), // i --> end --> j
-///                     );
-///                 dp[j][i] = dp[i][j];
-///             }
-///         }
-///     }
-///     // dbg!(&dp);
-///     let mut ans = vec![0; n];
-///     for i in 0..n {
-///         let mut cnt = 0;
-///         for j in 0..n {
-///             if i == j {
-///                 continue;
-///             }
-///             cnt += dp[i][j];
-///         }
-///         ans[i] = cnt;
-///     }
-///     ans
-/// }
-/// ```
-///
-pub fn sum_of_distances_in_tree(n: i32, edges: Vec<Vec<i32>>) -> Vec<i32> {
-    // 通过累加得到根节点0到其他所有节点的距离和以及每个节点作为跟节点时其子树的节点数
-    fn post_order(
-        ans: &mut Vec<i32>,
-        cnt: &mut Vec<i32>,
-        graph: &Vec<Vec<usize>>,
-        child: usize,
-        parent: usize,
-    ) {
-        for i in 0..graph[child].len() {
-            if graph[child][i] != parent {
-                post_order(ans, cnt, graph, graph[child][i], child);
-
-                cnt[child] += cnt[graph[child][i]]; // 所有子节点数目汇总
-                ans[child] = ans[child] + ans[graph[child][i]] + cnt[graph[child][i]];
-            }
+/// [845. 数组中的最长山脉](https://leetcode.cn/problems/longest-mountain-in-array/)
+/// * 阶段1: [滑动窗口](crate::array::ser::windows::longest_mountain)
+/// * 阶段2: [DP 解法](crate::dp::no_class::longest_mountain)
+///     * 如果序列是 "上山"(严格递增), 那必然不是 "下山"(严格递减)
+///     * 可以将这个判定结果存下来
+/// * 阶段3: [双指针](crate::array::ser::two_pointers::longest_mountain)
+pub fn longest_mountain(arr: Vec<i32>) -> i32 {
+    if arr.len() < 3 {
+        return 0;
+    }
+    let mut lefts = vec![0; arr.len()];
+    for i in 1..arr.len() {
+        if arr[i - 1] < arr[i] {
+            lefts[i] = lefts[i - 1] + 1; // 上山路径加1
         }
     }
-    fn pre_order(
-        ans: &mut Vec<i32>,
-        cnt: &mut Vec<i32>,
-        graph: &Vec<Vec<usize>>,
-        child: usize,
-        parent: usize,
-    ) {
-        for i in 0..graph[child].len() {
-            if parent != graph[child][i] {
-                ans[graph[child][i]] =
-                    ans[child] - cnt[graph[child][i]] + (ans.len() as i32) - cnt[graph[child][i]];
-                pre_order(ans, cnt, graph, graph[child][i], child);
-            }
+    let mut rights = vec![0; arr.len()];
+    for i in (0..arr.len() - 1).rev() {
+        if arr[i] > arr[i + 1] {
+            rights[i] = rights[i + 1] + 1; // 下山路径加1
         }
     }
-
-    let n = n as usize;
-
-    let mut ans = vec![0; n];
-    let mut cnt = vec![1; n]; // 统计自己, 默认大小为1
-    let mut graph = vec![vec![]; n];
-
-    for edge in edges {
-        let (start, end) = (edge[0] as usize, edge[1] as usize);
-        graph[start].push(end); // 记录 节点A可以到的其他节点
-        graph[end].push(start);
+    let mut ans = 0;
+    for i in 0..arr.len() {
+        if lefts[i] > 0 && rights[i] > 0 {
+            ans = ans.max(lefts[i] + rights[i] + 1);
+        }
     }
-
-    post_order(&mut ans, &mut cnt, &graph, 0, n + 1);
-    pre_order(&mut ans, &mut cnt, &graph, 0, n + 1);
-
     ans
 }
 
@@ -119,40 +35,35 @@ mod test {
     use crate::vec2;
 
     #[test]
-    fn test_sum_of_distances_in_tree() {
+    fn test_longest_mountain() {
         struct TestCase {
-            n: i32,
-            edges: Vec<Vec<i32>>,
-            expect: Vec<i32>,
+            arr: Vec<i32>,
+            expect: i32,
         }
 
         vec![
             TestCase {
-                n: 6,
-                edges: vec2![[0, 1], [0, 2], [2, 3], [2, 4], [2, 5]],
-                expect: vec![8, 12, 6, 10, 10, 10],
+                arr: vec![2, 1, 4, 7, 3, 2, 5],
+                expect: 5,
             },
             TestCase {
-                n: 1,
-                edges: vec2![],
-                expect: vec![0],
+                arr: vec![2, 2, 2],
+                expect: 0,
             },
             TestCase {
-                n: 2,
-                edges: vec2![[1, 0]],
-                expect: vec![1, 1],
+                arr: vec![0],
+                expect: 0,
             },
             TestCase {
-                n: 4,
-                edges: vec2![[2, 0], [3, 1], [2, 1]],
-                expect: vec![6, 4, 4, 6],
+                arr: vec![0, 1, 2, 3, 4, 5, 4, 3, 2, 1, 0],
+                expect: 11,
             },
         ]
         .into_iter()
         .enumerate()
         .for_each(|(idx, testcase)| {
-            let TestCase { n, edges, expect } = testcase;
-            let actual = sum_of_distances_in_tree(n, edges);
+            let TestCase { arr, expect } = testcase;
+            let actual = longest_mountain(arr);
             assert_eq!(expect, actual, "case {} failed", idx);
         });
     }

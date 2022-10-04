@@ -604,10 +604,69 @@ pub fn minimum_abs_difference(arr: Vec<i32>) -> Vec<Vec<i32>> {
 
     ret
 }
+/// [845. 数组中的最长山脉](https://leetcode.cn/problems/longest-mountain-in-array/)
+/// * 阶段1: [滑动窗口](crate::array::ser::windows::longest_mountain)
+///     * 枚举山顶
+///     * 找出最小的山, 然后向左向右扩展
+///     * 优化: 如果序列是 "上山"(严格递增), 那必然不是 "下山"(严格递减)
+///     * 每个元素最多比较两次
+/// * 阶段2: [DP 解法](crate::dp::no_class::longest_mountain)
+/// * 阶段3: [双指针](crate::array::ser::two_pointers::longest_mountain)
+pub fn longest_mountain(arr: Vec<i32>) -> i32 {
+    let mut ans = 0;
+    let mut cursor = 2; // 向后错位, 防止溢出
+    while cursor <= arr.len().checked_sub(1).unwrap_or(0) {
+        let (prev, curr, next) = (arr[cursor - 2], arr[cursor - 1], arr[cursor]);
+        if prev < curr && curr > next {
+            // 找到了山顶, 开始向两边扩展
+            let mut left = cursor;
+            while left > 1 && arr[left-2] < arr[left-1] {
+                left = left - 1; // 向左一格
+            }
+            let mut right = cursor;
+            while right < arr.len() && arr[right-1] > arr[right] {
+                right = right + 1; // 向右一格
+            }
+            let tmp = (cursor - left) + 1 + (right - cursor);
+            ans = ans.max(tmp);
+
+            cursor = right; // 下山的不会变上山, 因此可以跳过一点
+            continue;
+        }
+        cursor += 1;
+    }
+    ans as i32
+}
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_longest_mountain() {
+        struct TestCase {
+            arr: Vec<i32>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                arr: vec![2, 1, 4, 7, 3, 2, 5],
+                expect: 5,
+            },
+            TestCase {
+                arr: vec![2, 2, 2],
+                expect: 0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { arr, expect } = testcase;
+            let actual = longest_mountain(arr);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_repeated_n_times() {

@@ -14,6 +14,7 @@ pub mod moreandmore;
 pub mod sstr;
 pub mod tree;
 pub mod list;
+pub mod bfs;
 
 #[macro_export]
 macro_rules! vec2 {

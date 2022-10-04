@@ -658,9 +658,172 @@ pub fn push_dominoes(dominoes: String) -> String {
     }
     dominoes
 }
+
+/// [844. 比较含退格的字符串](https://leetcode.cn/problems/backspace-string-compare/)
+/// 栈模拟版本 [844. 比较含退格的字符串](crate::array::ser::stack::backspace_compare)
+pub fn backspace_compare(s: String, t: String) -> bool {
+    let (s, t) = (s.as_bytes(), t.as_bytes());
+    let (mut si, mut ti) = (s.len(), t.len()); // 留一个偏移, 防止usize溢出
+    let (mut sd, mut td) = (0, 0);
+    while si > 0 || ti > 0 {
+        // or
+        while si > 0 {
+            if s[si - 1] == b'#' {
+                // 回退符, 计数, 跳过
+                sd += 1;
+                si -= 1;
+            } else if sd > 0 {
+                // 需要回退, 回退一格
+                sd -= 1;
+                si -= 1;
+            } else {
+                break;
+            }
+        }
+        while ti > 0 {
+            if t[ti - 1] == b'#' {
+                td += 1;
+                ti -= 1;
+            } else if td > 0 {
+                td -= 1;
+                ti -= 1;
+            } else {
+                break;
+            }
+        }
+
+        if ti != 0 && si != 0 {
+            // 同时没有到头, 判断一下
+            if s[si - 1] != t[ti - 1] {
+                return false;
+            }
+            // 相同, 两边同时向前一格
+            si -= 1;
+            ti -= 1;
+        } else if ti != 0 || si != 0 {
+            // 有一个还没有结束
+            return false;
+        }
+    }
+    true
+}
+
+/// [845. 数组中的最长山脉](https://leetcode.cn/problems/longest-mountain-in-array/)
+/// * 阶段1: [滑动窗口](crate::array::ser::windows::longest_mountain)
+/// * 阶段2: [DP 解法](crate::dp::no_class::longest_mountain)
+/// * 阶段3: [双指针](crate::array::ser::two_pointers::longest_mountain)
+///     * 区别于 滑动窗口的枚举山顶, 可以枚举山脚
+pub fn longest_mountain(arr: Vec<i32>) -> i32 {
+    let n = arr.len();
+    let mut ans = 0;
+    let mut left = 0;
+    while left + 2 < n{
+        let mut right = left + 1;
+        // 假定自己在左边山脚
+        if arr[left] < arr[right]{
+            // 阶段1, 先上山
+            while right + 1 < n && arr[right] < arr[right+1]{
+                right += 1;
+            }
+            // 这时right在山顶
+            // 阶段2: 下山
+            if right + 1 < n && arr[right] > arr[right+1]{
+                while right + 1 < n && arr[right] > arr[right+1]{
+                    right += 1;
+                }
+                ans = ans.max(right-left+1);
+            }
+            // 这时right在右山脚
+        }
+        // 已经检查过的, 不用再重复, 可以跳过
+        left = right;
+    }
+    ans as i32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_longest_mountain() {
+        struct TestCase {
+            arr: Vec<i32>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                arr: vec![2, 1, 4, 7, 3, 2, 5],
+                expect: 5,
+            },
+            TestCase {
+                arr: vec![2, 2, 2],
+                expect: 0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { arr, expect } = testcase;
+            let actual = longest_mountain(arr);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_backspace_compare() {
+        struct TestCase {
+            s: &'static str,
+            t: &'static str,
+            expect: bool,
+        }
+
+        vec![
+            TestCase {
+                s: "ab#c",
+                t: "ad#c",
+                expect: true,
+            },
+            TestCase {
+                s: "ab##",
+                t: "c#d#",
+                expect: true,
+            },
+            TestCase {
+                s: "a#c",
+                t: "b",
+                expect: false,
+            },
+            TestCase {
+                s: "a##c",
+                t: "#a#c",
+                expect: true,
+            },
+            TestCase {
+                s: "bxj##tw",
+                t: "bxo#j##tw",
+                expect: true,
+            },
+            TestCase {
+                s: "bbbextm",
+                t: "bbb#extm",
+                expect: false,
+            },
+            TestCase {
+                s: "nzp#o#g",
+                t: "b#nzp#o#g",
+                expect: true,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { s, t, expect } = testcase;
+            let actual = backspace_compare(s.to_string(), t.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_push_dominoes() {
