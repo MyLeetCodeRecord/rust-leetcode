@@ -14,7 +14,7 @@ pub mod moreandmore;
 pub mod sstr;
 pub mod tree;
 pub mod list;
-pub mod bfs;
+pub mod graph_search;
 
 #[macro_export]
 macro_rules! vec2 {

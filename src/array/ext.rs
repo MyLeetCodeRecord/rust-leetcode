@@ -8,13 +8,10 @@ pub mod kmp;
 
 pub mod math;
 
-pub mod rng;
-
 // 拓扑排序
-// pub mod topological;
+pub mod topological;
 
 pub mod trie;
 
 pub mod disjoint;
-
-pub mod orderd;
+pub mod order_set;

@@ -437,18 +437,18 @@ mod tests {
         }
 
         vec![
-            // TestCase {
-            //     s: "abbxxxxzzy",
-            //     expect: vec2![[3, 6]],
-            // },
-            // TestCase {
-            //     s: "abc",
-            //     expect: vec2![],
-            // },
-            // TestCase {
-            //     s: "abcdddeeeeaabbbcd",
-            //     expect: vec2![[3,5],[6,9],[12,14]],
-            // },
+            TestCase {
+                s: "abbxxxxzzy",
+                expect: vec2![[3, 6]],
+            },
+            TestCase {
+                s: "abc",
+                expect: vec2![],
+            },
+            TestCase {
+                s: "abcdddeeeeaabbbcd",
+                expect: vec2![[3,5],[6,9],[12,14]],
+            },
             TestCase {
                 s: "aaa",
                 expect: vec2![[0, 2]],
@@ -568,3 +568,6 @@ mod tests {
         })
     }
 }
+
+
+pub mod no_class;

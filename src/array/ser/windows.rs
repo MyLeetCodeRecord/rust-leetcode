@@ -620,11 +620,11 @@ pub fn longest_mountain(arr: Vec<i32>) -> i32 {
         if prev < curr && curr > next {
             // 找到了山顶, 开始向两边扩展
             let mut left = cursor;
-            while left > 1 && arr[left-2] < arr[left-1] {
+            while left > 1 && arr[left - 2] < arr[left - 1] {
                 left = left - 1; // 向左一格
             }
             let mut right = cursor;
-            while right < arr.len() && arr[right-1] > arr[right] {
+            while right < arr.len() && arr[right - 1] > arr[right] {
                 right = right + 1; // 向右一格
             }
             let tmp = (cursor - left) + 1 + (right - cursor);
@@ -638,9 +638,64 @@ pub fn longest_mountain(arr: Vec<i32>) -> i32 {
     ans as i32
 }
 
+/// [852. 山脉数组的峰顶索引](https://leetcode.cn/problems/peak-index-in-a-mountain-array/)
+/// - 解法1: [滑动窗口](crate::array::ser::windows::peak_index_in_mountain_array)
+///     - 和 [845. 数组中的最长山脉](longest_mountain) 相似,
+///     - 不过不同于前题, 题目保证只有一个山顶, 因此可以在发现时, 直接返回, 但整体时间复杂度仍为O(n)
+/// - 解法 2&3: [二分](crate::array::ser::binary_search::peak_index_in_mountain_array)
+/// 
+pub fn peak_index_in_mountain_array(arr: Vec<i32>) -> i32 {
+    for (idx, win) in arr.windows(3).enumerate() {
+        if let [a, b, c] = &win {
+            if a < b && b > c {
+                return (idx + 1) as i32;
+            }
+        }
+    }
+    unreachable!()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_peak_index_in_mountain_array() {
+        struct TestCase {
+            arr: Vec<i32>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                arr: vec![0, 1, 0],
+                expect: 1,
+            },
+            TestCase {
+                arr: vec![0, 2, 1, 0],
+                expect: 1,
+            },
+            TestCase {
+                arr: vec![0, 10, 5, 2],
+                expect: 1,
+            },
+            TestCase {
+                arr: vec![3, 4, 5, 1],
+                expect: 2,
+            },
+            TestCase {
+                arr: vec![24, 69, 100, 99, 79, 78, 67, 36, 26, 19],
+                expect: 2,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { arr, expect } = testcase;
+            let actual = peak_index_in_mountain_array(arr);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_longest_mountain() {

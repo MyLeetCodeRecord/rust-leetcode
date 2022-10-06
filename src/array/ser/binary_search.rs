@@ -178,59 +178,24 @@ pub fn search_insert(nums: Vec<i32>, target: i32) -> i32 {
 
 /// [34. 在排序数组中查找元素的第一个和最后一个位置](https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/)
 pub fn search_range(nums: Vec<i32>, target: i32) -> Vec<i32> {
-    use std::cmp::Ordering;
-
     if nums.is_empty() {
         return vec![-1, -1];
     }
 
-    let first_find = |nums: &[i32], target: i32| -> i32 {
-        let (mut left, mut right) = (0, nums.len());
-        while left < right {
-            let mid = (right + left) / 2;
-            match target.cmp(nums.get(mid).unwrap()) {
-                Ordering::Greater => {
-                    left = mid + 1;
-                }
-                _ => {
-                    right = mid;
-                }
-            }
-        }
-        if let Some(&num) = nums.get(left) {
-            if num == target {
-                return left as i32;
-            }
-        }
-        -1
-    };
+    let first = first_occur(0, nums.len() - 1, |i| nums[i] >= target);
 
-    let last_find = |nums: &[i32], target: i32| -> i32 {
-        let (mut left, mut right) = (1, nums.len());
-        while left <= right {
-            let mid = (right + left) / 2;
-            match target.cmp(nums.get(mid - 1).unwrap()) {
-                Ordering::Less => {
-                    right = mid - 1;
-                }
-                _ => {
-                    left = mid + 1;
-                }
-            }
-        }
-        if right == 0 {
-            return -1;
-        }
+    if first >= nums.len() || nums[first] != target {
+        // 没有满足>=target的(第一个满足 >= target的, 已经超出长度范围了)
+        // 有满足的, 但是不是 target, 是其他的
+        return vec![-1, -1];
+    }
 
-        if let Some(&num) = nums.get(right - 1) {
-            if num == target {
-                return right as i32 - 1;
-            }
-        }
-        -1
-    };
+    let last = last_occur(0, nums.len() - 1, |i| nums[i] <= target);
+    if last >= nums.len() || nums[last] != target {
+        return vec![-1, -1];
+    }
 
-    vec![first_find(&nums, target), last_find(&nums, target)]
+    vec![first as i32, last as i32]
 }
 
 /// [875. 爱吃香蕉的珂珂](https://leetcode-cn.com/problems/koko-eating-bananas/)
@@ -489,7 +454,7 @@ pub fn trailing_zeroes(n: i32) -> i32 {
 
 /// [793. 阶乘函数后 K 个零](https://leetcode.cn/problems/preimage-size-of-factorial-zeroes-function/)
 ///
-/// 相对与[172. 阶乘后的零](trailing_zeroes), *172*是给定阶乘求结尾有几个0, *793*是给定数量, 求有多少个阶乘
+/// 相对与[172. 阶乘后的零](trailing_zeroes), *172*是给定阶乘求结尾有几个0, *793*是给定数量, 求是多少的阶乘
 ///
 /// 由 *172*可知, 一段范围内的阶乘, 0的数量不变, 即存在相等, 求边界
 ///
@@ -516,9 +481,158 @@ pub fn preimage_size_fzf(k: i32) -> i32 {
     left_bound(k + 1) - left_bound(k)
 }
 
+/// [852. 山脉数组的峰顶索引](https://leetcode.cn/problems/peak-index-in-a-mountain-array/)
+///
+/// - 解法1: [滑动窗口](crate::array::ser::windows::peak_index_in_mountain_array)
+/// - 解法2: 二分无重复
+///   - 整体由 _严格单调递增_ 和 _严格单调递减_ 两段组成
+///   - 目标是找到这个枢纽
+///   - 两端取中, 取`mid`周边两个元素, mid-1, mid, mid+1
+///     - 如果这三个元素递减, 则处在下山, 因此枢纽在左边
+///     - 如果这三个元素递增, 则处在上山, 因此枢纽在右边
+///     - 否则mid就是山顶
+///
+/// ```
+/// pub fn peak_index_in_mountain_array(arr: Vec<i32>) -> i32 {
+///     let (mut left, mut right) = (1usize, arr.len());
+///     // 两端含义相同, 保留等号
+///     while left + 2 <= right {
+///         let mid = left + (right - left) / 2;
+///         let (prev, curr, next) = (arr[mid - 2], arr[mid - 1], arr[mid]);
+///         if prev > curr && curr > next {
+///             // 下山ing
+///             right = mid - 1;
+///         } else if prev < curr && curr < next {
+///             // 上山ing
+///             left = mid + 1;
+///         } else {
+///             return (mid - 1) as i32;
+///         }
+///     }
+///     if arr[left - 1] < arr[right - 1] {
+///         right as i32 - 1
+///     } else {
+///         left as i32 - 1
+///     }
+/// }
+/// ```
+/// - 解法3: 二分有重复
+///   - 对于相邻的两个, [a, b]
+///     - 上山时, 都是 a < b, b可以是山顶
+///     - 下山时, 都是 a > b, a可以是山顶
+///     - 第一次出现   a > b 时, a为山顶
+///     - 最后一次出现 a < b 时, b为山顶
+///   - 因此可以按照有重复元素的二分查找
+///
+pub fn peak_index_in_mountain_array(arr: Vec<i32>) -> i32 {
+    first_occur(1, arr.len() - 2, |i| arr[i] > arr[i + 1]) as i32
+}
+
+/// 要求序列满足 `[from, x]` cmp 返回 false, `[x+1, end]` 返回 true
+/// 即一开始必须是 false
+///
+/// 返回的 `I`, 不保证 `cmp(I) == true`
+/// 这个函数保证的是 `[from, I)` cmp不会返回 true, `[from, I)` 可能是空
+///
+/// 做了防溢出, `from`和`end`可以是0, 即传入索引
+fn first_occur<F>(from: usize, end: usize, cmp: F) -> usize
+where
+    F: Fn(usize) -> bool,
+{
+    let (mut left, mut right) = (from, end);
+    while left <= right {
+        let mid = left + (right - left) / 2;
+        if cmp(mid) {
+            match mid.checked_sub(1) {
+                Some(r) => {
+                    right = r;
+                }
+                None => {
+                    return mid;
+                }
+            }
+        } else {
+            left = mid + 1;
+        }
+    }
+    right + 1
+}
+
+/// 要求序列满足 `[from, x]` cmp 返回 true, `[x+1, end]` 返回 false
+/// 即一开始必须时 true
+///
+/// 返回的 `I` 不保证 `cmp(I) == true`
+/// 这个函数保证的是 `(I, end]` cmp不会返回true, `(I, end]` 可能是空
+///
+/// 做了防溢出, `from`和`end`可以是0, 即传入索引
+fn last_occur<F>(from: usize, end: usize, cmp: F) -> usize
+where
+    F: Fn(usize) -> bool,
+{
+    let (mut left, mut right) = (from, end);
+    while left <= right {
+        let mid = left + (right - left) / 2;
+        if cmp(mid) {
+            left = mid + 1;
+        } else {
+            match mid.checked_sub(1) {
+                Some(r) => {
+                    right = r;
+                }
+                None => {
+                    return 0;
+                }
+            }
+        }
+    }
+    left.checked_sub(1).unwrap_or(0)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_peak_index_in_mountain_array() {
+        struct TestCase {
+            arr: Vec<i32>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                arr: vec![0, 1, 0],
+                expect: 1,
+            },
+            TestCase {
+                arr: vec![0, 2, 1, 0],
+                expect: 1,
+            },
+            TestCase {
+                arr: vec![0, 10, 5, 2],
+                expect: 1,
+            },
+            TestCase {
+                arr: vec![3, 4, 5, 1],
+                expect: 2,
+            },
+            TestCase {
+                arr: vec![24, 69, 100, 99, 79, 78, 67, 36, 26, 19],
+                expect: 2,
+            },
+            TestCase {
+                arr: vec![3, 5, 3, 2, 0],
+                expect: 1,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { arr, expect } = testcase;
+            let actual = peak_index_in_mountain_array(arr);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_preimage_size_fzf() {
