@@ -429,10 +429,68 @@ pub fn num_magic_squares_inside(grid: Vec<Vec<i32>>) -> i32 {
     ans
 }
 
+/// [1759. 统计同构子字符串的数目](https://leetcode.cn/problems/count-number-of-homogenous-substrings/)
+pub fn count_homogenous(s: String) -> i32 {
+    if s.is_empty(){
+        return 0;
+    }
+
+    const MODULO: i64 = 1_000_000_007;
+    let mut chrs = s.chars();
+
+    let mut sum = 0;
+    let mut last = chrs.next().unwrap();
+    let mut count: i64 = 1;
+
+    for c in chrs{
+        if last == c{
+            count += 1;
+            continue;
+        }
+        let cnt = (count + 1) * count / 2;
+        sum = (sum + (cnt % MODULO) as i32) % MODULO as i32;
+        
+        last = c;
+        count = 1;
+    }
+
+    let cnt = (count + 1) * count / 2;
+    sum = (sum + (cnt % MODULO) as i32)  % MODULO as i32;
+    
+    sum
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_count_homogenous(){
+        struct Testcase{
+            s: &'static str,
+            expect: i32
+        }
+
+        vec![
+            Testcase{
+                s: "abbcccaa",
+                expect: 13
+            },
+            Testcase{
+                s: "xy",
+                expect: 2
+            },
+            Testcase{
+                s: "zzzzz",
+                expect: 15
+            }
+        ].into_iter().enumerate().for_each(|(idx, testcase)| {
+            let Testcase { s, expect } = testcase;
+            let actual = count_homogenous(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_num_magic_squares_inside() {
