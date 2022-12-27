@@ -7,6 +7,7 @@
 //! * 中等
 //!     * [462. 最小操作次数使数组元素相等 II](min_moves2)
 //!     * [667. 优美的排列 II](construct_array)
+//!     * [1759. 统计同构子字符串的数目](count_homogenous)
 
 /// [462. 最少移动次数使数组元素相等 II](https://leetcode.cn/problems/minimum-moves-to-equal-array-elements-ii/)
 ///
@@ -431,7 +432,7 @@ pub fn num_magic_squares_inside(grid: Vec<Vec<i32>>) -> i32 {
 
 /// [1759. 统计同构子字符串的数目](https://leetcode.cn/problems/count-number-of-homogenous-substrings/)
 pub fn count_homogenous(s: String) -> i32 {
-    if s.is_empty(){
+    if s.is_empty() {
         return 0;
     }
 
@@ -442,21 +443,21 @@ pub fn count_homogenous(s: String) -> i32 {
     let mut last = chrs.next().unwrap();
     let mut count: i64 = 1;
 
-    for c in chrs{
-        if last == c{
+    for c in chrs {
+        if last == c {
             count += 1;
             continue;
         }
         let cnt = (count + 1) * count / 2;
         sum = (sum + (cnt % MODULO) as i32) % MODULO as i32;
-        
+
         last = c;
         count = 1;
     }
 
     let cnt = (count + 1) * count / 2;
-    sum = (sum + (cnt % MODULO) as i32)  % MODULO as i32;
-    
+    sum = (sum + (cnt % MODULO) as i32) % MODULO as i32;
+
     sum
 }
 
@@ -466,26 +467,26 @@ mod tests {
     use crate::vec2;
 
     #[test]
-    fn test_count_homogenous(){
-        struct Testcase{
+    fn test_count_homogenous() {
+        struct Testcase {
             s: &'static str,
-            expect: i32
+            expect: i32,
         }
 
         vec![
-            Testcase{
+            Testcase {
                 s: "abbcccaa",
-                expect: 13
+                expect: 13,
             },
-            Testcase{
-                s: "xy",
-                expect: 2
-            },
-            Testcase{
+            Testcase { s: "xy", expect: 2 },
+            Testcase {
                 s: "zzzzz",
-                expect: 15
-            }
-        ].into_iter().enumerate().for_each(|(idx, testcase)| {
+                expect: 15,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
             let Testcase { s, expect } = testcase;
             let actual = count_homogenous(s.to_string());
             assert_eq!(expect, actual, "case {} failed", idx);

@@ -11,6 +11,7 @@
 //!     * [455. 分发饼干](find_content_children)
 //!     * [53. 最大子数组和](max_sub_array)
 //!     * [942. 增减字符串匹配](di_string_match)
+//!     *  [2027. 转换字符串的最少操作次数](minimum_moves)
 //! * 中等
 //!     * [376. 摆动序列](wiggle_max_length)
 //!     * [55. 跳跃游戏](can_jump)
@@ -323,22 +324,22 @@ pub fn is_n_straight_hand(hand: Vec<i32>, group_size: i32) -> bool {
     hand.sort();
 
     let mut counter = HashMap::new();
-    for &card in hand.iter(){
+    for &card in hand.iter() {
         *counter.entry(card).or_insert(0) += 1;
     }
 
-    for i in 0..hand.len(){
+    for i in 0..hand.len() {
         let start = hand[i];
-        let e= counter.entry(start).or_default();
-        if *e ==0 {
+        let e = counter.entry(start).or_default();
+        if *e == 0 {
             // 跳过, 下一个
             continue;
         }
         *e -= 1;
-        for i in 1..group_size{
+        for i in 1..group_size {
             // 开始假设枚举
-            let e = counter.entry(start+i).or_default();
-            if *e == 0{
+            let e = counter.entry(start + i).or_default();
+            if *e == 0 {
                 return false;
             }
             *e -= 1;
@@ -347,9 +348,60 @@ pub fn is_n_straight_hand(hand: Vec<i32>, group_size: i32) -> bool {
     true
 }
 
+/// [2027. 转换字符串的最少操作次数](https://leetcode.cn/problems/minimum-moves-to-convert-string/)
+/// 
+/// 只要遇到 X, 三个以内不论什么, 都是至少转换一次
+/// 既然不管是啥都得转换, 那就直接跳过
+pub fn minimum_moves(s: String) -> i32 {
+    let mut sum = 0;
+
+    let bs = s.as_bytes();
+    let mut idx = 0;
+    while idx < bs.len(){
+        if bs[idx] == b'O'{
+            idx += 1;
+            continue;
+        }
+        sum += 1;
+        idx += 3;
+    }
+
+   sum
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_minimum_moves() {
+        struct TestCase {
+            s: &'static str,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                s: "XXX",
+                expect: 1,
+            },
+            TestCase {
+                s: "XXOX",
+                expect: 2,
+            },
+            TestCase {
+                s: "OOOO",
+                expect: 0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { s, expect } = testcase;
+            let actual = minimum_moves(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_is_n_straight_hand() {
