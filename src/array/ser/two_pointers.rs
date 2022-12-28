@@ -34,6 +34,7 @@
 //!     * [151. 颠倒字符串中的单词](reverse_words_1)
 //!     * [面试题 17.11. 单词距离](find_closest)
 //!     * [1089. 复写零](duplicate_zeros)
+//!     * [1750. 删除字符串两端相同字符后的最短长度](minimum_length)
 //! * [链表类型](crate::list::ser::two_pointers)
 //!
 
@@ -717,21 +718,21 @@ pub fn longest_mountain(arr: Vec<i32>) -> i32 {
     let n = arr.len();
     let mut ans = 0;
     let mut left = 0;
-    while left + 2 < n{
+    while left + 2 < n {
         let mut right = left + 1;
         // 假定自己在左边山脚
-        if arr[left] < arr[right]{
+        if arr[left] < arr[right] {
             // 阶段1, 先上山
-            while right + 1 < n && arr[right] < arr[right+1]{
+            while right + 1 < n && arr[right] < arr[right + 1] {
                 right += 1;
             }
             // 这时right在山顶
             // 阶段2: 下山
-            if right + 1 < n && arr[right] > arr[right+1]{
-                while right + 1 < n && arr[right] > arr[right+1]{
+            if right + 1 < n && arr[right] > arr[right + 1] {
+                while right + 1 < n && arr[right] > arr[right + 1] {
                     right += 1;
                 }
-                ans = ans.max(right-left+1);
+                ans = ans.max(right - left + 1);
             }
             // 这时right在右山脚
         }
@@ -741,9 +742,75 @@ pub fn longest_mountain(arr: Vec<i32>) -> i32 {
     ans as i32
 }
 
+/// [1750. 删除字符串两端相同字符后的最短长度](https://leetcode.cn/problems/minimum-length-of-string-after-deleting-similar-ends/)
+pub fn minimum_length(s: String) -> i32 {
+    if s.is_empty() {
+        return 0;
+    }
+
+    let bs = s.as_bytes();
+    let (mut left, mut right) = (1, bs.len()); // 使用[1, n], 防溢出
+
+    while left < right {
+        // 没等号
+        let (l, r) = (bs[left - 1], bs[right - 1]);
+        if l != r {
+            break;
+        }
+        while left <= right {
+            // 有等号
+            if bs[left - 1] == l {
+                left += 1;
+                continue;
+            }
+            break;
+        }
+        while left <= right {
+            // 有等号
+            if bs[right - 1] == r {
+                right -= 1;
+                continue;
+            }
+            break;
+        }
+    }
+    (right + 1 - left) as i32 // 先加1, 否则会溢出
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_minimum_length() {
+        struct Testcase {
+            s: &'static str,
+            expect: i32,
+        }
+
+        vec![
+            Testcase { s: "ca", expect: 2 },
+            Testcase {
+                s: "cabaabac",
+                expect: 0,
+            },
+            Testcase {
+                s: "aabccabba",
+                expect: 3,
+            },
+            Testcase {
+                s: "aaa",
+                expect: 0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase { s, expect } = testcase;
+            let actual = minimum_length(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_longest_mountain() {
