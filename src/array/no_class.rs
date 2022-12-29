@@ -143,10 +143,83 @@ pub fn maximum_wealth(accounts: Vec<Vec<i32>>) -> i32 {
         .unwrap()
 }
 
+/// [2032. 至少在两个数组中出现的值](https://leetcode.cn/problems/two-out-of-three/)
+pub fn two_out_of_three(nums1: Vec<i32>, nums2: Vec<i32>, nums3: Vec<i32>) -> Vec<i32> {
+    let mut mask = [[0u8; 101]; 3];
+    [nums1, nums2, nums3]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, nums)| {
+            nums.into_iter().for_each(|num| {
+                if mask[idx][num as usize] == 0 {
+                    mask[idx][num as usize] += 1;
+                }
+            });
+        });
+    mask[0]
+        .into_iter()
+        .zip(mask[1].into_iter())
+        .zip(mask[2].into_iter())
+        .enumerate()
+        .filter_map(|(idx, ((num1, num2), num3))| {
+            if num1 + num2 + num3 >= 2 {
+                Some(idx as i32)
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_two_out_of_three() {
+        struct Testcase {
+            nums1: Vec<i32>,
+            nums2: Vec<i32>,
+            nums3: Vec<i32>,
+            expect: Vec<i32>,
+        }
+
+        vec![
+            Testcase {
+                nums1: vec![1, 1, 3, 2],
+                nums2: vec![2, 3],
+                nums3: vec![3],
+                expect: vec![3, 2],
+            },
+            Testcase {
+                nums1: vec![3, 1],
+                nums2: vec![2, 3],
+                nums3: vec![1, 2],
+                expect: vec![3, 2, 1],
+            },
+            Testcase {
+                nums1: vec![1, 2, 2],
+                nums2: vec![4, 3, 3],
+                nums3: vec![5],
+                expect: vec![],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase {
+                nums1,
+                nums2,
+                nums3,
+                mut expect,
+            } = testcase;
+            let mut actual = two_out_of_three(nums1, nums2, nums3);
+            expect.sort();
+            actual.sort();
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_maximum_wealth() {
