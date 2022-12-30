@@ -8,5 +8,12 @@
     // "rust-analyzer.server.path": "~/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/bin/rust-analyzer",
     "rust-analyzer.runnableEnv": {
         "RUST_BACKTRACE": "0"
-    }
+    },
+    "coverage-gutters.coverageBaseDir": "target/coverage",
+    "coverage-gutters.coverageFileNames": [
+        "lcov.info",
+        "cov.xml",
+        "coverage.xml",
+        "jacoco.xml"
+    ]
 }

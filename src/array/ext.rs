@@ -16,3 +16,5 @@ pub mod rng;
 pub mod trie;
 
 pub mod disjoint;
+
+pub mod orderd;
