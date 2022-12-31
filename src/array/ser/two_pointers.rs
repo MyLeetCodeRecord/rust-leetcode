@@ -777,9 +777,61 @@ pub fn minimum_length(s: String) -> i32 {
     (right + 1 - left) as i32 // 先加1, 否则会溢出
 }
 
+/// [2037. 使每位学生都有座位的最少移动次数](https://leetcode.cn/problems/minimum-number-of-moves-to-seat-everyone/)
+///
+/// 思路: 局部最优之后, 全局最优
+/// 局部最优, 就是两组内最接近的两个. 最接近的方式, 按照从小到大排序, 两两配对
+pub fn min_moves_to_seat(mut seats: Vec<i32>, mut students: Vec<i32>) -> i32 {
+    seats.sort();
+    students.sort();
+
+    seats
+        .iter()
+        .zip(students.iter())
+        .map(|(&a, &b)| (a - b).abs())
+        .sum()
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_min_moves_to_seat() {
+        struct TestCase {
+            seats: Vec<i32>,
+            students: Vec<i32>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                seats: vec![3, 1, 5],
+                students: vec![2, 7, 4],
+                expect: 4,
+            },
+            TestCase {
+                seats: vec![4, 1, 5, 9],
+                students: vec![1, 3, 2, 6],
+                expect: 7,
+            },
+            TestCase {
+                seats: vec![2, 2, 6, 6],
+                students: vec![1, 3, 2, 6],
+                expect: 4,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase {
+                seats,
+                students,
+                expect,
+            } = testcase;
+            let actual = min_moves_to_seat(seats, students);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_minimum_length() {
