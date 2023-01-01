@@ -313,7 +313,7 @@ pub fn maximum_swap(num: i32) -> i32 {
 
 /// [846. 一手顺子](https://leetcode.cn/problems/hand-of-straights/)
 ///
-///
+/// [Hash解法](crate::mhash::no_class::is_n_straight_hand)
 pub fn is_n_straight_hand(hand: Vec<i32>, group_size: i32) -> bool {
     use std::collections::HashMap;
     if (hand.len() as i32) % group_size != 0 {

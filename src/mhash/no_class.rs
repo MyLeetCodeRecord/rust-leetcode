@@ -2,7 +2,7 @@
 ///
 /// 重点: 连续, 因此可以直接+1, 尝试找后一个
 ///
-/// [贪心解法]()
+/// [贪心解法](crate::moreandmore::is_n_straight_hand)
 pub fn is_n_straight_hand(hand: Vec<i32>, group_size: i32) -> bool {
     use std::cmp::Reverse;
     use std::collections::BinaryHeap;
@@ -37,6 +37,47 @@ pub fn is_n_straight_hand(hand: Vec<i32>, group_size: i32) -> bool {
         }
     }
     true
+}
+
+/// [2351. 第一个出现两次的字母](https://leetcode.cn/problems/first-letter-to-appear-twice/)
+///
+/// 题目说明只有26个小写字母, 但是返回类型时char, 在rust中转化起来费劲
+pub fn repeated_character(s: String) -> char {
+    use std::collections::HashMap;
+    let mut counter = HashMap::new();
+    for c in s.chars() {
+        let entry = counter.entry(c).or_insert(0);
+        *entry += 1;
+        if *entry == 2 {
+            return c;
+        }
+    }
+    unreachable!("题目保证有解")
+}
+#[test]
+fn test_repeated_character() {
+    struct TestCase {
+        s: String,
+        expect: char,
+    }
+
+    vec![
+        TestCase {
+            s: "abccbaacz".to_string(),
+            expect: 'c',
+        },
+        TestCase {
+            s: "abcdd".to_string(),
+            expect: 'd',
+        },
+    ]
+    .into_iter()
+    .enumerate()
+    .for_each(|(idx, testcase)| {
+        let TestCase { s, expect } = testcase;
+        let actual = repeated_character(s);
+        assert_eq!(expect, actual, "case {} failed", idx);
+    });
 }
 
 #[test]
