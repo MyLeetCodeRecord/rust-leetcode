@@ -791,6 +791,49 @@ pub fn min_moves_to_seat(mut seats: Vec<i32>, mut students: Vec<i32>) -> i32 {
         .map(|(&a, &b)| (a - b).abs())
         .sum()
 }
+/// [849. 到最近的人的最大距离](https://leetcode.cn/problems/maximize-distance-to-closest-person/)
+///
+/// 1. 阶段1: [dp解法](crate::dp::no_class::max_dist_to_closest)
+/// 2. 阶段2: [双指针解法](crate::array::ser::two_pointers::max_dist_to_closest)
+///     * 和[845. 数组中的最长山脉](crate::array::ser::two_pointers::longest_mountain)相似, 向后探测
+///     * 距离是向左向右两侧的, 取其中的最小值
+///     * 成段的0, 只有中间那个才可能是合适位置
+///
+pub fn max_dist_to_closest(seats: Vec<i32>) -> i32 {
+    let n = seats.len() as i32;
+    let mut prev = -n;
+    let mut ans = 0;
+
+    let mut cursor = 0;
+    while cursor < seats.len() {
+        if seats[cursor] == 1 {
+            prev = cursor as i32;
+            cursor += 1;
+            continue;
+        }
+        let mut future = cursor;
+        while future < seats.len() && seats[future] == 0 {
+            future += 1;
+        }
+        let length = (future - cursor) as i32;
+        if prev < 0 {
+            // 开头, 只有右端找到了1
+            ans = ans.max(length);
+        } else if future == seats.len() {
+            // 结尾, 只有左端有1
+            ans = ans.max(length);
+        } else {
+            if length % 2 == 0 {
+                ans = ans.max(length / 2);
+            } else {
+                ans = ans.max(length / 2 + 1);
+            }
+        }
+        cursor = future; // 成段的0, 只需要判断一次
+    }
+    ans
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -829,6 +872,36 @@ mod tests {
                 expect,
             } = testcase;
             let actual = min_moves_to_seat(seats, students);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_max_dist_to_closest() {
+        struct TestCase {
+            seats: Vec<i32>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                seats: vec![1, 0, 0, 0, 1, 0, 1],
+                expect: 2,
+            },
+            TestCase {
+                seats: vec![1, 0, 0, 0],
+                expect: 3,
+            },
+            TestCase {
+                seats: vec![0, 1],
+                expect: 1,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { seats, expect } = testcase;
+            let actual = max_dist_to_closest(seats);
             assert_eq!(expect, actual, "case {} failed", idx);
         });
     }

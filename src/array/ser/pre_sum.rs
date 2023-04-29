@@ -116,9 +116,55 @@ pub fn running_sum(nums: Vec<i32>) -> Vec<i32> {
     nums
 }
 
+/// [848. 字母移位](https://leetcode.cn/problems/shifting-letters/)
+///
+/// 从后向前累加的前缀和
+///
+pub fn shifting_letters(s: String, shifts: Vec<i32>) -> String {
+    let mut s = s;
+    let ss = unsafe { s.as_bytes_mut() };
+
+    let mut sum = 0;
+    for i in (0..ss.len()).rev() {
+        sum = (sum + shifts[i]) % 26;
+        let tmp = (ss[i] - b'a') as i32 + sum;
+        ss[i] = (tmp % 26) as u8 + b'a';
+    }
+    s
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_shifting_letters() {
+        struct TestCase {
+            s: &'static str,
+            shifts: Vec<i32>,
+            expect: &'static str,
+        }
+
+        vec![
+            TestCase {
+                s: "abc",
+                shifts: vec![3, 5, 9],
+                expect: "rpl",
+            },
+            TestCase {
+                s: "aaa",
+                shifts: vec![1, 2, 3],
+                expect: "gfd",
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { s, shifts, expect } = testcase;
+            let actual = shifting_letters(s.to_string(), shifts);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_running_sum() {

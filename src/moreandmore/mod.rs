@@ -349,7 +349,7 @@ pub fn is_n_straight_hand(hand: Vec<i32>, group_size: i32) -> bool {
 }
 
 /// [2027. 转换字符串的最少操作次数](https://leetcode.cn/problems/minimum-moves-to-convert-string/)
-/// 
+///
 /// 只要遇到 X, 三个以内不论什么, 都是至少转换一次
 /// 既然不管是啥都得转换, 那就直接跳过
 pub fn minimum_moves(s: String) -> i32 {
@@ -357,8 +357,8 @@ pub fn minimum_moves(s: String) -> i32 {
 
     let bs = s.as_bytes();
     let mut idx = 0;
-    while idx < bs.len(){
-        if bs[idx] == b'O'{
+    while idx < bs.len() {
+        if bs[idx] == b'O' {
             idx += 1;
             continue;
         }
@@ -366,9 +366,43 @@ pub fn minimum_moves(s: String) -> i32 {
         idx += 3;
     }
 
-   sum
+    sum
 }
 
+/// [853. 车队](https://leetcode.cn/problems/car-fleet/)
+///
+/// 可以追上去，并与前车 以相同的速度 紧接着行驶
+///
+pub fn car_fleet(target: i32, position: Vec<i32>, speed: Vec<i32>) -> i32 {
+    let target = target as f64;
+    let mut ps = position
+        .into_iter()
+        .zip(speed.into_iter())
+        .collect::<Vec<(i32, i32)>>();
+    ps.sort_by(|a, b| a.0.cmp(&b.0).reverse());
+    let mut cursor = 0;
+    let mut ans = 0;
+    while cursor < ps.len() {
+        let time = {
+            // f64精度够吗?
+            let div = target - ps[cursor].0 as f64;
+            let step = ps[cursor].1 as f64;
+            div / step
+        };
+        let mut end = cursor + 1;
+        while end < ps.len() {
+            let tmp = ps[end];
+            if tmp.0 as f64 + tmp.1 as f64 * time >= target {
+                end += 1;
+            } else {
+                break;
+            }
+        }
+        ans += 1;
+        cursor = end;
+    }
+    ans
+}
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -392,13 +426,62 @@ mod tests {
             TestCase {
                 s: "OOOO",
                 expect: 0,
-            },
+            }
         ]
         .into_iter()
         .enumerate()
         .for_each(|(idx, testcase)| {
             let TestCase { s, expect } = testcase;
             let actual = minimum_moves(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_car_fleet() {
+        struct TestCase {
+            target: i32,
+            position: Vec<i32>,
+            speed: Vec<i32>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                target: 12,
+                position: vec![10, 8, 0, 5, 3],
+                speed: vec![2, 4, 1, 1, 3],
+                expect: 3,
+            },
+            TestCase {
+                target: 10,
+                position: vec![3],
+                speed: vec![3],
+                expect: 1,
+            },
+            TestCase {
+                target: 100,
+                position: vec![0, 2, 4],
+                speed: vec![4, 2, 1],
+                expect: 1,
+            },
+            TestCase {
+                target: 17,
+                position: vec![8, 12, 16, 11, 7],
+                speed: vec![6, 9, 10, 9, 7],
+                expect: 4,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase {
+                target,
+                position,
+                speed,
+                expect,
+            } = testcase;
+            let actual = car_fleet(target, position, speed);
             assert_eq!(expect, actual, "case {} failed", idx);
         });
     }

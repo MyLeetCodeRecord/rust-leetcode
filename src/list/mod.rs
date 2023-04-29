@@ -1,3 +1,9 @@
+//! 链表题目
+//! 
+//! 由于rust写链表是真的难受, 因此将链表相关的题目汇总到这里.
+//! 当然也会右很多其他范式的题目, 比如[two pointers](crate::array::ser::two_pointers).
+//! 这种题目, 会在文档部分补上连接, 关联起来.
+
 use datastructure::ListNode;
 
 /// [203. 移除链表元素](https://leetcode.cn/problems/remove-linked-list-elements/)

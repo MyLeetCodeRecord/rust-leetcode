@@ -329,3 +329,4 @@ mod tests {
 }
 
 pub mod calculator;
+pub mod no_class;

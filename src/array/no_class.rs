@@ -171,6 +171,25 @@ pub fn two_out_of_three(nums1: Vec<i32>, nums2: Vec<i32>, nums3: Vec<i32>) -> Ve
         .collect()
 }
 
+/// [1779. 找到最近的有相同 X 或 Y 坐标的点](https://leetcode.cn/problems/find-nearest-point-that-has-the-same-x-or-y-coordinate/)
+pub fn nearest_valid_point(x: i32, y: i32, points: Vec<Vec<i32>>) -> i32 {
+    points
+        .into_iter()
+        .enumerate()
+        .rev()
+        .filter_map(|(_idx, point)| {
+            let (x0, y0) = (point[0], point[1]);
+            if x0 == x || y0 == y {
+                Some((_idx as i32, (x - x0).abs() + (y - y0).abs()))
+            } else {
+                None
+            }
+        })
+        .min_by(|(idx0, dis0), (idx1, dis1)| dis0.cmp(dis1).then(idx0.cmp(idx1)))
+        .unwrap_or((-1, 0))
+        .0 as i32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -184,7 +203,6 @@ mod tests {
             nums3: Vec<i32>,
             expect: Vec<i32>,
         }
-
         vec![
             Testcase {
                 nums1: vec![1, 1, 3, 2],
@@ -219,6 +237,48 @@ mod tests {
             actual.sort();
             assert_eq!(expect, actual, "case {} failed", idx);
         });
+    }
+    #[test]
+    fn test_nearest_valid_point() {
+        struct Testcase {
+            x: i32,
+            y: i32,
+            points: Vec<Vec<i32>>,
+            expect: i32,
+        }
+
+        vec![
+            Testcase {
+                x: 3,
+                y: 4,
+                points: vec2![[1, 2], [3, 1], [2, 4], [2, 3], [4, 4]],
+                expect: 2,
+            },
+            Testcase {
+                x: 3,
+                y: 4,
+                points: vec2![[3, 4]],
+                expect: 0,
+            },
+            Testcase {
+                x: 3,
+                y: 4,
+                points: vec2![[2, 3]],
+                expect: -1,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase {
+                x,
+                y,
+                points,
+                expect,
+            } = testcase;
+            let actual = nearest_valid_point(x, y, points);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        })
     }
 
     #[test]

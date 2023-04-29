@@ -5,3 +5,4 @@ pub mod pre_sum;
 pub mod two_pointers;
 pub mod windows;
 pub mod stack;
+pub mod rng;

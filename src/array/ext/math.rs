@@ -461,12 +461,41 @@ pub fn count_homogenous(s: String) -> i32 {
     sum
 }
 
+/// [858. 镜面反射](https://leetcode.cn/problems/mirror-reflection/)
+///
+/// 每反射一次, 在y轴方向最终上升距离为q,
+/// 如果上升 n 次后, n*q 为 p 的整数倍, 则到达了顶点
+///
+/// 也就是求最小公倍数
+///
+pub fn mirror_reflection(p: i32, q: i32) -> i32 {
+    let d = lcm(p, q);
+    if (d / p) % 2 == 0 {
+        return 0;
+    } else if (d / q) % 2 == 0 {
+        return 2;
+    }
+    return 1;
+}
+
+fn gcd(a: i32, b: i32) -> i32 {
+    let (m, n) = (a.max(b), a.min(b));
+    if n == 0 {
+        return m;
+    }
+    return gcd(n, m % n);
+}
+fn lcm(a: i32, b: i32) -> i32 {
+    a * b / gcd(a, b)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
 
     #[test]
+    #[rustfmt::skip]
     fn test_count_homogenous() {
         struct Testcase {
             s: &'static str,
@@ -474,21 +503,36 @@ mod tests {
         }
 
         vec![
-            Testcase {
-                s: "abbcccaa",
-                expect: 13,
-            },
+            Testcase { s: "abbcccaa", expect: 13},
             Testcase { s: "xy", expect: 2 },
-            Testcase {
-                s: "zzzzz",
-                expect: 15,
-            },
+            Testcase { s: "zzzzz", expect: 15},
         ]
         .into_iter()
         .enumerate()
         .for_each(|(idx, testcase)| {
             let Testcase { s, expect } = testcase;
             let actual = count_homogenous(s.to_string());
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    #[rustfmt::skip]
+    fn test_mirror_reflection() {
+        struct TestCase {
+            p: i32,
+            q: i32,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {p: 2, q: 1, expect: 2,}
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { p, q, expect } = testcase;
+            let actual = mirror_reflection(p, q);
             assert_eq!(expect, actual, "case {} failed", idx);
         });
     }
