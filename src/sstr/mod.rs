@@ -132,7 +132,7 @@ pub fn reorder_spaces(text: String) -> String {
     }
     result.extend(vec![b' '; space_cnt]);
 
-    unsafe { String::from_utf8_unchecked(result) }
+    String::from_utf8(result).unwrap()
 }
 
 /// [830. 较大分组的位置](https://leetcode.cn/problems/positions-of-large-groups/)
@@ -296,7 +296,7 @@ pub fn reformat_number(number: String) -> String {
         }
         _ => ans.extend_from_slice(nums.get(cursor..).unwrap()),
     }
-    unsafe { String::from_utf8_unchecked(ans) }
+    String::from_utf8(ans).unwrap()
 }
 #[cfg(test)]
 mod tests {

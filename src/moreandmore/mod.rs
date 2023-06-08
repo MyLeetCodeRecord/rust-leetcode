@@ -403,9 +403,143 @@ pub fn car_fleet(target: i32, position: Vec<i32>, speed: Vec<i32>) -> i32 {
     }
     ans
 }
+
+/// [860. 柠檬水找零](https://leetcode.cn/problems/lemonade-change/)
+///
+/// - 只有10, 20 需要找零, 5不用找零
+/// - 能先用大额就用大额
+/// - 10可以用于20的找零, 20不能用于找零, 因此20不用存
+pub fn lemonade_change(bills: Vec<i32>) -> bool {
+    let mut changes = vec![0; 2]; // 5, 10
+    for &bill in bills.iter() {
+        match bill {
+            5 => {
+                changes[0] += 1;
+            }
+            10 => {
+                if changes[0] == 0 {
+                    return false;
+                }
+                changes[0] -= 1;
+                changes[1] += 1;
+            }
+            20 => {
+                if changes[1] > 0 && changes[0] > 0 {
+                    changes[1] -= 1;
+                    changes[0] -= 1;
+                } else if changes[0] >= 3 {
+                    changes[0] -= 3;
+                } else {
+                    return false;
+                }
+                // 20参与不了找零, 因此可以不用存计数
+                // changes[2] += 1;
+            }
+            _ => unreachable!(),
+        }
+    }
+    return true;
+}
+
+/// [861. 翻转矩阵后的得分](https://leetcode.cn/problems/score-after-flipping-matrix/)
+///
+/// 1. 由于二进制高位在左边, 因此每一行的第一个数必须是1
+/// 2. 之后每列的1的个数必须大于0的个数, 否则翻转
+pub fn matrix_score(grid: Vec<Vec<i32>>) -> i32 {
+    let mut grid = grid;
+    let mut ans = 0;
+    for row in grid.iter_mut() {
+        if row[0] == 0 {
+            // 翻转
+            row.iter_mut().for_each(|x| *x ^= 1);
+        }
+    }
+    for col in 0..grid[0].len() {
+        let mut count = 0;
+        for row in 0..grid.len() {
+            if grid[row][col] == 1 {
+                count += 1;
+            }
+        }
+        if count <= grid.len() / 2 {
+            // 翻转
+            for row in 0..grid.len() {
+                grid[row][col] ^= 1;
+            }
+        }
+    }
+    for row in grid.iter() {
+        let mut sum = 0;
+        for &x in row.iter() {
+            sum = sum << 1 | x;
+        }
+        ans += sum;
+    }
+    ans
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_matrix_score() {
+        struct TestCase {
+            grid: Vec<Vec<i32>>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                grid: vec![vec![0, 0, 1, 1], vec![1, 0, 1, 0], vec![1, 1, 0, 0]],
+                expect: 39,
+            },
+            TestCase {
+                grid: vec![vec![0]],
+                expect: 1,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, TestCase { grid, expect })| {
+            let actual = matrix_score(grid);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_lemonade_change() {
+        struct TestCase {
+            bills: Vec<i32>,
+            expect: bool,
+        }
+
+        vec![
+            TestCase {
+                bills: vec![5, 5, 5, 10, 20],
+                expect: true,
+            },
+            TestCase {
+                bills: vec![5, 5, 10],
+                expect: true,
+            },
+            TestCase {
+                bills: vec![10, 10],
+                expect: false,
+            },
+            TestCase {
+                bills: vec![5, 5, 10, 10, 20],
+                expect: false,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let TestCase { bills, expect } = testcase;
+            let actual = lemonade_change(bills);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_minimum_moves() {
@@ -426,7 +560,7 @@ mod tests {
             TestCase {
                 s: "OOOO",
                 expect: 0,
-            }
+            },
         ]
         .into_iter()
         .enumerate()

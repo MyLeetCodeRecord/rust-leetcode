@@ -8,6 +8,11 @@
 //! * 简单
 //! * 中等
 //!     * [547. 省份数量](find_circle_num)
+//!     * [684. 冗余连接](find_redundant_connection)
+//!     * [990. 等式方程的可满足性](equations_possible)
+//!     * [841. 钥匙和房间](can_visit_all_rooms)
+//! * 困难
+//!     * [839. 相似字符串组](num_similar_groups)
 //!
 
 struct UnionFind {

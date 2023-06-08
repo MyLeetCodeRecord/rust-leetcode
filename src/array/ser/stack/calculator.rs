@@ -213,6 +213,100 @@ pub fn calculate3(s: String) -> i32 {
     )
 }
 
+/// [Evaluate mathematical expression](https://www.codewars.com/kata/52a78825cdfc2cfc87000005/train/rust)
+fn calc(expr: &str) -> f64 {
+    fn mul_div(ops: &mut Vec<i32>, lits: &mut Vec<i32>, num: i32) {
+        // 合并乘法/除法
+        match ops.pop() {
+            None => unreachable!(),
+            Some(3) => {
+                let mut last_num = lits.pop().unwrap();
+                last_num = last_num * num;
+                lits.push(last_num);
+            }
+            Some(4) => {
+                let mut last_num = lits.pop().unwrap();
+                last_num = last_num / num;
+                lits.push(last_num);
+            }
+            Some(x) => {
+                lits.push(num);
+                ops.push(x); // 再放回
+            }
+        }
+    }
+
+    let mut ops = vec![];
+    let mut lits = vec![];
+    ops.push(1);
+
+    let stream = expr.as_bytes();
+    let mut cursor = 0;
+    while cursor < stream.len() {
+        let peek = stream[cursor];
+        if peek == b' ' {
+            cursor += 1;
+        } else if peek == b'+' {
+            ops.push(1);
+            cursor += 1;
+        } else if peek == b'-' {
+            ops.push(2);
+            cursor += 1;
+        } else if peek == b'*' {
+            ops.push(3);
+            cursor += 1;
+        } else if peek == b'/' {
+            ops.push(4);
+            cursor += 1;
+        } else if peek == b'(' {
+            ops.push(0);
+            cursor += 1;
+        } else if peek == b')' {
+            // pop 直到找到对应的 (
+            // 先pop出来逆序, 运算完再压回去
+            let mut ops_temp = vec![];
+            let mut lits_tmp = vec![];
+            loop {
+                let lit = lits.pop().unwrap();
+                let op = ops.pop().unwrap();
+                lits_tmp.push(lit);
+                if op == 0 {
+                    break;
+                }
+                ops_temp.push(op);
+            }
+            ops_temp.push(1);
+            let num = ops_temp
+                .into_iter()
+                .rev()
+                .zip(lits_tmp.into_iter().rev())
+                .fold(0, |r, (op, lit)| if op == 1 { r + lit } else { r - lit });
+
+            mul_div(&mut ops, &mut lits, num);
+
+            cursor += 1;
+        } else {
+            let mut num = 0;
+            while cursor < stream.len() && stream[cursor] >= b'0' && stream[cursor] <= b'9' {
+                num = num * 10 + (stream[cursor] - b'0') as i32;
+                cursor += 1;
+            }
+
+            mul_div(&mut ops, &mut lits, num);
+        }
+    }
+    ops.into_iter().zip(lits.into_iter()).fold(
+        0.0,
+        |r, (op, lit)| {
+            if op == 1 {
+                r + lit as f64
+            } else {
+                r - lit as f64
+            }
+        },
+    )
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

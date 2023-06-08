@@ -4,10 +4,20 @@
 //! * 简单
 //!     * [1470. 重新排列数组](shuffle)
 //!     * [1582. 二进制矩阵中的特殊位置](num_special)
+//!     * [412. Fizz Buzz](fizz_buzz)
+//!     * [1342. 将数字变成 0 的操作次数](number_of_steps)
+//!     * [836. 矩形重叠](is_rectangle_overlap)
+//!     * [867. 转置矩阵](transpose)
 //! * 中等
 //!     * [462. 最小操作次数使数组元素相等 II](min_moves2)
 //!     * [667. 优美的排列 II](construct_array)
 //!     * [1759. 统计同构子字符串的数目](count_homogenous)
+//!     * [835. 图像重叠](largest_overlap)
+//!     * [840. 矩阵中的幻方](num_magic_squares_inside)
+//!     * [858. 镜面反射](mirror_reflection)
+//! * 困难
+//!     * [829. 连续整数求和](consecutive_numbers_sum)
+//!     * [828. 统计子串中的唯一字符](unique_letter_string)
 
 /// [462. 最少移动次数使数组元素相等 II](https://leetcode.cn/problems/minimum-moves-to-equal-array-elements-ii/)
 ///
@@ -489,10 +499,47 @@ fn lcm(a: i32, b: i32) -> i32 {
     a * b / gcd(a, b)
 }
 
+/// [867. 转置矩阵](https://leetcode.cn/problems/transpose-matrix/)
+pub fn transpose(matrix: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+    let (m, n) = (matrix.len(), matrix.first().unwrap().len());
+    let mut ret = vec![vec![0; m]; n];
+    for i in 0..m {
+        for j in 0..n {
+            ret[j][i] = matrix[i][j];
+        }
+    }
+    return ret;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_transpose() {
+        struct TestCase {
+            matrix: Vec<Vec<i32>>,
+            expect: Vec<Vec<i32>>,
+        }
+
+        vec![
+            TestCase {
+                matrix: vec2![[1, 2, 3], [4, 5, 6], [7, 8, 9]],
+                expect: vec2![[1, 4, 7], [2, 5, 8], [3, 6, 9]],
+            },
+            TestCase {
+                matrix: vec2![[1, 2, 3], [4, 5, 6]],
+                expect: vec2![[1, 4], [2, 5], [3, 6]],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, TestCase { matrix, expect })| {
+            let actual = transpose(matrix);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     #[rustfmt::skip]

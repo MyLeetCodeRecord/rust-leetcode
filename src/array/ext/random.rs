@@ -328,7 +328,7 @@ pub mod random0 {
 /// ## 题目
 /// * 简单
 /// * 中等
-///     * [382. 链表随机节点](linked::Solution)
+///     * [382. 链表随机节点](linked)
 ///     * [398. 随机数索引](array)
 ///
 pub mod random2 {
@@ -388,12 +388,7 @@ pub mod random2 {
     pub mod linked {
         use rand::{thread_rng, Rng};
         use std::cell::RefCell;
-
-        #[derive(PartialEq, Eq, Clone, Debug)]
-        pub struct ListNode {
-            pub val: i32,
-            pub next: Option<Box<ListNode>>,
-        }
+        use datastructure::ListNode;
 
         struct Solution {
             list: Option<Box<ListNode>>,
@@ -428,38 +423,28 @@ pub mod random2 {
         #[cfg(test)]
         mod tests {
             use super::*;
+            use macros::list;
 
             #[test]
             fn test_get_random() {
                 struct TestCase {
                     name: &'static str,
-                    head: &'static [i32],
+                    head: Option<Box<ListNode>>,
                     expect: i32,
                 }
 
                 vec![TestCase {
                     name: "basic",
-                    head: &[1, 2, 3],
+                    head: list![1, 2, 3],
                     expect: 1,
                 }]
-                .iter()
+                .into_iter()
                 .for_each(|testcase| {
-                    let list = build_list_from_slice(testcase.head);
-                    let s = Solution::new(list);
+                    let TestCase{name, head, expect} = testcase;
+                    let s = Solution::new(head);
                     let actual = s.get_random();
-                    assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+                    assert_eq!(expect, actual, "{} failed", name);
                 });
-            }
-
-            fn build_list_from_slice(s: &[i32]) -> Option<Box<ListNode>> {
-                if s.is_empty() {
-                    return None;
-                }
-                let head = Box::new(ListNode {
-                    val: s.first().copied().unwrap(),
-                    next: build_list_from_slice(&s[1..]),
-                });
-                Some(head)
             }
         }
     }
@@ -489,6 +474,7 @@ pub mod random3 {
     /// 1. 哈希: 用索引关联
     /// 2. 偏移: 前一段中第几个黑名单, 后一段中对应第几个正常元素
     pub mod black_random {
+        /// 待证
         pub mod _hash {
             use rand;
             use std::collections::{HashMap, HashSet};

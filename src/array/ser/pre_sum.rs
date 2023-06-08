@@ -121,8 +121,8 @@ pub fn running_sum(nums: Vec<i32>) -> Vec<i32> {
 /// 从后向前累加的前缀和
 ///
 pub fn shifting_letters(s: String, shifts: Vec<i32>) -> String {
-    let mut s = s;
-    let ss = unsafe { s.as_bytes_mut() };
+    let s = s;
+    let mut ss = s.as_bytes().to_vec();
 
     let mut sum = 0;
     for i in (0..ss.len()).rev() {
@@ -130,12 +130,102 @@ pub fn shifting_letters(s: String, shifts: Vec<i32>) -> String {
         let tmp = (ss[i] - b'a') as i32 + sum;
         ss[i] = (tmp % 26) as u8 + b'a';
     }
-    s
+    String::from_utf8(ss).unwrap()
+}
+
+/// [862. 和至少为 K 的最短子数组](https://leetcode.cn/problems/shortest-subarray-with-sum-at-least-k/)
+/// 
+/// 误区:
+/// 1. 滑动窗口: 添加负数之后窗口的滑动就没有单向性了，因此无法使用滑动窗口解决
+/// 2. 数据输入可能有溢出
+/// 
+pub fn shortest_subarray(nums: Vec<i32>, k: i32) -> i32 {
+    use std::collections::VecDeque;
+
+    let k = k as i64;
+
+    let mut pre = vec![0];
+    let mut curr_sum = 0i64;
+    for num in nums {
+        curr_sum += num as i64;
+        pre.push(curr_sum);
+    }
+
+    let mut ret = std::usize::MAX;
+    let mut deque = VecDeque::new();
+    for (i, &num) in pre.iter().enumerate() {
+        while !deque.is_empty() && num - pre[*deque.front().unwrap()] >= k {
+            ret = ret.min(i - deque.pop_front().unwrap());
+        }
+        while !deque.is_empty() && num <= pre[*deque.back().unwrap()] {
+            deque.pop_back();
+        }
+        deque.push_back(i);
+    }
+
+    if ret == std::usize::MAX {
+        -1
+    } else {
+        ret as i32
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_shortest_subarray() {
+        struct TestCase {
+            nums: Vec<i32>,
+            k: i32,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                nums: vec![1],
+                k: 1,
+                expect: 1,
+            },
+            TestCase {
+                nums: vec![1, 2],
+                k: 4,
+                expect: -1,
+            },
+            TestCase {
+                nums: vec![2, -1, 2],
+                k: 3,
+                expect: 3,
+            },
+            TestCase{
+                nums: vec![84,-37,32,40,95],
+                k: 167,
+                expect: 3
+            },
+            TestCase{
+                nums: vec![45,95,97,-34,-42],
+                k: 21,
+                expect: 1
+            },
+            TestCase{
+                nums: vec![-34,37,51,3,-12,-50,51,100,-47,99,34,14,-13,89,31,-14,-44,23,-38,6],
+                k: 151,
+                expect: 2
+            },
+            TestCase{
+                nums: vec![-100000;100000],
+                k: 1000000000,
+                expect: -1
+            }
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, TestCase { nums, k, expect })| {
+            let ans = shortest_subarray(nums, k);
+            assert_eq!(ans, expect, "case {} failed", idx);
+        })
+    }
 
     #[test]
     fn test_shifting_letters() {
