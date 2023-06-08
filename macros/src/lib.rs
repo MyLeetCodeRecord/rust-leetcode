@@ -1,7 +1,7 @@
 //! 树/链表题, 除了题目自身难受, 构建测试用例也是难事
 //! `Rc` `RefCell` `Box` 反复写, 人都麻了.
 //!
-//! 所以正这个 proc_macro, 自己定义一套 dsl, 至少方便一下测试用例.
+//! 所以整这个 proc_macro, 自己定义一套 dsl, 至少方便一下测试用例.
 //!
 use proc_macro::TokenStream;
 

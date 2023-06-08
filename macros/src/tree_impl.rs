@@ -66,6 +66,7 @@ impl From<TokenStream> for TreeNode {
     fn from(stream: TokenStream) -> Self {
         let mut tree_node = TreeNode::default();
         let mut which_node = WhichNode::S;
+        let mut negtive = false;
 
         for tree in stream.into_iter() {
             match tree {
@@ -88,10 +89,19 @@ impl From<TokenStream> for TreeNode {
                         which_node = WhichNode::R;
                     }
                 }
-                TokenTree::Punct(_punct) => {}
+                TokenTree::Punct(_punct) => {
+                    if _punct.to_string().eq("-") {
+                        negtive = true;
+                    }
+                }
                 TokenTree::Literal(literal) => {
                     let lit = literal.to_string().parse().unwrap();
-                    tree_node.val = lit;
+                    if negtive {
+                        tree_node.val = 0-lit;
+                        negtive = false;
+                    } else {
+                        tree_node.val = lit;
+                    }
                 }
             }
         }
@@ -104,7 +114,7 @@ mod test {
     use super::*;
     #[test]
     fn test_x() {
-        let ts = TokenStream::from_str("{1, right:{2, left: {3}}}").unwrap();
+        let ts = TokenStream::from_str("{1, right:{2, left: {-3}}}").unwrap();
         let tree = tree(ts);
         dbg!(tree);
     }

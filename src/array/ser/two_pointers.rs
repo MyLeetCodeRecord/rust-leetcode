@@ -300,9 +300,8 @@ pub fn advantage_count(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
 
 /// [541. 反转字符串 II](https://leetcode-cn.com/problems/reverse-string-ii/)
 pub fn reverse_str(s: String, k: i32) -> String {
-    let mut s = s;
     let k = k as usize;
-    let bytes = unsafe { s.as_mut_vec() };
+    let mut bytes = s.into_bytes();
 
     let mut start = 0;
     while start < bytes.len() {
@@ -319,13 +318,12 @@ pub fn reverse_str(s: String, k: i32) -> String {
         }
         start += 2 * k;
     }
-    s
+    String::from_utf8(bytes).unwrap()
 }
 
 /// [剑指 Offer 05. 替换空格](https://leetcode-cn.com/problems/ti-huan-kong-ge-lcof/)
 pub fn replace_space(s: String) -> String {
-    let mut s = s;
-    let bytes = unsafe { s.as_mut_vec() };
+    let mut bytes = s.into_bytes();
     let mut old = bytes.len();
 
     let space_cnt = bytes.iter().filter(|b| b' '.eq(b)).count();
@@ -348,7 +346,7 @@ pub fn replace_space(s: String) -> String {
         }
         old -= 1;
     }
-    s
+    String::from_utf8(bytes).unwrap()
 }
 
 /// [186. 翻转字符串里的单词 II](https://leetcode-cn.com/problems/reverse-words-in-a-string-ii/)
@@ -394,8 +392,7 @@ pub fn reverse_words(s: &mut Vec<char>) {
 /// 思路2: 双指针, 原地操作.
 /// 只是在T186的基础上, 加了删除空格
 pub fn reverse_words_1(s: String) -> String {
-    let mut s = s;
-    let bytes = unsafe { s.as_mut_vec() };
+    let mut bytes = s.into_bytes();
     bytes.reverse();
 
     // clean space
@@ -440,7 +437,7 @@ pub fn reverse_words_1(s: String) -> String {
             y -= 1;
         }
     }
-    s
+    String::from_utf8(bytes).unwrap()
 }
 
 /// [88. 合并两个有序数组](https://leetcode.cn/problems/merge-sorted-array/)
@@ -613,8 +610,7 @@ pub fn duplicate_zeros(arr: &mut Vec<i32>) {
 /// ```
 ///
 pub fn push_dominoes(dominoes: String) -> String {
-    let mut dominoes = dominoes;
-    let s = unsafe { dominoes.as_bytes_mut() };
+    let mut s = dominoes.into_bytes();
 
     let (mut cursor, mut last) = (0, None::<u8>);
 
@@ -657,7 +653,7 @@ pub fn push_dominoes(dominoes: String) -> String {
         }
         cursor = tmp;
     }
-    dominoes
+    String::from_utf8(s).unwrap()
 }
 
 /// [844. 比较含退格的字符串](https://leetcode.cn/problems/backspace-string-compare/)

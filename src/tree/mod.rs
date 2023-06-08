@@ -1,5 +1,5 @@
 pub mod traversal;
-
+pub mod dfs;
 
 #[cfg(test)]
 mod tests {

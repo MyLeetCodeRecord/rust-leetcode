@@ -1,5 +1,16 @@
-//! * [827. 最大人工岛](largest_island)
-//! * [1636. 按照频率将数组升序排序](frequency_sort)
+//! 暂时不知道怎么归类的数组题目
+//! 
+//! ## 题目
+//! * 简单
+//!     * [1636. 按照频率将数组升序排序](frequency_sort)
+//!     * [1672. 最富有客户的资产总量](maximum_wealth)
+//!     * [2032. 至少在两个数组中出现的值](two_out_of_three)
+//!     * [1779. 找到最近的有相同 X 或 Y 坐标的点](nearest_valid_point)
+//! * 中等
+//! * 困难
+//!     * [827. 最大人工岛](largest_island)
+//!     * [37. 解数独](solve_sudoku)
+//! 
 
 /// [827. 最大人工岛](https://leetcode.cn/problems/making-a-large-island/)
 pub fn largest_island(grid: Vec<Vec<i32>>) -> i32 {
@@ -190,10 +201,55 @@ pub fn nearest_valid_point(x: i32, y: i32, points: Vec<Vec<i32>>) -> i32 {
         .0 as i32
 }
 
+/// [37. 解数独](https://leetcode.cn/problems/sudoku-solver/)
+pub fn solve_sudoku(_board: &mut Vec<Vec<char>>) {
+   todo!() 
+}
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    #[ignore]
+    fn test_solve_sudoku() {
+        struct Testcase {
+            board: Vec<Vec<char>>,
+            expect: Vec<Vec<char>>,
+        }
+
+        vec![Testcase {
+            board: vec2![
+                ['5', '3', '.', '.', '7', '.', '.', '.', '.'],
+                ['6', '.', '.', '1', '9', '5', '.', '.', '.'],
+                ['.', '9', '8', '.', '.', '.', '.', '6', '.'],
+                ['8', '.', '.', '.', '6', '.', '.', '.', '3'],
+                ['4', '.', '.', '8', '.', '3', '.', '.', '1'],
+                ['7', '.', '.', '.', '2', '.', '.', '.', '6'],
+                ['.', '6', '.', '.', '.', '.', '2', '8', '.'],
+                ['.', '.', '.', '4', '1', '9', '.', '.', '5'],
+                ['.', '.', '.', '.', '8', '.', '.', '7', '9']
+            ],
+            expect: vec2![
+                ['5', '3', '4', '6', '7', '8', '9', '1', '2'],
+                ['6', '7', '2', '1', '9', '5', '3', '4', '8'],
+                ['1', '9', '8', '3', '4', '2', '5', '6', '7'],
+                ['8', '5', '9', '7', '6', '1', '4', '2', '3'],
+                ['4', '2', '6', '8', '5', '3', '7', '9', '1'],
+                ['7', '1', '3', '9', '2', '4', '8', '5', '6'],
+                ['9', '6', '1', '5', '3', '7', '2', '8', '4'],
+                ['2', '8', '7', '4', '1', '9', '6', '3', '5'],
+                ['3', '4', '5', '2', '8', '6', '1', '7', '9']
+            ],
+        }]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let mut board = testcase.board.clone();
+            solve_sudoku(&mut board);
+            assert_eq!(board, testcase.expect, "test failed at {}", idx);
+        });
+    }
 
     #[test]
     fn test_two_out_of_three() {

@@ -1,19 +1,23 @@
 //! 有序集合
 //! 主要是 [`BTreeMap`](https://doc.rust-lang.org/std/collections/struct.BTreeMap.html) 和 [`BTreeSet`](https://doc.rust-lang.org/std/collections/struct.BTreeSet.html)的使用
 //!
-//!
+//! ## 题目
+//! * 简单
+//! * 中等
+//!     * [855. 考场就座](quiz_855)
+//! * 困难
 
+/// [855. 考场就座](https://leetcode-cn.com/problems/exam-room/)
 pub mod quiz_855 {
     use std::collections::BTreeSet;
+
+    /// ExamRoom
     pub struct ExamRoom {
         n: i32,
         seats: BTreeSet<i32>,
     }
 
-    /**
-     * `&self` means the method takes an immutable reference.
-     * If you need a mutable reference, change it to `&mut self` instead.
-     */
+    #[allow(missing_docs)]
     impl ExamRoom {
         pub fn new(n: i32) -> Self {
             Self {
@@ -62,38 +66,38 @@ pub mod quiz_855 {
             self.seats.remove(&p);
         }
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+    #[cfg(test)]
+    mod tests {
+        use super::*;
 
-    #[test]
-    fn test_quiz_855() {
-        enum OP {
-            Seat(i32),
-            Leave(i32),
+        #[test]
+        fn test_quiz_855() {
+            enum OP {
+                Seat(i32),
+                Leave(i32),
+            }
+
+            let mut room = ExamRoom::new(10);
+
+            vec![
+                OP::Seat(0),
+                OP::Seat(9),
+                OP::Seat(4),
+                OP::Seat(2),
+                OP::Leave(4),
+                OP::Seat(5),
+            ]
+            .into_iter()
+            .enumerate()
+            .for_each(|(idx, op)| match op {
+                OP::Seat(expect) => {
+                    assert_eq!(expect, room.seat(), "case {} failed", idx);
+                }
+                OP::Leave(seat) => {
+                    room.leave(seat);
+                }
+            });
         }
-
-        let mut room = quiz_855::ExamRoom::new(10);
-
-        vec![
-            OP::Seat(0),
-            OP::Seat(9),
-            OP::Seat(4),
-            OP::Seat(2),
-            OP::Leave(4),
-            OP::Seat(5),
-        ]
-        .into_iter()
-        .enumerate()
-        .for_each(|(idx, op)| match op {
-            OP::Seat(expect) => {
-                assert_eq!(expect, room.seat(), "case {} failed", idx);
-            }
-            OP::Leave(seat) => {
-                room.leave(seat);
-            }
-        });
     }
 }

@@ -3,6 +3,7 @@
 //! ## 题目
 //! * 简单
 //!     * [剑指 Offer 58 - II. 左旋转字符串](reverse_left_words)
+//!    * [832. 翻转图像](flip_and_invert_image)
 //! * 中等
 //!     * [48. 旋转图像](rotate)
 //!     * [54. 螺旋矩阵](spiral_order)
@@ -16,10 +17,9 @@
 /// 方法1: slice 有实现旋转方法 [core::slice::rotate::ptr_rotate] 直接调用即可
 /// ```
 /// pub fn reverse_left_words(s: String, n: i32) -> String {
-///     let mut s = s;
-///     let x = unsafe { s.as_bytes_mut() };
+///     let mut x = s.into_bytes();
 ///     x.rotate_left(n as usize);
-///     s
+///     String::from_utf8(x).unwrap()
 /// }
 /// ```
 /// 方法2:
@@ -34,18 +34,17 @@ pub fn reverse_left_words(s: String, n: i32) -> String {
             right -= 1;
         }
     }
-
-    let mut s = s;
-    let x = unsafe { s.as_bytes_mut() };
+    let mut x = s.into_bytes();
+    let len = x.len();
 
     // 前n个
-    swap_range(x, 0, n as usize - 1);
+    swap_range(&mut x, 0, n as usize - 1);
     // n个之后的
-    swap_range(x, n as usize, x.len() - 1);
+    swap_range(&mut x, n as usize, len - 1);
     // 整体
-    swap_range(x, 0, x.len() - 1);
+    swap_range(&mut x, 0, len - 1);
 
-    s
+    String::from_utf8(x).unwrap()
 }
 
 /// [48. 旋转图像](https://leetcode-cn.com/problems/rotate-image/)

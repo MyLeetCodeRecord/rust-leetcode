@@ -1,4 +1,4 @@
-.PHONY: clean coverage
+.PHONY: clean test coverage lint
 
 clean:
 	@cargo clean

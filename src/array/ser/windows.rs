@@ -11,6 +11,7 @@
 //!     * [944. 删列造序](min_deletion_size)
 //!     * [961. 在长度 2N 的数组中找出重复 N 次的元素](repeated_n_times)
 //!     * [1200. 最小绝对差](minimum_abs_difference)
+//!     * [896. 单调数列](is_monotonic)
 //! * 中等
 //!     * [2024. 考试的最大困扰度](max_consecutive_answers)
 //!     * [1004. 最大连续1的个数 III](longest_ones)
@@ -643,7 +644,7 @@ pub fn longest_mountain(arr: Vec<i32>) -> i32 {
 ///     - 和 [845. 数组中的最长山脉](longest_mountain) 相似,
 ///     - 不过不同于前题, 题目保证只有一个山顶, 因此可以在发现时, 直接返回, 但整体时间复杂度仍为O(n)
 /// - 解法 2&3: [二分](crate::array::ser::binary_search::peak_index_in_mountain_array)
-/// 
+///
 pub fn peak_index_in_mountain_array(arr: Vec<i32>) -> i32 {
     for (idx, win) in arr.windows(3).enumerate() {
         if let [a, b, c] = &win {
@@ -655,9 +656,78 @@ pub fn peak_index_in_mountain_array(arr: Vec<i32>) -> i32 {
     unreachable!()
 }
 
+/// [896. 单调数列](https://leetcode.cn/problems/monotonic-array/)
+///
+/// 思路1:
+/// 从现象上看, 必须出现一个 "波峰" 或者 "波谷", 才会破坏单调性
+/// 即, 相邻三个元素 abc, 如果 a < b > c 或者 a > b < c, 则不是单调数列
+/// 因此, 只需要判断是否出现了这种情况即可
+///
+/// 思路2的漏洞, 单调性发生变化, 比如 11,11,9,4,3,3,3,1,-1,-1,3,3,3,5,5,5
+/// 有很多相等元素, 在窗口内符合, 但是单调性发生了变化
+/// 形状类似 \___/
+///
+/// 如果使用变量存储单调性, 则效果不如思路1
+///
+/// 思路2:
+/// 可以利用排除法, 比如出现了 a < b, 则一定不是单调递减
+/// 出现了 a > b, 则一定不是单调递增
+/// 最后看是否有一种情况出现即可
+pub fn is_monotonic(nums: Vec<i32>) -> bool {
+    let mut inc = true;
+    let mut dec = true;
+    for win in nums.windows(2) {
+        if let [a, b] = &win {
+            if a > b {
+                inc = false;
+            }
+            if a < b {
+                dec = false;
+            }
+        }
+    }
+    inc || dec
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_is_monotonic() {
+        struct TestCase {
+            nums: Vec<i32>,
+            expect: bool,
+        }
+
+        vec![
+            TestCase {
+                nums: vec![1, 2, 2, 3],
+                expect: true,
+            },
+            TestCase {
+                nums: vec![6, 5, 4, 4],
+                expect: true,
+            },
+            TestCase {
+                nums: vec![1, 3, 2],
+                expect: false,
+            },
+            TestCase {
+                nums: vec![1, 2, 2, 2],
+                expect: true,
+            },
+            TestCase {
+                nums: vec![11, 11, 9, 4, 3, 3, 3, 1, -1, -1, 3, 3, 3, 5, 5, 5],
+                expect: false,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, case)| {
+            assert_eq!(is_monotonic(case.nums), case.expect, "{} failed", idx);
+        });
+    }
 
     #[test]
     fn test_peak_index_in_mountain_array() {
