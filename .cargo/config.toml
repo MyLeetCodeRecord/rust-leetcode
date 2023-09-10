@@ -1,4 +1,5 @@
 [build]
 rustflags = ["-Cinstrument-coverage",]
+rustdocflags = [ "--html-in-header", ".cargo/docs-header.html" ]
 [env]
 LLVM_PROFILE_FILE = "target/coverage/grcov.profraw"

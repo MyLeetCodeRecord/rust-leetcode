@@ -1,17 +1,19 @@
 //! 拓扑排序
-//! 
+//!
 //! 特点:
 //! 1. 有向无环图(DAG)
 //! 2. 有入度为0的节点
-//! 
+//!
 //! ## 题目
 //! * 简单
 //! * 中等
 //!     * [851. 喧闹和富有](loud_and_rich)
 //!     * [207. 课程表](can_finish)
+//!     * [210. Course Schedule II](find_order)
 //! * 困难
 //!     * [269. 火星词典](alien_order)
-//! 
+//!
+
 
 /// [269. 火星词典](https://leetcode.cn/problems/alien-dictionary/)
 ///
@@ -309,10 +311,103 @@ pub fn can_finish(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> bool {
     }
     count == 0
 }
+
+/// [210. Course Schedule II](https://leetcode.cn/problems/course-schedule-ii/)
+pub fn find_order(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> Vec<i32> {
+    use std::collections::VecDeque;
+    let count = num_courses as usize;
+
+    let mut in_deg = vec![0; count];
+    let mut graph = vec![vec![]; count];
+    for pre in prerequisites {
+        let (want, require) = (pre[0], pre[1]);
+        in_deg[want as usize] += 1;
+        graph[require as usize].push(want as usize);
+    }
+
+    let mut queue = VecDeque::new();
+    for (idx, &iin) in in_deg.iter().enumerate() {
+        if iin == 0 {
+            queue.push_back(idx);
+        }
+    }
+
+    let mut result = vec![];
+    while !queue.is_empty() {
+        let require = queue.pop_front().unwrap();
+        result.push(require as i32);
+        for &want in graph.get(require).unwrap() {
+            in_deg[want] -= 1;
+            if in_deg[want] == 0 {
+                queue.push_back(want);
+            }
+        }
+    }
+    if result.len() == count{
+        return result;
+    }
+    vec![]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_find_order() {
+        struct TestCase {
+            num_courses: i32,
+            prerequisites: Vec<Vec<i32>>,
+            expect: Vec<Vec<i32>>,
+        }
+
+        vec![
+            TestCase {
+                num_courses: 2,
+                prerequisites: vec2![[1, 0]],
+                expect: vec2![[0, 1]],
+            },
+            TestCase {
+                num_courses: 4,
+                prerequisites: vec2![[1, 0], [2, 0], [3, 1], [3, 2]],
+                expect: vec2![[0, 2, 1, 3], [0, 1, 2, 3]],
+            },
+            TestCase {
+                num_courses: 1,
+                prerequisites: vec![],
+                expect: vec2![[0]],
+            },
+            TestCase{
+                num_courses: 3,
+                prerequisites: vec2![[1,0],[1,2],[0,1]],
+                expect: vec![],
+            }
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(
+            |(
+                idx,
+                TestCase {
+                    num_courses,
+                    prerequisites,
+                    expect,
+                },
+            )| {
+                let actual = find_order(num_courses, prerequisites);
+                if expect.is_empty() {
+                    assert!(actual.is_empty(), "case {} failed", idx);
+                    return;
+                }
+                assert!(
+                    expect.into_iter().any(|x| x == actual),
+                    "case {} failed",
+                    idx
+                );
+            },
+        )
+    }
 
     #[test]
     fn test_can_finish() {
