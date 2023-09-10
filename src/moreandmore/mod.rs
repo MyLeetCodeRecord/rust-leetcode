@@ -125,7 +125,7 @@ pub fn di_string_match(s: String) -> Vec<i32> {
 
 /// [55. 跳跃游戏](https://leetcode.cn/problems/jump-game/)
 ///
-/// 从 nums[i] 出发最远到达的距离：
+/// 从 `nums[i]` 出发最远到达的距离：
 /// `x`在`[nums[i], nums[i]+i]`内的 `nums[x]+x`的最大值
 ///
 /// 这样就扩展了最远距离， 但不是下一轮的起点
@@ -229,7 +229,7 @@ pub fn erase_overlap_intervals(intervals: Vec<Vec<i32>>) -> i32 {
 ///
 /// 序列增长的越慢， 最终的长度可能越长
 ///
-///  d[i], 表示长度为 i 的最长上升子序列的末尾元素的最小值
+///  `d[i]`, 表示长度为 `i` 的最长上升子序列的末尾元素的最小值
 ///
 pub fn length_of_lis(nums: Vec<i32>) -> i32 {
     if nums.is_empty() {

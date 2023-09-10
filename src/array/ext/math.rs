@@ -220,6 +220,7 @@ pub fn number_of_steps(num: i32) -> i32 {
 /// ```
 /// 根据[等差数列的公式](https://en.wikipedia.org/wiki/Arithmetic_progression), 可以得到以下推导,  
 /// 假定起始项为$a$, 差$d$为1 项数$k$, 和为$n$, 则
+/// 
 /// $$
 /// n = \frac{k \times (a+a+(k-1))}{2}
 /// $$
