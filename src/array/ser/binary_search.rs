@@ -113,13 +113,13 @@
 //!
 //! 前面 对`nums[mid]`和`target`判大小, 其实用数学描述即为
 //! 
-//! $$
+//! ```math
 //! f(i) = nums_{i} >= target
 //!      = \begin{cases}
 //!            False, & i < target_{first} ,\\
 //!            True,  & i \ge target_{first}
 //!        \end{cases}
-//! $$
+//! ```
 //!
 //! 即在左区间为`0`, 右区间为`1`, 这样就构成了一个 **二分**.
 //!

@@ -1,7 +1,6 @@
 //! 树形DP
 //!
-//! * [834. 树中距离之和](sum_of_distances_in_tree)
-//! * [847. 访问所有节点的最短路径](shortest_path_length)
+//! * [834. 树中距离之和](sum_of_distances_in_tree) 
 
 /// [834. 树中距离之和](https://leetcode.cn/problems/sum-of-distances-in-tree/)
 /// 标签: 树形DP

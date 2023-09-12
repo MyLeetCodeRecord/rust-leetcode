@@ -478,9 +478,85 @@ pub fn matrix_score(grid: Vec<Vec<i32>>) -> i32 {
     ans
 }
 
+/// [630. Course Schedule III](https://leetcode.cn/problems/course-schedule-iii/)
+/// 
+/// 思路:
+/// 1. 先学 deadline 早的, 总是好的
+/// 2. 在 deadline 相同时, 学时越短越好
+pub fn schedule_course(mut courses: Vec<Vec<i32>>) -> i32 {
+    use std::cmp::Reverse;
+    use std::collections::BinaryHeap;
+    courses.sort_unstable_by(|a, b|{
+        match a[1].cmp(&b[1]){
+            std::cmp::Ordering::Equal => a[0].cmp(&b[0]),
+            other => other
+        }
+    });
+
+    let mut heap = BinaryHeap::new();
+    let mut time = 0;
+    for course in courses {
+        let (duration, deadline) = (course[0], course[1]);
+        
+        if time + duration <= deadline{
+            time = time + duration;
+            heap.push(Reverse(duration));
+            continue;
+        }
+
+        let Reverse(last_duration) = heap.peek().unwrap_or(&Reverse(0));
+        if last_duration > &duration{
+            // 如果最后一个课程耗时更长, 换个更短的
+            time = time - last_duration + duration;
+            heap.pop();
+            heap.push(Reverse(duration));
+        }
+    }
+
+    heap.len() as i32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::vec2;
+
+    #[test]
+    fn test_schedule_course() {
+        struct TestCase {
+            courses: Vec<Vec<i32>>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                courses: vec2![[100, 200], [200, 1300], [1000, 1250], [2000, 3200]],
+                expect: 3,
+            },
+            TestCase {
+                courses: vec2![[1, 2]],
+                expect: 1,
+            },
+            TestCase {
+                courses: vec2![[3, 2], [4, 3]],
+                expect: 0,
+            },
+            TestCase{
+                courses: vec2![[5,5],[4,6],[2,6]],
+                expect: 2,
+            },
+            TestCase{
+                courses: vec2![[7,17],[3,12],[10,20],[9,10],[5,20],[10,19],[4,18]],
+                expect: 4
+            }
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, TestCase { courses, expect })| {
+            let actual = schedule_course(courses);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_matrix_score() {

@@ -77,7 +77,7 @@ pub fn insert(intervals: Vec<Vec<i32>>, new_interval: Vec<i32>) -> Vec<Vec<i32>>
 
 /// [758. 字符串中的加粗单词](https://leetcode.cn/problems/bold-words-in-string/)
 ///
-/// 相对[616. 给字符串添加加粗标签](add_bold_tag) 只是将字符范围缩小到了仅英文字母
+/// 相对[616. 给字符串添加加粗标签](crate::array::ext::trie::add_bold_tag) 只是将字符范围缩小到了仅英文字母
 /// 由于前面使用的char, 因此可以覆盖
 ///
 /// 除了字典树, 还可以模拟

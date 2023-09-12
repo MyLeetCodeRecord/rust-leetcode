@@ -1,3 +1,11 @@
+//! 不好归类的
+//! 
+//! 题目:
+//! * 简单
+//! * 中等
+//!     * [856. 括号的分数](score_of_parentheses)
+//! * 困难
+
 /// [856. 括号的分数](https://leetcode.cn/problems/score-of-parentheses/)
 pub fn score_of_parentheses(s: String) -> i32 {
     let mut score = vec![0];

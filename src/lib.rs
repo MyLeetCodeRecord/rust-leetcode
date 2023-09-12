@@ -36,6 +36,7 @@ pub mod tree;
 pub mod list;
 pub mod graph_search;
 
+/// 生成二维数组
 #[macro_export]
 macro_rules! vec2 {
     () => (
