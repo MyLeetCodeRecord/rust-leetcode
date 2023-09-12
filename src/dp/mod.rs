@@ -11,13 +11,6 @@
 //!
 //! 这里面有一些是系列的题目, 放到了[ser]中, 其他在 [no_class] 中
 //!
-//! ## 题目
-//! * 简单
-//! * 中等
-//!     * [926. 将字符串翻转到单调递增](min_flips_mono_incr)
-//! * 困难
-//!     * [473. 火柴拼正方形](makesquare)
-//!
 
 pub mod ser;
 pub mod no_class;

@@ -14,7 +14,7 @@
 
 /// [303. 区域和检索 - 数组不可变](https://leetcode-cn.com/problems/range-sum-query-immutable/)
 #[allow(dead_code)]
-struct NumArray {
+pub struct NumArray {
     pre: Vec<i32>,
 }
 
@@ -48,7 +48,7 @@ impl NumArray {
 
 /// [304. 二维区域和检索 - 矩阵不可变](https://leetcode-cn.com/problems/range-sum-query-2d-immutable/)
 #[allow(dead_code)]
-struct NumMatrix {
+pub struct NumMatrix {
     pre: Vec<Vec<i32>>,
 }
 

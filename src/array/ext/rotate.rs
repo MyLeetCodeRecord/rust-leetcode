@@ -14,7 +14,8 @@
 
 /// [剑指 Offer 58 - II. 左旋转字符串](https://leetcode-cn.com/problems/zuo-xuan-zhuan-zi-fu-chuan-lcof/)
 ///
-/// 方法1: slice 有实现旋转方法 [core::slice::rotate::ptr_rotate] 直接调用即可
+/// 方法1: slice 有实现旋转方法 [core::slice::rotate::ptr_rotate](https://stdrs.dev/nightly/x86_64-unknown-linux-gnu/core/slice/rotate/fn.ptr_rotate.html) 直接调用即可
+/// 不过目前(2023-09-12)还是nightly
 /// ```
 /// pub fn reverse_left_words(s: String, n: i32) -> String {
 ///     let mut x = s.into_bytes();

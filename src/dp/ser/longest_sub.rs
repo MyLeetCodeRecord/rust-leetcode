@@ -6,7 +6,7 @@
 /// [300. 最长递增子序列](https://leetcode.cn/problems/longest-increasing-subsequence/)
 /// dp解法的复杂度是 `O(n^2)` 更优方法见 [贪心解法](crate::moreandmore::length_of_lis)
 ///
-/// 以 nums[i] 结尾， 如果前一个是 nums[j], 则 `f{i} = max{f(i), f(j)+1}`
+/// 以 `nums[i]` 结尾， 如果前一个是 `nums[j]`, 则 `f{i} = max{f(i), f(j)+1}`
 ///
 pub fn length_of_lis(nums: Vec<i32>) -> i32 {
     let mut dp = vec![1; nums.len()];

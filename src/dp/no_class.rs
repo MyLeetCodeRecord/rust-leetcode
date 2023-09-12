@@ -95,7 +95,7 @@ pub fn min_cost(costs: Vec<Vec<i32>>) -> i32 {
 ///
 /// 记 `dp[i-1] = (x, y)` 分别为 第i-1为0, 为1需要的变化次数
 ///
-/// $$
+/// ```math
 /// dp[i].x = \left \{
 /// \begin{array}{ll}
 ///    x + 1 & s[i] == 1 \\
@@ -109,9 +109,7 @@ pub fn min_cost(costs: Vec<Vec<i32>>) -> i32 {
 ///     min(dp[i].x + dp[i].y)     & s[i] \neq 0
 /// \end{array}
 /// \right.
-///
-/// $$
-///
+/// ```
 /// 最终 `min(x, y)`
 pub fn min_flips_mono_incr(s: String) -> i32 {
     let mut dp = vec![(0, 0); s.len()];
@@ -300,14 +298,14 @@ pub fn max_dist_to_closest(seats: Vec<i32>) -> i32 {
 /// 2. (x, root, y) 和 (y, root, x) 是两颗树
 /// 3. 递推关系:
 ///
-/// $$
+/// ```math
 /// dp[i] = \left \{
 /// \begin{array}{ll}
 ///     dp[i] + dp[x] * dp[y] * 2  & dp[x] \neq dp[y] \\
 ///     dp[i] + dp[x] * dp[y]  & dp[x] == dp[y] \\
 /// \end{array}
 /// \right.
-/// $$
+/// ```
 ///
 /// 因为是组合数, 因此是乘积关系
 pub fn num_factored_binary_trees(mut arr: Vec<i32>) -> i32 {

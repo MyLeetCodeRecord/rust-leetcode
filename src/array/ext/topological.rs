@@ -10,10 +10,10 @@
 //!     * [851. 喧闹和富有](loud_and_rich)
 //!     * [207. 课程表](can_finish)
 //!     * [210. Course Schedule II](find_order)
+//!     * [1462. Course Schedule IV](check_if_prerequisite)
 //! * 困难
 //!     * [269. 火星词典](alien_order)
 //!
-
 
 /// [269. 火星词典](https://leetcode.cn/problems/alien-dictionary/)
 ///
@@ -343,16 +343,109 @@ pub fn find_order(num_courses: i32, prerequisites: Vec<Vec<i32>>) -> Vec<i32> {
             }
         }
     }
-    if result.len() == count{
+    if result.len() == count {
         return result;
     }
     vec![]
+}
+
+/// [1462. Course Schedule IV](https://leetcode.cn/problems/course-schedule-iv/description/)
+pub fn check_if_prerequisite(
+    num_courses: i32,
+    prerequisites: Vec<Vec<i32>>,
+    queries: Vec<Vec<i32>>,
+) -> Vec<bool> {
+    use std::collections::VecDeque;
+
+    let mut graph = vec![vec![]; num_courses as usize];
+    let mut in_degrees = vec![0; num_courses as usize];
+    for pre in prerequisites {
+        let (require, want) = (pre[0], pre[1]);
+        in_degrees[want as usize] += 1;
+        graph[require as usize].push(want as usize);
+    }
+
+    let mut queue = VecDeque::new();
+    for (cls, &in_degree) in in_degrees.iter().enumerate() {
+        if in_degree == 0 {
+            queue.push_back(cls);
+        }
+    }
+
+    let mut query_map = vec![vec![0; num_courses as usize]; num_courses as usize];
+    while !queue.is_empty() {
+        let require = queue.pop_front().unwrap();
+        for &want in graph.get(require).unwrap() {
+            // [x][y] == 1, 表示 x 是 y 的前置
+            query_map[require][want] = 1;
+            for col in 0..query_map.len() {
+                // 将require的前置, 也加入到want的前置中
+                query_map[col][want] = query_map[col][want] | query_map[col][require];
+            }
+
+            in_degrees[want] -= 1;
+            if in_degrees[want] == 0 {
+                queue.push_back(want);
+            }
+        }
+    }
+    queries
+        .into_iter()
+        .map(|q| query_map[q[0] as usize][q[1] as usize] == 1)
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_check_if_prerequisite() {
+        struct TestCase {
+            num_courses: i32,
+            prerequisites: Vec<Vec<i32>>,
+            queries: Vec<Vec<i32>>,
+            expect: Vec<bool>,
+        }
+
+        vec![
+            TestCase {
+                num_courses: 2,
+                prerequisites: vec2![[1, 0]],
+                queries: vec2![[0, 1], [1, 0]],
+                expect: vec![false, true],
+            },
+            TestCase {
+                num_courses: 2,
+                prerequisites: vec![],
+                queries: vec2![[1, 0], [0, 1]],
+                expect: vec![false, false],
+            },
+            TestCase {
+                num_courses: 3,
+                prerequisites: vec2![[1, 2], [1, 0], [2, 0]],
+                queries: vec2![[1, 0], [1, 2]],
+                expect: vec![true, true],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(
+            |(
+                idx,
+                TestCase {
+                    num_courses,
+                    prerequisites,
+                    queries,
+                    expect,
+                },
+            )| {
+                let actual = check_if_prerequisite(num_courses, prerequisites, queries);
+                assert_eq!(expect, actual, "case {} failed", idx);
+            },
+        )
+    }
 
     #[test]
     fn test_find_order() {
@@ -378,11 +471,11 @@ mod tests {
                 prerequisites: vec![],
                 expect: vec2![[0]],
             },
-            TestCase{
+            TestCase {
                 num_courses: 3,
-                prerequisites: vec2![[1,0],[1,2],[0,1]],
+                prerequisites: vec2![[1, 0], [1, 2], [0, 1]],
                 expect: vec![],
-            }
+            },
         ]
         .into_iter()
         .enumerate()

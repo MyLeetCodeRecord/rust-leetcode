@@ -9,7 +9,7 @@
 /// [719. 找出第 K 小的数对距离](https://leetcode.cn/problems/find-k-th-smallest-pair-distance/)
 ///
 /// 要求
-/// 1. 数对 (nums[i], nums[j]) 0 <= i < j < nums.length 即不含自身
+/// 1. 数对 `(nums[i], nums[j])` `0 <= i < j < nums.length` 即不含自身
 /// 2. 绝对差值, 因此(a, b) == (b, a) 顺序不关键
 /// 3. 所有数对距离中第 k 小, 相等的绝对差值, 只要不是是同一个数对, 就视为不同的.
 ///

@@ -9,4 +9,4 @@ coverage: test
 lint:
 	@cargo fix --allow-dirty --allow-staged
 doc:
-	@cargo +nightly doc --lib --no-deps --document-private-items
+	@cargo +nightly doc --lib --no-deps --document-private-items --open

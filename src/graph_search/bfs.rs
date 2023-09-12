@@ -1,5 +1,10 @@
 //! BFS
 //!
+//! 题目:
+//! * 简单
+//! * 中等
+//!     * [847. 访问所有节点的最短路径](shortest_path_length)
+//! * 困难
 
 /// [847. 访问所有节点的最短路径](https://leetcode.cn/problems/shortest-path-visiting-all-nodes/)
 ///
