@@ -1,5 +1,5 @@
 //! 暂时不知道怎么归类的数组题目
-//! 
+//!
 //! ## 题目
 //! * 简单
 //!     * [1636. 按照频率将数组升序排序](frequency_sort)
@@ -10,7 +10,7 @@
 //! * 困难
 //!     * [827. 最大人工岛](largest_island)
 //!     * [37. 解数独](solve_sudoku)
-//! 
+//!
 
 /// [827. 最大人工岛](https://leetcode.cn/problems/making-a-large-island/)
 pub fn largest_island(grid: Vec<Vec<i32>>) -> i32 {
@@ -203,15 +203,16 @@ pub fn nearest_valid_point(x: i32, y: i32, points: Vec<Vec<i32>>) -> i32 {
 
 /// [37. 解数独](https://leetcode.cn/problems/sudoku-solver/)
 pub fn solve_sudoku(_board: &mut Vec<Vec<char>>) {
-   todo!() 
+    todo!()
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
 
     #[test]
-    #[ignore]
+    #[ignore = "暂时不知道怎么解"]
     fn test_solve_sudoku() {
         struct Testcase {
             board: Vec<Vec<char>>,
