@@ -35,6 +35,7 @@ pub mod sstr;
 pub mod tree;
 pub mod list;
 pub mod graph_search;
+pub mod simulation;
 
 /// 生成二维数组
 #[macro_export]
