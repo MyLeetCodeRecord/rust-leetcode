@@ -2,6 +2,7 @@
 //!
 //! 题目
 //! * 简单
+//!     * [LCP 50. 宝石补给](give_gem)
 //! * 中等
 //!     * [2596. Check Knight Tour Configuration](check_valid_grid)
 //!     * [1222. Queens That Can Attack the King](queens_attackthe_king)
@@ -104,10 +105,65 @@ pub fn queens_attackthe_king(queens: Vec<Vec<i32>>, king: Vec<i32>) -> Vec<Vec<i
     result
 }
 
+/// [LCP 50. 宝石补给](https://leetcode.cn/problems/WHnhjV)
+pub fn give_gem(mut gem: Vec<i32>, operations: Vec<Vec<i32>>) -> i32 {
+    for op in operations {
+        let (from, to) = (op[0] as usize, op[1] as usize);
+        let how_much = gem[from] / 2;
+        gem[from] = gem[from] - how_much;
+        gem[to] = gem[to] + how_much;
+    }
+    // 可以不用排序, 遍历两次取最大最小值即可
+    // 不能在op的同时计算最大最小, op可能不涉及全部节点
+    gem.sort_unstable();
+    gem.last().copied().unwrap() - gem.first().copied().unwrap()
+}
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_give_gem() {
+        struct TestCase {
+            gem: Vec<i32>,
+            operations: Vec<Vec<i32>>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                gem: vec![3, 1, 2],
+                operations: vec2![[0, 2], [2, 1], [2, 0]],
+                expect: 2,
+            },
+            TestCase {
+                gem: vec![100, 0, 50, 100],
+                operations: vec2![[0, 2], [0, 1], [3, 0], [3, 0]],
+                expect: 75,
+            },
+            TestCase {
+                gem: vec![0, 0, 0, 0],
+                operations: vec2![[1, 2], [3, 1], [1, 2]],
+                expect: 0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(
+            |(
+                idx,
+                TestCase {
+                    gem,
+                    operations,
+                    expect,
+                },
+            )| {
+                let actual = give_gem(gem, operations);
+                assert_eq!(expect, actual, "case {} failed", idx);
+            },
+        )
+    }
 
     #[test]
     fn test_queens_attackthe_king() {
