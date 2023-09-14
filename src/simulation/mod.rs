@@ -1,13 +1,14 @@
 //! 模拟类题目
-//! 
+//!
 //! 题目
 //! * 简单
 //! * 中等
+//!     * [2596. Check Knight Tour Configuration](check_valid_grid)
+//!     * [1222. Queens That Can Attack the King](queens_attackthe_king)
 //! * 困难
-//! 
+//!
 
-
-/// [2596. Check Knight Tour Configuration](https://leetcode.cn/problems/check-knight-tour-configuration/description)
+/// [2596. Check Knight Tour Configuration](https://leetcode.cn/problems/check-knight-tour-configuration/)
 ///
 /// 思路:
 /// 1. 先根据config, 产出一个`(step, x, y)`的数组
@@ -63,11 +64,92 @@ pub fn check_valid_grid(grid: Vec<Vec<i32>>) -> bool {
     true
 }
 
+/// [1222. Queens That Can Attack the King](https://leetcode.cn/problems/queens-that-can-attack-the-king/)
+///
+/// 象棋规则: Queen可以横, 竖, 斜走, 但是不能跨越棋子
+/// 思路:
+/// 1. 从king的位置开始, 向8个方向遍历, 找到第一个queen
+pub fn queens_attackthe_king(queens: Vec<Vec<i32>>, king: Vec<i32>) -> Vec<Vec<i32>> {
+    use std::collections::HashSet;
+    let queens = queens.into_iter().collect::<HashSet<Vec<i32>>>();
+    let mut result = vec![];
+
+    let (x, y) = (king[0], king[1]);
+
+    for dir in [
+        (0, 1),
+        (1, 0),
+        (0, -1),
+        (-1, 0),
+        (1, 1),
+        (-1, -1),
+        (-1, 1),
+        (1, -1),
+    ]
+    .iter()
+    {
+        let (mut x, mut y) = (x, y);
+        loop {
+            x += dir.0;
+            y += dir.1;
+            if x < 0 || y < 0 || x >= 8 || y >= 8 {
+                break;
+            }
+            if queens.contains(&vec![x, y]) {
+                result.push(vec![x, y]);
+                break;
+            }
+        }
+    }
+    result
+}
 
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_queens_attackthe_king() {
+        struct Testcase {
+            queens: Vec<Vec<i32>>,
+            king: Vec<i32>,
+            expect: Vec<Vec<i32>>,
+        }
+
+        vec![
+            Testcase {
+                queens: vec2![[0, 1], [1, 0], [4, 0], [0, 4], [3, 3], [2, 4]],
+                king: vec![0, 0],
+                expect: vec2![[0, 1], [1, 0], [3, 3]],
+            },
+            Testcase {
+                queens: vec2![[0, 0], [1, 1], [2, 2], [3, 4], [3, 5], [4, 4], [4, 5]],
+                king: vec![3, 3],
+                expect: vec2![[2, 2], [3, 4], [4, 4]],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(
+            |(
+                idx,
+                Testcase {
+                    queens,
+                    king,
+                    expect,
+                },
+            )| {
+                use std::collections::HashSet;
+                let actual = queens_attackthe_king(queens, king);
+
+                let actual = actual.into_iter().collect::<HashSet<Vec<i32>>>();
+                let expect = expect.into_iter().collect::<HashSet<Vec<i32>>>();
+
+                assert_eq!(expect, actual, "case {} failed", idx);
+            },
+        )
+    }
 
     #[test]
     fn test_check_valid_grid() {
