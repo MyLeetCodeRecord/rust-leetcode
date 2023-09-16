@@ -118,6 +118,7 @@ pub fn give_gem(mut gem: Vec<i32>, operations: Vec<Vec<i32>>) -> i32 {
     gem.sort_unstable();
     gem.last().copied().unwrap() - gem.first().copied().unwrap()
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
