@@ -340,55 +340,12 @@ pub fn num_factored_binary_trees(mut arr: Vec<i32>) -> i32 {
     result as i32
 }
 
-/// [198. 打家劫舍](https://leetcode.cn/problems/house-robber/description)
-///
-/// 记 `f(k)` 为前 `k` 个的最终结果
-/// 可以得到递推关系: `f(k) = max(f(k-1), H_k + f(k-2)) k >=2`
-/// 对于边界, `f(0) = 0, f(1) = H_0`
-pub fn rob(nums: Vec<i32>) -> i32 {
-    if nums.is_empty() {
-        return 0;
-    }
 
-    let (mut a, mut b) = (0, nums[0]);
-    for k in 1..nums.len() {
-        let (k_2, k_1) = (a, b);
-        a = k_1;
-        b = (nums[k] + k_2).max(k_1);
-    }
-
-    return b;
-}
 
 #[cfg(test)]
 mod test {
     use super::*;
     use crate::vec2;
-
-    #[test]
-    fn test_rob() {
-        struct TestCase {
-            nums: Vec<i32>,
-            expect: i32,
-        }
-
-        vec![
-            TestCase {
-                nums: vec![1, 2, 3, 1],
-                expect: 4,
-            },
-            TestCase {
-                nums: vec![2, 7, 9, 3, 1],
-                expect: 12,
-            },
-        ]
-        .into_iter()
-        .enumerate()
-        .for_each(|(idx, TestCase { nums, expect })| {
-            let actual = rob(nums);
-            assert_eq!(expect, actual, "case {} failed", idx);
-        });
-    }
 
     #[test]
     fn test_num_factored_binary_trees() {
