@@ -3,7 +3,12 @@
 //! * 中等
 //!     * [198. 打家劫舍](rob_1)
 //!     * [213. 打家劫舍 II](rob_2)
+//!     * [337. 打家劫舍 III](rob_3)
 //!
+
+use datastructure::TreeNode;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// [198. 打家劫舍](https://leetcode.cn/problems/house-robber/description)
 ///
@@ -53,9 +58,63 @@ pub fn rob_2(nums: Vec<i32>) -> i32 {
     one.max(two)
 }
 
+/// [337. 打家劫舍 III](https://leetcode.cn/problems/house-robber-iii/)
+///
+/// 和[213. 打家劫舍 II](rob_2)类似, 分类讨论即可
+/// 1. 包含当前root节点的最大值
+///     - 进而递归时, 要求左右子树的不包含当前root节点的最大值
+/// 2. 不包含当前root节点的最大值
+///     - 进而递归时, 要求左右子树的最大值
+///     - 可以包含左右子树的根
+///
+/// 为防止重复计算, 一次返回两种情况的值
+pub fn rob_3(root: Option<Rc<RefCell<TreeNode>>>) -> i32 {
+    fn dfs(root: Option<Rc<RefCell<TreeNode>>>) -> (i32, i32) {
+        if root.is_none() {
+            return (0, 0);
+        }
+        let mut need = root.as_ref().unwrap().borrow().val;
+        let mut needless = 0;
+
+        let (l_need, l_needless) = dfs(root.as_ref().unwrap().borrow().left.clone());
+        let (r_need, r_needless) = dfs(root.as_ref().unwrap().borrow().right.clone());
+
+        need += l_needless + r_needless;
+        needless += l_need.max(l_needless) + r_need.max(r_needless);
+
+        (need, needless)
+    }
+
+    let (need, needless) = dfs(root);
+    need.max(needless)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+    use macros::tree;
+
+    #[test]
+    fn test_rob_3() {
+        struct TestCase {
+            root: Option<Rc<RefCell<TreeNode>>>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase{
+                root: tree!(val:3, left: {val: 2, right: {val: 3}}, right: {val: 3, right: {val: 1}}),
+                expect: 7
+            },
+            TestCase{
+                root: tree!(val: 3, left: {val: 4, left: {val: 1}, right: {val: 3}}, right: {val: 5, right: {val: 1}}),
+                expect: 9
+            },
+        ].into_iter().enumerate().for_each(|(idx, TestCase{root, expect})|{
+            let actual = rob_3(root);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_rob_2() {
