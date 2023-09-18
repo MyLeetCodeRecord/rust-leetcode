@@ -17,6 +17,8 @@
 //!     * [55. 跳跃游戏](can_jump)
 //!     * [646. 最长数对链](find_longest_chain)
 //!     * [300. 最长递增子序列](length_of_lis)
+//! * 困难
+//!     * [630. 课程表 III](schedule_course)
 //!
 
 /// [455. 分发饼干](https://leetcode-cn.com/problems/assign-cookies/)
@@ -482,34 +484,41 @@ pub fn matrix_score(grid: Vec<Vec<i32>>) -> i32 {
 /// 
 /// 思路:
 /// 1. 先学 deadline 早的, 总是好的
-/// 2. 在 deadline 相同时, 学时越短越好
 pub fn schedule_course(mut courses: Vec<Vec<i32>>) -> i32 {
-    use std::cmp::Reverse;
     use std::collections::BinaryHeap;
+
     courses.sort_unstable_by(|a, b|{
-        match a[1].cmp(&b[1]){
-            std::cmp::Ordering::Equal => a[0].cmp(&b[0]),
-            other => other
-        }
+       a[1].cmp(&b[1])
     });
 
+    // 用来存当前选的课程的耗时, 大顶堆
     let mut heap = BinaryHeap::new();
-    let mut time = 0;
+    // 总时间
+    let mut total = 0;
     for course in courses {
         let (duration, deadline) = (course[0], course[1]);
         
-        if time + duration <= deadline{
-            time = time + duration;
-            heap.push(Reverse(duration));
+        if total + duration <= deadline{
+            // 如果能学完, 就学
+            // 更新总时间
+            total = total + duration;
+            heap.push(duration);
             continue;
-        }
-
-        let Reverse(last_duration) = heap.peek().unwrap_or(&Reverse(0));
-        if last_duration > &duration{
-            // 如果最后一个课程耗时更长, 换个更短的
-            time = time - last_duration + duration;
-            heap.pop();
-            heap.push(Reverse(duration));
+        } else {
+            // 学不完, 看下最耗时那个, 能不能换掉
+            if let Some(max_duration) = heap.peek(){
+                if max_duration > &duration{
+                    // 如果前面有个耗时更长的, 换掉
+                    // 万一换掉也不够deadline呢? 
+                    // 因为前面已经排好序了, 耗时更长的, deadline也更早
+                    // max_duration > duration, 
+                    // 所以 total - max_duration + duration < total <= max_deadline <= deadline
+                    // 所以可以完成
+                    total = total - max_duration + duration;
+                    heap.pop();
+                    heap.push(duration);
+                }
+            }
         }
     }
 
