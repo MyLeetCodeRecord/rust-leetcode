@@ -4,6 +4,7 @@
 //!     * [198. 打家劫舍](rob_1)
 //!     * [213. 打家劫舍 II](rob_2)
 //!     * [337. 打家劫舍 III](rob_3)
+//!     * [2560. 打家劫舍 IV](crate::array::ser::binary_search::min_capability)
 //!
 
 use datastructure::TreeNode;
