@@ -112,7 +112,7 @@
 //! ## 扩展 - 单调函数
 //!
 //! 前面 对`nums[mid]`和`target`判大小, 其实用数学描述即为
-//! 
+//!
 //! ```math
 //! f(i) = nums_{i} >= target
 //!      = \begin{cases}
@@ -137,6 +137,7 @@
 //!     * [2226. 每个小孩最多能分到多少糖果](maximum_candies)
 //!     * [436. 寻找右区间](find_right_interval)
 //!     * [33. 搜索旋转排序数组](search_2)
+//!     * [2560. 打家劫舍 IV](min_capability)
 //! * 困难
 //!     * [668. 乘法表中第k小的数](find_kth_number)
 //!
@@ -589,9 +590,70 @@ where
     left.checked_sub(1).unwrap_or(0)
 }
 
+/// [2560. 打家劫舍 IV](https://leetcode.cn/problems/house-robber-iv/description/)
+/// 
+/// 即`f(y)`为最大偷取金额为`y`的情况下, 可以偷取的房屋最大数量
+/// 显然`f(y)`是非递减函数(y越大, 可以选择的节点越多?)
+/// 
+/// 由于`f(y)`是非递减函数, 因此可以使用二分查找
+pub fn min_capability(nums: Vec<i32>, k: i32) -> i32 {
+    let (mut min, mut max) = (nums.iter().min().copied().unwrap(), nums.iter().max().copied().unwrap());
+    while min <= max{
+        let mid = min + (max - min) / 2;
+
+        let mut count = 0;
+        let mut visited = false;
+        for &num in nums.iter() {
+            if num <= mid && !visited{
+                count += 1;
+                visited = true;
+            } else {
+                visited = false;
+            }
+        }
+
+        // 非递减, 找最小
+        // 因此等号在这里
+        if count >= k{
+            max = mid - 1;
+        } else {
+            min = mid + 1;
+        }
+    }
+    return min;
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_min_capability() {
+        struct TestCase {
+            nums: Vec<i32>,
+            k: i32,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                nums: vec![2, 3, 5, 9],
+                k: 2,
+                expect: 5,
+            },
+            TestCase {
+                nums: vec![2, 7, 9, 3, 1],
+                k: 2,
+                expect: 2,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idc, TestCase { nums, k, expect })| {
+            let acutal = min_capability(nums, k);
+            assert_eq!(expect, acutal, "case {} failed", idc);
+        });
+    }
 
     #[test]
     fn test_peak_index_in_mountain_array() {
