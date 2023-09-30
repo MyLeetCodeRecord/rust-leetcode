@@ -8,6 +8,8 @@
 //!     * [1342. 将数字变成 0 的操作次数](number_of_steps)
 //!     * [836. 矩形重叠](is_rectangle_overlap)
 //!     * [867. 转置矩阵](transpose)
+//!     * [LCP 06. 拿硬币](min_count)
+//!     * [2582. 递枕头](pass_the_pillow)
 //! * 中等
 //!     * [462. 最小操作次数使数组元素相等 II](min_moves2)
 //!     * [667. 优美的排列 II](construct_array)
@@ -220,7 +222,7 @@ pub fn number_of_steps(num: i32) -> i32 {
 /// ```
 /// 根据[等差数列的公式](https://en.wikipedia.org/wiki/Arithmetic_progression), 可以得到以下推导,  
 /// 假定起始项为$a$, 差$d$为1 项数$k$, 和为$n$, 则
-/// 
+///
 /// ```math
 /// n = \frac{k \times (a+a+(k-1))}{2}
 /// ```
@@ -512,10 +514,89 @@ pub fn transpose(matrix: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
     return ret;
 }
 
+/// [LCP 06. 拿硬币](https://leetcode.cn/problems/na-ying-bi)
+pub fn min_count(coins: Vec<i32>) -> i32 {
+    coins.into_iter().fold(0, |acc, x| {
+        if x % 2 == 0 {
+            acc + x / 2
+        } else {
+            acc + x / 2 + 1
+        }
+    })
+}
+
+/// [2582. 递枕头](https://leetcode.cn/problems/pass-the-pillow)
+pub fn pass_the_pillow(n: i32, time: i32) -> i32 {
+    let step = n - 1; // 一轮步数
+    let cycle = time / step; // 跑了几轮
+    let remain = time % step; // 最后一轮剩余步数
+
+    if cycle % 2 == 0 {
+        // 偶数轮, 从1开始
+        1 + remain
+    } else {
+        // 奇数轮, 从n开始
+        n - remain
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_pass_the_pillow() {
+        struct TestCase {
+            n: i32,
+            time: i32,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                n: 3,
+                time: 2,
+                expect: 3,
+            },
+            TestCase {
+                n: 4,
+                time: 5,
+                expect: 2,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, TestCase { n, time, expect })| {
+            let actual = pass_the_pillow(n, time);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_min_count() {
+        struct TestCase {
+            coins: Vec<i32>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                coins: vec![4, 2, 1],
+                expect: 4,
+            },
+            TestCase {
+                coins: vec![2, 3, 10],
+                expect: 8,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, TestCase { coins, expect })| {
+            let actual = min_count(coins);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_transpose() {
