@@ -53,3 +53,19 @@ macro_rules! vec2 {
         }
     };
 }
+
+fn divisors(integer: u32) -> Result<Vec<u32>, String> {
+    // assert!((u32::MAX as f64) < f64::MAX );
+	let mut div = vec![];
+    for i in 2..(integer as f64).sqrt() as u32 + 1{
+        if integer%i == 0{
+            div.push(i);
+            div.push(integer/i);
+        }
+    }
+    if div.is_empty(){
+        return Err(format!("{} is prime", integer));
+    }
+    div.sort_unstable();
+    Ok(div)
+}
