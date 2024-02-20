@@ -221,8 +221,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 prices: &[7, 1, 5, 3, 6, 4],
                 expect: 5,
@@ -236,8 +235,7 @@ mod tests {
                 name: "fix 1",
                 prices: &[],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let acutal = max_profit_6(testcase.prices.to_vec());
@@ -254,8 +252,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 prices: &[1, 3, 2, 8, 4, 9],
                 fee: 2,
@@ -266,8 +263,7 @@ mod tests {
                 prices: &[1, 3, 7, 5, 10, 3],
                 fee: 3,
                 expect: 6,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = max_profit_5(testcase.prices.to_vec(), testcase.fee);
@@ -283,8 +279,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 prices: &[1, 2, 3, 0, 2],
                 expect: 3,
@@ -293,8 +288,7 @@ mod tests {
                 name: "basic 2",
                 prices: &[1],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = max_profit_4(testcase.prices.to_vec());
@@ -311,8 +305,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 k: 2,
                 prices: &[2, 4, 1],
@@ -335,8 +328,7 @@ mod tests {
                 k: 0,
                 prices: &[1, 3],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = max_profit_3(testcase.k, testcase.prices.to_vec());
@@ -352,8 +344,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 prices: &[3, 3, 5, 0, 0, 3, 1, 4],
                 expect: 6,
@@ -372,8 +363,7 @@ mod tests {
                 name: "basic 4",
                 prices: &[1],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = max_profit_2(testcase.prices.to_vec());
@@ -389,8 +379,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 prices: &[7, 1, 5, 3, 6, 4],
                 expect: 7,
@@ -404,8 +393,7 @@ mod tests {
                 name: "basic 3",
                 prices: &[7, 6, 4, 3, 1],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = max_profit_1(testcase.prices.to_vec());
@@ -421,8 +409,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 prices: &[7, 1, 5, 3, 6, 4],
                 expect: 5,
@@ -431,8 +418,7 @@ mod tests {
                 name: "basic 2",
                 prices: &[7, 6, 4, 3, 1],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let acutal = max_profit(testcase.prices.to_vec());

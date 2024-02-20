@@ -110,8 +110,8 @@ pub fn give_gem(mut gem: Vec<i32>, operations: Vec<Vec<i32>>) -> i32 {
     for op in operations {
         let (from, to) = (op[0] as usize, op[1] as usize);
         let how_much = gem[from] / 2;
-        gem[from] = gem[from] - how_much;
-        gem[to] = gem[to] + how_much;
+        gem[from] -= how_much;
+        gem[to] += how_much;
     }
     // 可以不用排序, 遍历两次取最大最小值即可
     // 不能在op的同时计算最大最小, op可能不涉及全部节点

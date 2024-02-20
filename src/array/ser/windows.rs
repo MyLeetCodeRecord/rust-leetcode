@@ -472,7 +472,7 @@ pub fn min_deletion_size(strs: Vec<String>) -> i32 {
     let mut ans = 0;
     'NextPoi: for i in 0..n {
         for win in strs.windows(2) {
-            let (a, b) = (win.get(0).unwrap(), win.get(1).unwrap());
+            let (a, b) = (win.first().unwrap(), win.get(1).unwrap());
             let (a_bytes, b_bytes) = (a.as_bytes(), b.as_bytes());
             if b_bytes[i] < a_bytes[i] {
                 ans += 1;
@@ -616,17 +616,17 @@ pub fn minimum_abs_difference(arr: Vec<i32>) -> Vec<Vec<i32>> {
 pub fn longest_mountain(arr: Vec<i32>) -> i32 {
     let mut ans = 0;
     let mut cursor = 2; // 向后错位, 防止溢出
-    while cursor <= arr.len().checked_sub(1).unwrap_or(0) {
+    while cursor <= arr.len().saturating_sub(1) {
         let (prev, curr, next) = (arr[cursor - 2], arr[cursor - 1], arr[cursor]);
         if prev < curr && curr > next {
             // 找到了山顶, 开始向两边扩展
             let mut left = cursor;
             while left > 1 && arr[left - 2] < arr[left - 1] {
-                left = left - 1; // 向左一格
+                left -= 1; // 向左一格
             }
             let mut right = cursor;
             while right < arr.len() && arr[right - 1] > arr[right] {
-                right = right + 1; // 向右一格
+                right += 1; // 向右一格
             }
             let tmp = (cursor - left) + 1 + (right - cursor);
             ans = ans.max(tmp);
@@ -801,8 +801,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[1, 2, 3, 3],
                 expect: 3,
@@ -821,8 +820,7 @@ mod tests {
                 name: "fix 1",
                 nums: &[9, 5, 6, 9],
                 expect: 9,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = repeated_n_times(testcase.nums.to_vec());
@@ -880,8 +878,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 strs: &["cba", "daf", "ghi"],
                 expect: 1,
@@ -895,8 +892,7 @@ mod tests {
                 name: "basic 3",
                 strs: &["zyx", "wvu", "tsr"],
                 expect: 3,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let strs = testcase.strs.iter().map(|s| s.to_string()).collect();
@@ -914,8 +910,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[10, 5, 2, 6],
                 k: 100,
@@ -926,8 +921,7 @@ mod tests {
                 nums: &[1, 2, 3],
                 k: 0,
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = num_subarray_product_less_than_k(testcase.nums.to_vec(), testcase.k);
@@ -943,8 +937,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 fruits: &[1, 2, 1],
                 expect: 3,
@@ -963,8 +956,7 @@ mod tests {
                 name: "basic 4",
                 fruits: &[3, 3, 3, 1, 2, 1, 1, 2, 3, 3, 4],
                 expect: 5,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = total_fruit(testcase.fruits.to_vec());
@@ -980,8 +972,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s: "abcabcbb",
                 expect: 3,
@@ -995,8 +986,7 @@ mod tests {
                 name: "basic 3",
                 s: "pwwkew",
                 expect: 3,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = length_of_longest_substring(testcase.s.to_string());
@@ -1013,8 +1003,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s: "cbaebabacd",
                 p: "abc",
@@ -1025,8 +1014,7 @@ mod tests {
                 s: "abab",
                 p: "ab",
                 expect: &[0, 1, 2],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = find_anagrams(testcase.s.to_string(), testcase.p.to_string());
@@ -1043,8 +1031,7 @@ mod tests {
             expect: bool,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s1: "ab",
                 s2: "eidbaooo",
@@ -1061,8 +1048,7 @@ mod tests {
                 s1: "hello",
                 s2: "ooolleoooleh",
                 expect: false,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = check_inclusion(testcase.s1.to_string(), testcase.s2.to_string());
@@ -1079,8 +1065,7 @@ mod tests {
             expect: &'static str,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s: "ADOBECODEBANC",
                 t: "ABC",
@@ -1097,8 +1082,7 @@ mod tests {
                 s: "a",
                 t: "aa",
                 expect: "",
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = min_window(testcase.s.to_string(), testcase.t.to_string());
@@ -1115,8 +1099,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 target: 7,
                 nums: &[2, 3, 1, 2, 4, 3],
@@ -1145,8 +1128,7 @@ mod tests {
                 target: 15,
                 nums: &[1, 2, 3, 4, 5],
                 expect: 5,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let nums = testcase.nums.to_vec();
@@ -1164,8 +1146,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0],
                 k: 2,
@@ -1176,8 +1157,7 @@ mod tests {
                 nums: &[0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1],
                 k: 3,
                 expect: 10,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let nums = testcase.nums.to_vec();
@@ -1195,8 +1175,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 answer: "TTFF",
                 k: 2,
@@ -1213,8 +1192,7 @@ mod tests {
                 answer: "TTFTTFTT",
                 k: 1,
                 expect: 5,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let answer = testcase.answer.to_string();

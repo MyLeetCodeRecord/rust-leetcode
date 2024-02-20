@@ -104,14 +104,14 @@ pub fn subarray_sum(nums: Vec<i32>, k: i32) -> i32 {
         *store.entry(curr).or_insert(0) += 1;
     }
 
-    ret as i32
+    ret
 }
 
 /// [1480. 一维数组的动态和](https://leetcode.cn/problems/running-sum-of-1d-array/)
 pub fn running_sum(nums: Vec<i32>) -> Vec<i32> {
     let mut nums = nums;
     for i in 1..nums.len() {
-        nums[i] = nums[i] + nums[i - 1];
+        nums[i] += nums[i - 1];
     }
     nums
 }
@@ -339,7 +339,7 @@ mod tests {
             query: &'static [(Range, i32)],
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic",
             matrix: &[
                 &[3, 0, 1, 4, 2],
@@ -405,7 +405,7 @@ mod tests {
             query: &'static [(Range, i32)],
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic",
             nums: &[-2, 0, 3, -5, 2, -1],
             query: &[

@@ -100,7 +100,7 @@ pub fn final_prices(prices: Vec<i32>) -> Vec<i32> {
         }
         stack.push((idx, price));
     }
-    return result;
+    result
 }
 
 /// [1598. 文件夹操作日志搜集器](https://leetcode.cn/problems/crawler-log-folder/)
@@ -129,7 +129,7 @@ pub fn backspace_compare(s: String, t: String) -> bool {
                 tmp.push(*b);
             }
         }
-        return tmp;
+        tmp
     }
 
     sss(s.as_str()).eq(&sss(t.as_str()))

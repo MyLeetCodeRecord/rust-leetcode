@@ -65,7 +65,7 @@ pub fn rectangle_area(rectangles: Vec<Vec<i32>>) -> i32 {
             if line.start > r {
                 // l..r..start..end
                 // 新的片段 start..end
-                tot = tot + (r - l) as i64; // 记录Y轴上的区间总和
+                tot += (r - l) as i64; // 记录Y轴上的区间总和
                 Range { start: l, end: r } = line;
             } else if line.end > r {
                 // l..start..r..end
@@ -74,7 +74,7 @@ pub fn rectangle_area(rectangles: Vec<Vec<i32>>) -> i32 {
             }
         }
         // 把剩余的加上
-        tot = tot + (r - l) as i64;
+        tot += (r - l) as i64;
         // 计算结果
         ans += tot * (b - a) as i64;
         ans %= MOD;
@@ -108,7 +108,7 @@ pub fn rectangle_area_2(rectangles: Vec<Vec<i32>>) -> i32 {
     let sweep = {
         let mut tmp = vec![];
         for (idx, rect) in rectangles.iter().enumerate() {
-            tmp.push((rect[0], idx, 0+1));
+            tmp.push((rect[0], idx, 1));
             tmp.push((rect[2], idx, 0-1));
         }
         tmp.sort();

@@ -78,8 +78,7 @@ pub mod black_random {
                     expect_in: &'static [i32],
                 }
 
-                vec![
-                    TestCase {
+                [TestCase {
                         name: "basic",
                         n: 7,
                         blacklist: &[2, 3, 5],
@@ -90,8 +89,7 @@ pub mod black_random {
                         n: 4,
                         blacklist: &[2, 1],
                         expect_in: &[0, 3],
-                    },
-                ]
+                    }]
                 .iter()
                 .for_each(|testcase| {
                     let s = Solution::new(testcase.n, testcase.blacklist.to_vec());
@@ -159,7 +157,7 @@ pub mod black_random {
                     expect_in: &'static [i32],
                 }
 
-                vec![TestCase {
+                [TestCase {
                     name: "basic",
                     n: 7,
                     blacklist: &[2, 3, 5],

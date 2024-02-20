@@ -274,8 +274,8 @@ pub fn advantage_count(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
     let mut result = nums1.clone();
 
     let (mut left, mut right) = (1, nums1.len());
-    while !nums2.is_empty() {
-        let (index, val) = nums2.pop().unwrap();
+    while let Some((index, val)) = nums2.pop() {
+        
         match val.cmp(nums1.get(right - 1).unwrap()) {
             Ordering::Greater => {
                 // 用次等马对它的好马
@@ -818,12 +818,10 @@ pub fn max_dist_to_closest(seats: Vec<i32>) -> i32 {
         } else if future == seats.len() {
             // 结尾, 只有左端有1
             ans = ans.max(length);
+        } else if length % 2 == 0 {
+            ans = ans.max(length / 2);
         } else {
-            if length % 2 == 0 {
-                ans = ans.max(length / 2);
-            } else {
-                ans = ans.max(length / 2 + 1);
-            }
+            ans = ans.max(length / 2 + 1);
         }
         cursor = future; // 成段的0, 只需要判断一次
     }
@@ -1051,8 +1049,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 arr: &[1, 0, 2, 3, 0, 4, 5, 0],
                 expect: &[1, 0, 0, 2, 3, 0, 0, 4],
@@ -1066,8 +1063,7 @@ mod tests {
                 name: "fix 1",
                 arr: &[0, 0, 0, 0, 0, 0, 0],
                 expect: &[0, 0, 0, 0, 0, 0, 0],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mut arr = testcase.arr.to_vec();
@@ -1086,7 +1082,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic 1",
             words: &[
                 "I",
@@ -1179,8 +1175,7 @@ mod tests {
             expect: &'static str,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s: "the sky is blue",
                 expect: "blue is sky the",
@@ -1194,8 +1189,7 @@ mod tests {
                 name: "basic 3",
                 s: "a good   example",
                 expect: "example good a",
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = reverse_words_1(testcase.s.to_string());
@@ -1211,7 +1205,7 @@ mod tests {
             expect: &'static [char],
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic",
             s: &[
                 't', 'h', 'e', ' ', 's', 'k', 'y', ' ', 'i', 's', ' ', 'b', 'l', 'u', 'e',
@@ -1236,7 +1230,7 @@ mod tests {
             expect: &'static str,
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic",
             s: "We are happy.",
             expect: "We%20are%20happy.",
@@ -1257,8 +1251,7 @@ mod tests {
             expect: &'static str,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s: "abcdefg",
                 k: 2,
@@ -1269,8 +1262,7 @@ mod tests {
                 s: "abcd",
                 k: 2,
                 expect: "bacd",
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = reverse_str(testcase.s.to_string(), testcase.k);
@@ -1287,8 +1279,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums1: &[2, 7, 11, 15],
                 nums2: &[1, 10, 4, 11],
@@ -1299,8 +1290,7 @@ mod tests {
                 nums1: &[12, 24, 8, 32],
                 nums2: &[13, 25, 32, 11],
                 expect: &[24, 32, 8, 12],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let acutal = advantage_count(testcase.nums1.to_vec(), testcase.nums2.to_vec());
@@ -1316,8 +1306,7 @@ mod tests {
             val: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[3, 2, 2, 3],
                 val: 3,
@@ -1336,8 +1325,7 @@ mod tests {
                 name: "empty",
                 nums: &[],
                 val: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             use std::collections::HashSet;
@@ -1372,8 +1360,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[1, 1, 2],
                 expect: &[1, 2],
@@ -1392,8 +1379,7 @@ mod tests {
                 name: "fix 1",
                 nums: &[1, 2],
                 expect: &[1, 2],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mut tmp = testcase.nums.to_vec();
@@ -1411,8 +1397,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[0, 1, 0, 3, 12],
                 expect: &[1, 3, 12, 0, 0],
@@ -1426,8 +1411,7 @@ mod tests {
                 name: "cov 1",
                 nums: &[1, 2, 0, 3, 4, 5],
                 expect: &[1, 2, 3, 4, 5, 0],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mut tmp = testcase.nums.to_vec();
@@ -1486,8 +1470,7 @@ mod tests {
             expect: &'static [char],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s: &['h', 'e', 'l', 'l', 'o'],
                 expect: &['o', 'l', 'l', 'e', 'h'],
@@ -1496,8 +1479,7 @@ mod tests {
                 name: "basic 2",
                 s: &['H', 'a', 'n', 'n', 'a', 'h'],
                 expect: &['h', 'a', 'n', 'n', 'a', 'H'],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mut tmp = testcase.s.to_vec();
@@ -1543,8 +1525,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[-4, -1, 0, 3, 10],
                 expect: &[0, 1, 9, 16, 100],
@@ -1558,8 +1539,7 @@ mod tests {
                 name: "fix 1",
                 nums: &[1],
                 expect: &[1],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = sorted_squares(testcase.nums.to_vec());

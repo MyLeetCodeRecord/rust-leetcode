@@ -105,10 +105,10 @@ pub fn largest_island(grid: Vec<Vec<i32>>) -> i32 {
             (row + 1, col),                           // 下边
         ] {
             if let Some(line) = grid.get(r) {
-                if let Some(_) = line.get(c) {
+                if line.get(c).is_some() {
                     let id = visited_map[r][c];
                     if visited_area.insert(id) {
-                        area = area + area_size_map.get(&id).copied().unwrap_or(0);
+                        area += area_size_map.get(&id).copied().unwrap_or(0);
                     }
                 }
             }
@@ -169,8 +169,8 @@ pub fn two_out_of_three(nums1: Vec<i32>, nums2: Vec<i32>, nums3: Vec<i32>) -> Ve
         });
     mask[0]
         .into_iter()
-        .zip(mask[1].into_iter())
-        .zip(mask[2].into_iter())
+        .zip(mask[1])
+        .zip(mask[2])
         .enumerate()
         .filter_map(|(idx, ((num1, num2), num3))| {
             if num1 + num2 + num3 >= 2 {
@@ -198,7 +198,7 @@ pub fn nearest_valid_point(x: i32, y: i32, points: Vec<Vec<i32>>) -> i32 {
         })
         .min_by(|(idx0, dis0), (idx1, dis1)| dis0.cmp(dis1).then(idx0.cmp(idx1)))
         .unwrap_or((-1, 0))
-        .0 as i32
+        .0
 }
 
 /// [37. 解数独](https://leetcode.cn/problems/sudoku-solver/)

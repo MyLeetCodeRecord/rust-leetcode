@@ -165,7 +165,7 @@ pub mod array {
                 expect: i32,
             }
 
-            vec![TestCase {
+            [TestCase {
                 name: "basic",
                 w: &[1],
                 expect: 0,
@@ -258,7 +258,7 @@ pub mod set {
                 queries: &'static [Op],
             }
 
-            vec![TestCase {
+            [TestCase {
                 name: "basic",
                 queries: &[
                     Op::Insert((1, true)),
@@ -299,7 +299,7 @@ mod tests {
     #[test]
     #[ignore]
     fn test_show_binary_search() {
-        let v = vec![1, 2, 3, 4, 5, 6, 9];
+        let v = [1, 2, 3, 4, 5, 6, 9];
         println!("1: {}", v.binary_search(&1).unwrap());
         println!("5: {}", v.binary_search(&5).unwrap());
         println!("9: {}", v.binary_search(&9).unwrap());

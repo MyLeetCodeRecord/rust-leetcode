@@ -77,7 +77,7 @@ pub fn subtree_with_all_deepest(
         let (left, left_depth) = postorder(root.borrow().left.clone(), depth + 1);
         let (right, right_depth) = postorder(root.borrow().right.clone(), depth + 1);
         if left_depth == right_depth {
-            return (Some(root), left_depth);
+            (Some(root), left_depth)
         } else if left_depth > right_depth {
             return (left, left_depth);
         } else {

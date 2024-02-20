@@ -63,8 +63,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 nums: &[1, 3, 1],
                 k: 1,
@@ -81,8 +80,7 @@ mod tests {
                 nums: &[1, 6, 1],
                 k: 3,
                 expect: 5,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = smallest_distance_pair(testcase.nums.to_vec(), testcase.k);

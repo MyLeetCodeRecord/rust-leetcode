@@ -83,8 +83,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 intervals: &[[1, 2], [2, 3], [3, 4], [1, 3]],
                 expect: 1,
@@ -98,8 +97,7 @@ mod tests {
                 name: "basic 1",
                 intervals: &[[1, 2], [2, 3]],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let intervals = testcase.intervals.iter().map(|p| p.to_vec()).collect();
@@ -116,7 +114,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic 1",
             pair: &[(1, 2), (2, 3), (3, 4)],
             expect: 2,
@@ -137,8 +135,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 nums: &[10, 9, 2, 5, 3, 7, 101, 18],
                 expect: 4,
@@ -157,8 +154,7 @@ mod tests {
                 name: "basic 4",
                 nums: &[],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = length_of_lis(testcase.nums.to_vec());

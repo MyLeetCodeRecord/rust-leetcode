@@ -275,7 +275,7 @@ pub fn maximum_swap(num: i32) -> i32 {
     let mut part = vec![];
     while num > 0 {
         part.push(num % 10);
-        num = num / 10;
+        num /= 10;
     }
 
     'SWAP: for j in (1..part.len()).rev() {
@@ -289,12 +289,10 @@ pub fn maximum_swap(num: i32) -> i32 {
                 .max_by(|a, b| {
                     if a.1 != b.1 {
                         a.1.cmp(&b.1)
+                    } else if a.0 < b.0 {
+                        std::cmp::Ordering::Greater // 小序号优先
                     } else {
-                        if a.0 < b.0 {
-                            std::cmp::Ordering::Greater // 小序号优先
-                        } else {
-                            std::cmp::Ordering::Less
-                        }
+                        std::cmp::Ordering::Less
                     }
                 })
                 .unwrap();
@@ -379,7 +377,7 @@ pub fn car_fleet(target: i32, position: Vec<i32>, speed: Vec<i32>) -> i32 {
     let target = target as f64;
     let mut ps = position
         .into_iter()
-        .zip(speed.into_iter())
+        .zip(speed)
         .collect::<Vec<(i32, i32)>>();
     ps.sort_by(|a, b| a.0.cmp(&b.0).reverse());
     let mut cursor = 0;
@@ -412,7 +410,7 @@ pub fn car_fleet(target: i32, position: Vec<i32>, speed: Vec<i32>) -> i32 {
 /// - 能先用大额就用大额
 /// - 10可以用于20的找零, 20不能用于找零, 因此20不用存
 pub fn lemonade_change(bills: Vec<i32>) -> bool {
-    let mut changes = vec![0; 2]; // 5, 10
+    let mut changes = [0; 2]; // 5, 10
     for &bill in bills.iter() {
         match bill {
             5 => {
@@ -440,7 +438,7 @@ pub fn lemonade_change(bills: Vec<i32>) -> bool {
             _ => unreachable!(),
         }
     }
-    return true;
+    true
 }
 
 /// [861. 翻转矩阵后的得分](https://leetcode.cn/problems/score-after-flipping-matrix/)
@@ -501,7 +499,7 @@ pub fn schedule_course(mut courses: Vec<Vec<i32>>) -> i32 {
         if total + duration <= deadline{
             // 如果能学完, 就学
             // 更新总时间
-            total = total + duration;
+            total += duration;
             heap.push(duration);
             continue;
         } else {
@@ -746,8 +744,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 num: 2736,
                 expect: 7236,
@@ -766,8 +763,7 @@ mod tests {
                 name: "fix 2",
                 num: 1993,
                 expect: 9913,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = maximum_swap(testcase.num);
@@ -783,8 +779,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 nums: &[10, 9, 2, 5, 3, 7, 101, 18],
                 expect: 4,
@@ -803,8 +798,7 @@ mod tests {
                 name: "fix 1",
                 nums: &[10, 9, 2, 5, 3, 4],
                 expect: 3,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = length_of_lis(testcase.nums.to_vec());
@@ -820,8 +814,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 intervals: &[[1, 2], [2, 3], [3, 4], [1, 3]],
                 expect: 1,
@@ -835,8 +828,7 @@ mod tests {
                 name: "basic 1",
                 intervals: &[[1, 2], [2, 3]],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let intervals = testcase.intervals.iter().map(|p| p.to_vec()).collect();
@@ -853,7 +845,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic 1",
             pair: &[(1, 2), (2, 3), (3, 4)],
             expect: 2,
@@ -931,8 +923,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s: "IDID",
                 expect: &[0, 4, 1, 3, 2],
@@ -946,8 +937,7 @@ mod tests {
                 name: "basic 3",
                 s: "DDI",
                 expect: &[3, 2, 0, 1],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = di_string_match(testcase.s.to_string());
@@ -963,8 +953,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[-2, 1, -3, 4, -1, 2, 1, -5, 4],
                 expect: 6,
@@ -978,8 +967,7 @@ mod tests {
                 name: "basic 3",
                 nums: &[5, 4, -1, 7, 8],
                 expect: 23,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = max_sub_array(testcase.nums.to_vec());
@@ -995,8 +983,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[1, 7, 4, 9, 2, 5],
                 expect: 6,
@@ -1010,8 +997,7 @@ mod tests {
                 name: "basic 3",
                 nums: &[1, 2, 3, 4, 5, 6, 7, 8, 9],
                 expect: 2,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = wiggle_max_length(testcase.nums.to_vec());
@@ -1028,8 +1014,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 g: &[1, 2, 3],
                 s: &[1, 1],
@@ -1040,8 +1025,7 @@ mod tests {
                 g: &[1, 2],
                 s: &[1, 2, 3],
                 expect: 2,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = find_content_children(testcase.g.to_vec(), testcase.s.to_vec());

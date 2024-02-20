@@ -263,8 +263,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 mat: &[&[1, 2, 3], &[4, 5, 6], &[7, 8, 9]],
                 expect: &[1, 2, 4, 7, 5, 3, 6, 8, 9],
@@ -273,8 +272,7 @@ mod tests {
                 name: "basic 2",
                 mat: &[&[1, 2, 3], &[4, 5, 6], &[7, 8, 9]],
                 expect: &[1, 2, 4, 7, 5, 3, 6, 8, 9],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mat = testcase.mat.iter().map(|line| line.to_vec()).collect();
@@ -291,8 +289,7 @@ mod tests {
             expect: &'static [&'static [i32]],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 n: 3,
                 expect: &[&[1, 2, 3], &[8, 9, 4], &[7, 6, 5]],
@@ -301,8 +298,7 @@ mod tests {
                 name: "basic 2",
                 n: 1,
                 expect: &[&[1]],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = generate_matrix(testcase.n);
@@ -318,8 +314,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 matrix: &[&[1, 2, 3], &[4, 5, 6], &[7, 8, 9]],
                 expect: &[1, 2, 3, 6, 9, 8, 7, 4, 5],
@@ -333,8 +328,7 @@ mod tests {
                 name: "fix 1",
                 matrix: &[&[3], &[2]],
                 expect: &[3, 2],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let matrix = testcase.matrix.iter().map(|x| x.to_vec()).collect();
@@ -351,7 +345,7 @@ mod tests {
             expect: &'static [&'static [i32]],
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic",
             matrix: &[&[1, 2, 3], &[4, 5, 6], &[7, 8, 9]],
             expect: &[&[7, 4, 1], &[8, 5, 2], &[9, 6, 3]],
@@ -373,8 +367,7 @@ mod tests {
             expect: &'static str,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s: "abcdefg",
                 n: 2,
@@ -385,8 +378,7 @@ mod tests {
                 s: "lrloseumgh",
                 n: 6,
                 expect: "umghlrlose",
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let s = testcase.s.to_string();
