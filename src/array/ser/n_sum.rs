@@ -235,8 +235,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums1: &[1, 2],
                 nums2: &[-2, -1],
@@ -251,8 +250,7 @@ mod tests {
                 nums3: &[0],
                 nums4: &[0],
                 expect: 1,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = four_sum_count(
@@ -274,8 +272,7 @@ mod tests {
             expect: &'static [&'static [i32]],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[1, 0, -1, 0, -2, 2],
                 target: 0,
@@ -292,8 +289,7 @@ mod tests {
                 nums: &[0, 0, 0, 1000000000, 1000000000, 1000000000, 1000000000],
                 target: 1000000000,
                 expect: &[&[0, 0, 0, 1000000000]],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mut actual = four_sum(testcase.nums.to_vec(), testcase.target);
@@ -374,8 +370,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[2, 7, 11, 15],
                 target: 9,
@@ -392,8 +387,7 @@ mod tests {
                 nums: &[3, 3],
                 target: 6,
                 expect: &[0, 1],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mut actual = two_sum(testcase.nums.to_vec(), testcase.target);

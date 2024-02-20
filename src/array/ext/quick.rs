@@ -172,8 +172,7 @@ mod tests {
             expect: &'static [&'static [i32]],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 intervals: &[&[1, 3], &[2, 6], &[8, 10], &[15, 18]],
                 expect: &[&[1, 6], &[8, 10], &[15, 18]],
@@ -182,8 +181,7 @@ mod tests {
                 name: "basic 2",
                 intervals: &[&[1, 4], &[4, 5]],
                 expect: &[&[1, 5]],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let intervals = testcase.intervals.iter().map(|rng| rng.to_vec()).collect();
@@ -200,8 +198,7 @@ mod tests {
             k: i32,
             expect: i32,
         }
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[3, 2, 1, 5, 6, 4],
                 k: 2,
@@ -212,8 +209,7 @@ mod tests {
                 nums: &[3, 2, 3, 1, 2, 4, 5, 5, 6],
                 k: 4,
                 expect: 4,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = find_kth_largest(testcase.nums.to_vec(), testcase.k);
@@ -228,8 +224,7 @@ mod tests {
             nums: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[5, 2, 3, 1],
             },
@@ -240,8 +235,7 @@ mod tests {
             TestCase {
                 name: "fix 1",
                 nums: &[-1, 2, -8, -10],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mut nums = testcase.nums.to_vec();

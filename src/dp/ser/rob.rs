@@ -32,7 +32,7 @@ fn rob(nums: &[i32]) -> i32 {
         b = (nums[k] + k_2).max(k_1);
     }
 
-    return b;
+    b
 }
 
 /// [213. 打家劫舍 II](https://leetcode.cn/problems/house-robber-ii)

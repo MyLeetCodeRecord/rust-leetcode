@@ -236,11 +236,10 @@ pub fn merge_k_lists(lists: Vec<Option<Box<ListNode>>>) -> Option<Box<ListNode>>
     while lists.len() > 1 {
         lists = lists
             .chunks(2)
-            .into_iter()
             .map(|x| {
                 if x.len() >= 2 {
                     merge_two_lists(x[0].clone(), x[1].clone())
-                } else if x.len() >= 1 {
+                } else if !x.is_empty() {
                     x.split_first().unwrap().0.clone()
                 } else {
                     unreachable!()

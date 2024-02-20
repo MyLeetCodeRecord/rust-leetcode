@@ -40,10 +40,10 @@ pub fn path_sum_3(root: Option<Rc<RefCell<TreeNode>>>, target_sum: i32) -> i32 {
 
         let mut cnt = 0;
         if root_val == target_sum {
-            cnt = cnt + 1;
+            cnt += 1;
         }
-        cnt = cnt + count(root.borrow().left.clone(), target_sum - root_val);
-        cnt = cnt + count(root.borrow().right.clone(), target_sum - root_val);
+        cnt += count(root.borrow().left.clone(), target_sum - root_val);
+        cnt += count(root.borrow().right.clone(), target_sum - root_val);
         cnt
     }
 
@@ -56,14 +56,14 @@ pub fn path_sum_3(root: Option<Rc<RefCell<TreeNode>>>, target_sum: i32) -> i32 {
 
         let mut cnt = 0;
         if root_val == target_sum {
-            cnt = cnt + 1;
+            cnt += 1;
         }
 
         // 包含 root 的
-        cnt = cnt + count(root.borrow().left.clone(), target_sum - root_val);
-        cnt = cnt + count(root.borrow().right.clone(), target_sum - root_val);
-        cnt = cnt + path_sum(root.borrow().left.clone(), target_sum);
-        cnt = cnt + path_sum(root.borrow().right.clone(), target_sum);
+        cnt += count(root.borrow().left.clone(), target_sum - root_val);
+        cnt += count(root.borrow().right.clone(), target_sum - root_val);
+        cnt += path_sum(root.borrow().left.clone(), target_sum);
+        cnt += path_sum(root.borrow().right.clone(), target_sum);
         cnt
     }
 

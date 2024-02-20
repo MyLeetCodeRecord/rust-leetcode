@@ -56,7 +56,7 @@ pub fn group_anagrams(strs: Vec<String>) -> Vec<Vec<String>> {
 
     for s in strs.into_iter() {
         let mark = Mark::from_str(s.as_str());
-        store.entry(mark).or_insert(vec![]).push(s);
+        store.entry(mark).or_default().push(s);
     }
 
     store.values().cloned().collect()
@@ -95,8 +95,7 @@ mod tests {
             expect: bool,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 ransom_note: "a",
                 magazine: "b",
@@ -113,8 +112,7 @@ mod tests {
                 ransom_note: "aa",
                 magazine: "aab",
                 expect: true,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = can_construct(
@@ -132,7 +130,7 @@ mod tests {
             strs: &'static [&'static str],
             expect: &'static [&'static [&'static str]],
         }
-        vec![TestCase {
+        [TestCase {
             name: "basic",
             strs: &["eat", "tea", "tan", "ate", "nat", "bat"],
             expect: &[&["bat"], &["nat", "tan"], &["ate", "eat", "tea"]],

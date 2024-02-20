@@ -380,7 +380,7 @@ pub fn check_if_prerequisite(
             query_map[require][want] = 1;
             for col in 0..query_map.len() {
                 // 将require的前置, 也加入到want的前置中
-                query_map[col][want] = query_map[col][want] | query_map[col][require];
+                query_map[col][want] |= query_map[col][require];
             }
 
             in_degrees[want] -= 1;

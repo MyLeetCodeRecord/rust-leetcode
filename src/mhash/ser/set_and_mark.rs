@@ -361,8 +361,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 nums: &[1, 2, 0],
                 expect: 3,
@@ -381,8 +380,7 @@ mod tests {
                 name: "fix 1",
                 nums: &[1],
                 expect: 2,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = first_missing_positive(testcase.nums.to_vec());
@@ -399,7 +397,7 @@ mod tests {
             expect: &'static [&'static str],
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic 1",
             words: &["abc", "deq", "mee", "aqq", "dkd", "ccc"],
             pattern: "abb",
@@ -461,8 +459,7 @@ mod tests {
             n: i32,
             expect: bool,
         }
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 n: 19,
                 expect: true,
@@ -471,8 +468,7 @@ mod tests {
                 name: "basic 2",
                 n: 2,
                 expect: false,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = is_happy(testcase.n);
@@ -488,8 +484,7 @@ mod tests {
             expect: &'static [&'static str],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 words: &["bella", "label", "roller"],
                 expect: &["e", "l", "l"],
@@ -498,8 +493,7 @@ mod tests {
                 name: "basic 2",
                 words: &["cool", "lock", "cook"],
                 expect: &["c", "o"],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let words: Vec<String> = testcase.words.iter().map(|s| s.to_string()).collect();
@@ -521,8 +515,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums1: &[1, 2, 2, 1],
                 nums2: &[2, 2],
@@ -533,8 +526,7 @@ mod tests {
                 nums1: &[4, 9, 5],
                 nums2: &[9, 4, 9, 8, 4],
                 expect: &[9, 4],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mut actual = intersect(testcase.nums1.to_vec(), testcase.nums2.to_vec());
@@ -556,8 +548,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums1: &[1, 2, 2, 1],
                 nums2: &[2, 2],
@@ -568,12 +559,11 @@ mod tests {
                 nums1: &[4, 9, 5],
                 nums2: &[9, 4, 9, 8, 4],
                 expect: &[9, 4],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = intersection(testcase.nums1.to_vec(), testcase.nums2.to_vec());
-            let actual_set: HashSet<i32> = HashSet::from_iter(actual.into_iter());
+            let actual_set: HashSet<i32> = HashSet::from_iter(actual);
             let expect: HashSet<i32> = HashSet::from_iter(testcase.expect.iter().copied());
 
             assert_eq!(expect, actual_set, "{} failed", testcase.name);

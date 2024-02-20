@@ -19,7 +19,7 @@
 /// * `+(1-2)` ==> `1 - 2`
 pub fn calculate(s: String) -> i32 {
     let mut ops = vec![];
-    ops.push(0 + 1);
+    ops.push(1);
     let mut sign = 1;
 
     let mut ret = 0;
@@ -46,7 +46,7 @@ pub fn calculate(s: String) -> i32 {
                 num = num * 10 + (stream[cursor] - b'0') as i32;
                 cursor += 1;
             }
-            ret = ret + sign * num;
+            ret += sign * num;
         }
     }
     ret
@@ -90,12 +90,12 @@ pub fn calculate2(s: String) -> i32 {
                 // 乘除算出来, 其他可以最后统一处理
                 Some(3) => {
                     let mut last_num = lits.pop().unwrap();
-                    last_num = last_num * num;
+                    last_num *= num;
                     lits.push(last_num);
                 }
                 Some(4) => {
                     let mut last_num = lits.pop().unwrap();
-                    last_num = last_num / num;
+                    last_num /= num;
                     lits.push(last_num);
                 }
                 Some(x) => {
@@ -107,7 +107,7 @@ pub fn calculate2(s: String) -> i32 {
     }
 
     ops.into_iter()
-        .zip(lits.into_iter())
+        .zip(lits)
         .fold(0, |r, (op, lit)| {
             if op == 1 {
                 r + lit
@@ -127,12 +127,12 @@ pub fn calculate3(s: String) -> i32 {
             None => unreachable!(),
             Some(3) => {
                 let mut last_num = lits.pop().unwrap();
-                last_num = last_num * num;
+                last_num *= num;
                 lits.push(last_num);
             }
             Some(4) => {
                 let mut last_num = lits.pop().unwrap();
-                last_num = last_num / num;
+                last_num /= num;
                 lits.push(last_num);
             }
             Some(x) => {
@@ -201,7 +201,7 @@ pub fn calculate3(s: String) -> i32 {
             mul_div(&mut ops, &mut lits, num);
         }
     }
-    ops.into_iter().zip(lits.into_iter()).fold(
+    ops.into_iter().zip(lits).fold(
         0,
         |r, (op, lit)| {
             if op == 1 {
@@ -221,12 +221,12 @@ fn calc(expr: &str) -> f64 {
             None => unreachable!(),
             Some(3) => {
                 let mut last_num = lits.pop().unwrap();
-                last_num = last_num * num;
+                last_num *= num;
                 lits.push(last_num);
             }
             Some(4) => {
                 let mut last_num = lits.pop().unwrap();
-                last_num = last_num / num;
+                last_num /= num;
                 lits.push(last_num);
             }
             Some(x) => {
@@ -295,7 +295,7 @@ fn calc(expr: &str) -> f64 {
             mul_div(&mut ops, &mut lits, num);
         }
     }
-    ops.into_iter().zip(lits.into_iter()).fold(
+    ops.into_iter().zip(lits).fold(
         0.0,
         |r, (op, lit)| {
             if op == 1 {

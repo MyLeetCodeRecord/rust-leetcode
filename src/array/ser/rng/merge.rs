@@ -132,8 +132,7 @@ mod tests {
             expect: &'static str,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 s: "aabcd",
                 words: &["ab", "bc"],
@@ -144,8 +143,7 @@ mod tests {
                 s: "aabcd",
                 words: &["ab", "cb"],
                 expect: "a<b>ab</b>cd",
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let words = testcase.words.iter().map(|s| s.to_string()).collect();
@@ -217,8 +215,7 @@ mod tests {
             expect: &'static [&'static [i32]],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 intervals: &[&[1, 3], &[2, 6], &[8, 10], &[15, 18]],
                 expect: &[&[1, 6], &[8, 10], &[15, 18]],
@@ -227,8 +224,7 @@ mod tests {
                 name: "basic 2",
                 intervals: &[&[1, 4], &[4, 5]],
                 expect: &[&[1, 5]],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let intervals = testcase.intervals.iter().map(|s| s.to_vec()).collect();

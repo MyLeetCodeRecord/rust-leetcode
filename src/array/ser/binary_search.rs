@@ -448,7 +448,7 @@ pub fn trailing_zeroes(n: i32) -> i32 {
         if n == 0 {
             break;
         }
-        n = n / 5;
+        n /= 5;
         cnt += n;
     }
     cnt
@@ -477,7 +477,7 @@ pub fn preimage_size_fzf(k: i32) -> i32 {
                 left = mid + 1;
             }
         }
-        return right + 1;
+        right + 1
     }
 
     left_bound(k + 1) - left_bound(k)
@@ -587,7 +587,7 @@ where
             }
         }
     }
-    left.checked_sub(1).unwrap_or(0)
+    left.saturating_sub(1)
 }
 
 /// [2560. 打家劫舍 IV](https://leetcode.cn/problems/house-robber-iv/description/)
@@ -620,7 +620,7 @@ pub fn min_capability(nums: Vec<i32>, k: i32) -> i32 {
             min = mid + 1;
         }
     }
-    return min;
+    min
 }
 
 #[cfg(test)]
@@ -705,8 +705,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 k: 0,
                 expect: 5,
@@ -720,8 +719,7 @@ mod tests {
                 name: "basic 3",
                 k: 3,
                 expect: 5,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = preimage_size_fzf(testcase.k);
@@ -737,8 +735,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 n: 3,
                 expect: 0,
@@ -757,8 +754,7 @@ mod tests {
                 name: "fix 1",
                 n: 10,
                 expect: 2,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = trailing_zeroes(testcase.n);
@@ -775,8 +771,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[4, 5, 6, 7, 0, 1, 2],
                 target: 0,
@@ -799,8 +794,7 @@ mod tests {
                 nums: &[3, 5, 1],
                 target: 3,
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = search_2(testcase.nums.to_vec(), testcase.target);
@@ -816,8 +810,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 intervals: &[&[1, 2]],
                 expect: &[-1],
@@ -831,8 +824,7 @@ mod tests {
                 name: "basic 3",
                 intervals: &[&[1, 4], &[2, 3], &[3, 4]],
                 expect: &[-1, 2, -1],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let intervals = testcase.intervals.iter().map(|x| x.to_vec()).collect();
@@ -851,8 +843,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 m: 3,
                 n: 3,
@@ -872,8 +863,7 @@ mod tests {
                 n: 3,
                 k: 2,
                 expect: 2,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = find_kth_number(testcase.m, testcase.n, testcase.k);
@@ -890,8 +880,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 candies: &[5, 8, 6],
                 k: 3,
@@ -902,8 +891,7 @@ mod tests {
                 candies: &[2, 5],
                 k: 11,
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = maximum_candies(testcase.candies.to_vec(), testcase.k);
@@ -919,8 +907,7 @@ mod tests {
             target: i32,
             expect: i32,
         }
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: vec![-1, 0, 3, 5, 9, 12],
                 target: 9,
@@ -931,8 +918,7 @@ mod tests {
                 nums: vec![-1, 0, 3, 5, 9, 12],
                 target: 2,
                 expect: -1,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = search(testcase.nums.clone(), testcase.target);
@@ -948,8 +934,7 @@ mod tests {
             target: i32,
             expect: i32,
         }
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: vec![1, 3, 5, 6],
                 target: 5,
@@ -966,8 +951,7 @@ mod tests {
                 nums: vec![1, 3, 5, 6],
                 target: 7,
                 expect: 4,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = search_insert(testcase.nums.clone(), testcase.target);
@@ -1044,8 +1028,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 piles: vec![3, 6, 7, 11],
                 h: 8,
@@ -1062,8 +1045,7 @@ mod tests {
                 piles: vec![30, 11, 23, 4, 20],
                 h: 6,
                 expect: 23,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = min_eating_speed(testcase.piles.clone(), testcase.h);
@@ -1079,8 +1061,7 @@ mod tests {
             days: i32,
             expect: i32,
         }
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 weights: vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                 days: 5,
@@ -1097,8 +1078,7 @@ mod tests {
                 weights: vec![1, 2, 3, 1, 1],
                 days: 4,
                 expect: 3,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = ship_within_days(testcase.weights.clone(), testcase.days);

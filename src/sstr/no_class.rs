@@ -218,7 +218,7 @@ pub fn mask_pii(s: String) -> String {
         if b == b'@' {
             is_email = true;
             at_pos = chrs.len();
-        } else if b >= b'A' && b <= b'Z' {
+        } else if b.is_ascii_uppercase() {
             b = b - b'A' + b'a';
         }
         chrs.push(b);
@@ -289,9 +289,9 @@ pub fn find_replace_string(
 pub fn reformat_number(number: String) -> String {
     let nums: Vec<u8> = number
         .as_bytes()
-        .into_iter()
+        .iter()
         .filter_map(|&x| {
-            if x >= b'0' && x <= b'9' {
+            if x.is_ascii_digit() {
                 Some(x)
             } else {
                 None
@@ -380,8 +380,8 @@ pub fn buddy_strings(s: String, goal: String) -> bool {
 /// [1796. 字符串中第二大的数字](https://leetcode.cn/problems/second-largest-digit-in-a-string/)
 pub fn second_highest(s: String) -> i32 {
     let mut heap = [-1; 2];
-    s.bytes().into_iter().for_each(|c| {
-        if c >= b'0' && c <= b'9' {
+    s.bytes().for_each(|c| {
+        if c.is_ascii_digit() {
             let num = (c - b'0') as i32;
             if heap[1] == -1 {
                 heap[1] = num;
@@ -659,8 +659,7 @@ mod tests {
             expect: &'static str,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 text: "  this   is  a sentence ",
                 expect: "this   is   a   sentence",
@@ -679,8 +678,7 @@ mod tests {
                 name: "basic 4",
                 text: "  walks  udp package   into  bar a",
                 expect: "walks  udp  package  into  bar  a ",
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = reorder_spaces(testcase.text.to_string());
@@ -697,8 +695,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 nums: &[3, 1, 4, 1, 5],
                 k: 2,
@@ -715,8 +712,7 @@ mod tests {
                 nums: &[1, 3, 1, 5, 4],
                 k: 0,
                 expect: 1,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = find_pairs(testcase.nums.to_vec(), testcase.k);
@@ -732,8 +728,7 @@ mod tests {
             expect: &'static str,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 query_ip: "172.16.254.1",
                 expect: "IPv4",
@@ -747,8 +742,7 @@ mod tests {
                 name: "basic 3",
                 query_ip: "256.256.256.256",
                 expect: "Neither",
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = valid_ip_address(testcase.query_ip.to_string());

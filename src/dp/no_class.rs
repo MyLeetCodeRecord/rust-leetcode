@@ -47,7 +47,7 @@ pub fn unique_letter_string(s: String) -> i32 {
         let (i, c) = (i as i32, (b - b'A') as usize);
 
         // 出现多次的
-        ans = ans + prev_diff[c] * (i - prev[c]);
+        ans += prev_diff[c] * (i - prev[c]);
         prev_diff[c] = i - prev[c];
         prev[c] = i;
     }
@@ -56,7 +56,7 @@ pub fn unique_letter_string(s: String) -> i32 {
     // 对于只出现一次的， 需要补齐
     ans + prev
         .into_iter()
-        .zip(prev_diff.into_iter())
+        .zip(prev_diff)
         .map(|(a, b)| b * (length - a))
         .sum::<i32>()
 }
@@ -282,7 +282,7 @@ pub fn max_dist_to_closest(seats: Vec<i32>) -> i32 {
     }
 
     left.into_iter()
-        .zip(right.into_iter())
+        .zip(right)
         .map(|(a, b)| a.min(b))
         .max()
         .unwrap_or(0)
@@ -325,17 +325,15 @@ pub fn num_factored_binary_trees(mut arr: Vec<i32>) -> i32 {
                 break;
             }
 
-            if right >= left {
-                if (arr[left - 1] as i64) * (arr[right - 1] as i64) == (arr[i - 1] as i64) {
-                    dp[i] += dp[left] * dp[right] * if left == right { 1 } else { 2 };
-                    dp[i] = dp[i] % 1_000_000_007;
-                }
+            if right >= left && (arr[left - 1] as i64) * (arr[right - 1] as i64) == (arr[i - 1] as i64) {
+                dp[i] += dp[left] * dp[right] * if left == right { 1 } else { 2 };
+                dp[i] %= 1_000_000_007;
             }
             left += 1;
         }
 
         result += dp[i];
-        result = result % 1_000_000_007;
+        result %= 1_000_000_007;
     }
     result as i32
 }
@@ -419,8 +417,7 @@ mod test {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 s: "ABC",
                 expect: 10,
@@ -434,8 +431,7 @@ mod test {
                 name: "basic 3",
                 s: "LEETCODE",
                 expect: 92,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = unique_letter_string(testcase.s.to_string());
@@ -451,8 +447,7 @@ mod test {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 costs: &[&[17, 2, 17], &[16, 16, 5], &[14, 3, 19]],
                 expect: 10,
@@ -461,8 +456,7 @@ mod test {
                 name: "basic 2",
                 costs: &[&[7, 6, 2]],
                 expect: 2,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let costs = testcase.costs.iter().map(|c| c.to_vec()).collect();
@@ -479,8 +473,7 @@ mod test {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 s: "00110",
                 expect: 1,
@@ -494,8 +487,7 @@ mod test {
                 name: "basic 3",
                 s: "00011000",
                 expect: 2,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = min_flips_mono_incr(testcase.s.to_string());
@@ -511,8 +503,7 @@ mod test {
             expect: bool,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 matchsticks: &[1, 1, 2, 2, 2],
                 expect: true,
@@ -521,8 +512,7 @@ mod test {
                 name: "basic 2",
                 matchsticks: &[3, 3, 3, 3, 4],
                 expect: false,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = makesquare(testcase.matchsticks.to_vec());
@@ -538,8 +528,7 @@ mod test {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 p: "a",
                 expect: 1,
@@ -553,8 +542,7 @@ mod test {
                 name: "basic 3",
                 p: "zab",
                 expect: 6,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = find_substring_in_wrapround_string(testcase.p.to_string());

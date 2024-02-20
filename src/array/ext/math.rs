@@ -70,11 +70,11 @@ pub fn shuffle(nums: Vec<i32>, n: i32) -> Vec<i32> {
     let mut nums = nums;
     let n = n as usize;
     for i in 0..n {
-        nums[2 * i] = nums[2 * i] | ((nums[i] & 1023) << 10);
-        nums[2 * i + 1] = nums[2 * i + 1] | ((nums[i + n] & 1023) << 10);
+        nums[2 * i] |= (nums[i] & 1023) << 10;
+        nums[2 * i + 1] |= (nums[i + n] & 1023) << 10;
     }
     nums.iter_mut().for_each(|num| {
-        *num = *num >> 10;
+        *num >>= 10;
     });
     nums
 }
@@ -101,7 +101,7 @@ pub fn num_special(mat: Vec<Vec<i32>>) -> i32 {
                 return false;
             }
         }
-        return true;
+        true
     }
 
     let mut cnt = 0;
@@ -150,7 +150,6 @@ pub fn construct_array(n: i32, k: i32) -> Vec<i32> {
 /// [412. Fizz Buzz](https://leetcode.cn/problems/fizz-buzz/)
 pub fn fizz_buzz(n: i32) -> Vec<String> {
     (1..=n)
-        .into_iter()
         .map(|num| {
             if num % 3 == 0 && num % 5 == 0 {
                 "FizzBuzz".to_string()
@@ -194,7 +193,7 @@ pub fn fizz_buzz(n: i32) -> Vec<String> {
 /// 注意: 如果原本为0， 这时 `31 - (leading_zero)`可能有溢出
 ///
 pub fn number_of_steps(num: i32) -> i32 {
-    (num.count_ones() + 31u32.checked_sub(num.leading_zeros()).unwrap_or(0)) as i32
+    (num.count_ones() + 31u32.saturating_sub(num.leading_zeros())) as i32
 }
 
 /// [829. 连续整数求和](https://leetcode.cn/problems/consecutive-numbers-sum/)
@@ -329,7 +328,7 @@ pub fn unique_letter_string(s: String) -> i32 {
         let pos = pos as i32;
         if curr_pos[i] > -1 {
             // 这个字符之前出现过, 这时的pos对应上述推导中的后一个
-            ans = ans + (pos - curr_pos[i]) * (curr_pos[i] - last_pos[i]);
+            ans += (pos - curr_pos[i]) * (curr_pos[i] - last_pos[i]);
         }
         last_pos[i] = curr_pos[i];
         curr_pos[i] = pos;
@@ -337,7 +336,7 @@ pub fn unique_letter_string(s: String) -> i32 {
     // 对于只出现过一次的字符, 上面循环统计不到, 即等效 后一个 的位置为字符结尾
     for (last, curr) in last_pos.into_iter().zip(curr_pos.into_iter()) {
         if curr > -1 {
-            ans = ans + (curr - last) * (s.len() as i32 - curr);
+            ans += (curr - last) * (s.len() as i32 - curr);
         }
     }
     ans
@@ -363,7 +362,7 @@ pub fn largest_overlap(img1: Vec<Vec<i32>>, img2: Vec<Vec<i32>>) -> i32 {
             }
         }
     }
-    delta.values().into_iter().max().copied().unwrap_or(0)
+    delta.values().max().copied().unwrap_or(0)
 }
 
 /// [836. 矩形重叠](https://leetcode.cn/problems/rectangle-overlap/)
@@ -488,7 +487,7 @@ pub fn mirror_reflection(p: i32, q: i32) -> i32 {
     } else if (d / q) % 2 == 0 {
         return 2;
     }
-    return 1;
+    1
 }
 
 fn gcd(a: i32, b: i32) -> i32 {
@@ -496,7 +495,7 @@ fn gcd(a: i32, b: i32) -> i32 {
     if n == 0 {
         return m;
     }
-    return gcd(n, m % n);
+    gcd(n, m % n)
 }
 fn lcm(a: i32, b: i32) -> i32 {
     a * b / gcd(a, b)
@@ -511,7 +510,7 @@ pub fn transpose(matrix: Vec<Vec<i32>>) -> Vec<Vec<i32>> {
             ret[j][i] = matrix[i][j];
         }
     }
-    return ret;
+    ret
 }
 
 /// [LCP 06. 拿硬币](https://leetcode.cn/problems/na-ying-bi)
@@ -882,8 +881,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 n: 3,
                 k: 1,
@@ -894,8 +892,7 @@ mod tests {
                 n: 3,
                 k: 2,
                 expect: &[1, 3, 2],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let acutal = construct_array(testcase.n, testcase.k);
@@ -911,8 +908,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 mat: &[&[1, 0, 0], &[0, 0, 1], &[1, 0, 0]],
                 expect: 1,
@@ -926,8 +922,7 @@ mod tests {
                 name: "basic 3",
                 mat: &[&[0, 0, 0, 1], &[1, 0, 0, 0], &[0, 1, 1, 0], &[0, 0, 0, 0]],
                 expect: 2,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mat = testcase.mat.iter().map(|line| line.to_vec()).collect();
@@ -945,8 +940,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 nums: &[2, 5, 1, 3, 4, 7],
                 n: 3,
@@ -963,8 +957,7 @@ mod tests {
                 nums: &[1, 1, 2, 2],
                 n: 2,
                 expect: &[1, 2, 1, 2],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = shuffle(testcase.nums.to_vec(), testcase.n);
@@ -980,8 +973,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[1, 2, 3],
                 expect: 2,
@@ -1000,8 +992,7 @@ mod tests {
                 name: "fix 1",
                 nums: &[1],
                 expect: 0,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = min_moves2(testcase.nums.to_vec());

@@ -32,7 +32,7 @@ pub fn find_subsequences(nums: Vec<i32>) -> Vec<Vec<i32>> {
     let mut ret = vec![];
     let mut ser = vec![];
     backtrace(&nums, &mut ret, &mut ser, 0);
-    HashSet::<Vec<i32>>::from_iter(ret.into_iter())
+    HashSet::<Vec<i32>>::from_iter(ret)
         .into_iter()
         .collect()
 }
@@ -80,7 +80,7 @@ pub fn split_into_fibonacci(num: String) -> Vec<i32> {
             }
             ans.pop();
         }
-        return false;
+        false
     }
 
     let mut ans = vec![];
@@ -133,8 +133,7 @@ mod tests {
             expect: &'static [&'static [i32]],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 nums: &[4, 6, 7, 7],
                 expect: &[
@@ -152,8 +151,7 @@ mod tests {
                 name: "basic 2",
                 nums: &[4, 4, 3, 2, 1],
                 expect: &[&[4, 4]],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let mut actual = find_subsequences(testcase.nums.to_vec());

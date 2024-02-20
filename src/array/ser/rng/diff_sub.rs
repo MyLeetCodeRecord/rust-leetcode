@@ -97,8 +97,7 @@ mod tests {
             expect: bool,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 trips: &[&[2, 1, 5], &[3, 3, 7]],
                 capacity: 4,
@@ -121,8 +120,7 @@ mod tests {
                 trips: &[&[9, 0, 1], &[3, 3, 7]],
                 capacity: 4,
                 expect: false,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let trips = testcase.trips.iter().map(|x| x.to_vec()).collect();
@@ -140,8 +138,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 bookings: &[&[1, 2, 10], &[2, 3, 20], &[2, 5, 25]],
                 n: 5,
@@ -152,8 +149,7 @@ mod tests {
                 bookings: &[&[1, 2, 10], &[2, 2, 15]],
                 n: 2,
                 expect: &[10, 25],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let bookings = testcase.bookings.iter().map(|x| x.to_vec()).collect();
@@ -171,7 +167,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![TestCase {
+        [TestCase {
             name: "basic",
             length: 5,
             updates: &[&[1, 3, 2], &[2, 4, 3], &[0, 2, -2]],

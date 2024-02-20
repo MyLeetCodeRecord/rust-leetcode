@@ -226,8 +226,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 n: 5,
                 ranges: &[3, 4, 1, 1, 0, 0],
@@ -244,8 +243,7 @@ mod tests {
                 n: 8,
                 ranges: &[4, 0, 0, 0, 0, 0, 0, 0, 4],
                 expect: 2,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = min_taps(testcase.n, testcase.ranges.to_vec());
@@ -262,8 +260,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 clips: &[&[0, 2], &[4, 6], &[8, 10], &[1, 9], &[1, 5], &[5, 9]],
                 time: 10,
@@ -312,8 +309,7 @@ mod tests {
                 ],
                 time: 5,
                 expect: 1,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let clips = testcase.clips.iter().map(|c| c.to_vec()).collect();
@@ -331,8 +327,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 nums: &[1, 3],
                 n: 6,
@@ -355,8 +350,7 @@ mod tests {
                 nums: &[1, 2, 31, 33],
                 n: 2147483647,
                 expect: 28,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = min_patches(testcase.nums.to_vec(), testcase.n);
@@ -372,8 +366,7 @@ mod tests {
             expect: &'static [i32],
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 s: "ababcbacadefegdehijhklij",
                 expect: &[9, 7, 8],
@@ -382,8 +375,7 @@ mod tests {
                 name: "basic 2",
                 s: "eccbbbbdec",
                 expect: &[10],
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = partition_labels(testcase.s.to_string());
@@ -399,8 +391,7 @@ mod tests {
             expect: bool,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic 1",
                 nums: &[2, 3, 1, 1, 4],
                 expect: true,
@@ -419,8 +410,7 @@ mod tests {
                 name: "fix 2",
                 nums: &[2, 5, 0, 0],
                 expect: true,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = can_jump(testcase.nums.to_vec());
@@ -436,8 +426,7 @@ mod tests {
             expect: i32,
         }
 
-        vec![
-            TestCase {
+        [TestCase {
                 name: "basic",
                 nums: &[2, 3, 1, 1, 4],
                 expect: 2,
@@ -456,8 +445,7 @@ mod tests {
                 name: "fix 2",
                 nums: &[3, 2, 1],
                 expect: 1,
-            },
-        ]
+            }]
         .iter()
         .for_each(|testcase| {
             let actual = jump(testcase.nums.to_vec());

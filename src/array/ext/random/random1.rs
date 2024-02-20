@@ -44,7 +44,7 @@ pub mod array {
                 nums: &'static [i32],
             }
 
-            vec![TestCase {
+            [TestCase {
                 name: "basic",
                 nums: &[1, 2, 3, 3, 3],
             }]
