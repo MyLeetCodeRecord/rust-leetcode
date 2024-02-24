@@ -124,12 +124,76 @@ pub fn closest_nodes(root: Option<Rc<RefCell<TreeNode>>>, queries: Vec<i32>) -> 
     result
 }
 
+/// [235. 二叉搜索树的最近公共祖先](https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-search-tree/description/)
+///
+/// ## 思路
+/// 由于是二叉搜索树, 因此只需要找到一个能将两个值左右分割的点即可, 不用存储父节点的栈
+pub fn lowest_common_ancestor(
+    root: Option<Rc<RefCell<TreeNode>>>,
+    p: Option<Rc<RefCell<TreeNode>>>,
+    q: Option<Rc<RefCell<TreeNode>>>,
+) -> Option<Rc<RefCell<TreeNode>>> {
+    let p = p.unwrap().borrow().val;
+    let q = q.unwrap().borrow().val;
+
+    let mut node = root;
+    while let Some(inner) = node {
+        let v = inner.borrow().val;
+        if p < v && q < v {
+            node = inner.borrow().left.clone();
+        } else if p > v && q > v {
+            node = inner.borrow().right.clone();
+        } else {
+            return Some(inner);
+        }
+    }
+    None
+}
 #[cfg(test)]
 mod tests {
     use crate::vec2;
 
     use super::*;
     use macros::tree;
+
+    #[test]
+    fn test_lowest_common_ancestor() {
+        struct Testcase {
+            tree: Option<Rc<RefCell<TreeNode>>>,
+            p: Option<Rc<RefCell<TreeNode>>>,
+            q: Option<Rc<RefCell<TreeNode>>>,
+            expect: Option<Rc<RefCell<TreeNode>>>,
+        }
+
+        vec![
+            Testcase {
+                tree: tree!({6, left: {2, left: {0}, right: {4, left: {3}, right: {5}}}, right: {8, left: {7}, right: {9}}}),
+                p: tree!({2}),
+                q: tree!({8}),
+                expect: tree!({6}),
+            },
+            Testcase {
+                tree: tree!({6, left: {2, left: {0}, right: {4, left: {3}, right: {5}}}, right: {8, left: {7}, right: {9}}}),
+                p: tree!({2}),
+                q: tree!({4}),
+                expect: tree!({2}),
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase {
+                tree,
+                p,
+                q,
+                expect,
+            } = testcase;
+            let acutal = lowest_common_ancestor(tree, p, q);
+            let actual_val = acutal.map(|x| x.borrow().val).unwrap();
+            let expect_val = expect.map(|x| x.borrow().val).unwrap();
+            assert_eq!(expect_val, actual_val, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_closest_nodes() {
