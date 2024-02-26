@@ -4,3 +4,4 @@ pub mod in_order;
 pub mod post_order;
 pub mod pre_order;
 pub mod no_class;
+pub mod level_order;
