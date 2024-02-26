@@ -149,12 +149,77 @@ pub fn lowest_common_ancestor(
     }
     None
 }
+
+/// [938. 二叉搜索树的范围和](https://leetcode.cn/problems/range-sum-of-bst/)
+pub fn range_sum_bst(root: Option<Rc<RefCell<TreeNode>>>, low: i32, high: i32) -> i32 {
+    fn inorder(node: Option<Rc<RefCell<TreeNode>>>, store: &mut Vec<i32>) {
+        if node.is_none() {
+            return;
+        }
+        let inner = node.unwrap().clone();
+        inorder(inner.borrow().left.clone(), store);
+        store.push(inner.borrow().val);
+        inorder(inner.borrow().right.clone(), store);
+    }
+    let mut store = vec![];
+    inorder(root, &mut store);
+
+    let left = match store.binary_search(&low) {
+        Ok(idx) => idx,
+        Err(idx) => idx,
+    };
+    let right = match store.binary_search(&high) {
+        Ok(idx) => idx+1,
+        Err(idx) => idx,
+    };
+    //println!("left: {}, right: {}, store {:?}", left, right, &store[left..right]);
+
+    store[left..right].iter().sum()
+}
+
 #[cfg(test)]
 mod tests {
     use crate::vec2;
 
     use super::*;
     use macros::tree;
+
+    #[test]
+    fn test_range_sum_bst() {
+        struct Testcase {
+            tree: Option<Rc<RefCell<TreeNode>>>,
+            low: i32,
+            high: i32,
+            expect: i32,
+        }
+
+        vec![
+            Testcase {
+                tree: tree!({10, left: {5, left: {3}, right: {7}}, right: {15, right: {18}}}),
+                low: 7,
+                high: 15,
+                expect: 32,
+            },
+            Testcase {
+                tree: tree!{val: 10, left: {val: 5, left: {val: 3, left: {val: 1}}, right: {val: 7, left: {val:6}}}, right: {val: 15,  left: {val: 13}, right: {val: 18}}},
+                low: 6,
+                high: 10,
+                expect: 23,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase {
+                tree,
+                low,
+                high,
+                expect,
+            } = testcase;
+            let acutal = range_sum_bst(tree, low, high);
+            assert_eq!(expect, acutal, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_lowest_common_ancestor() {
