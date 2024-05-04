@@ -206,10 +206,111 @@ pub fn solve_sudoku(_board: &mut Vec<Vec<char>>) {
     todo!()
 }
 
+/// [857. 雇佣 K 名工人的最低成本](https://leetcode.cn/problems/minimum-cost-to-hire-k-workers)
+///
+/// 思路:
+/// 1. 至少有一个员工是其最低工资要求
+///     - 如果不是, 则说明整体工资可以再降
+/// 2.
+pub fn mincost_to_hire_workers(quality: Vec<i32>, wage: Vec<i32>, k: i32) -> f64 {
+    todo!()
+}
+
+/// [1491. 去掉最低工资和最高工资后的工资平均值](https://leetcode.cn/problems/average-salary-excluding-the-minimum-and-maximum-salary)
+pub fn average(salary: Vec<i32>) -> f64 {
+    let (mut min, mut max) = (i32::MAX, i32::MIN);
+    let (mut total, mut count) = (0.0f64, 0.0f64);
+    for one in salary {
+        total += one as f64;
+        count += 1.0f64;
+
+        min = min.min(one);
+        max = max.max(one);
+    }
+
+    total = total - min as f64 - max as f64;
+    count = count - 2.0;
+
+    total / count
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_average() {
+        struct Testcase {
+            salary: Vec<i32>,
+            expect: f64,
+        }
+        vec![
+            Testcase {
+                salary: vec![4000, 3000, 1000, 2000],
+                expect: 2500.00000,
+            },
+            Testcase {
+                salary: vec![1000, 2000, 3000],
+                expect: 2000.0000,
+            },
+            Testcase {
+                salary: vec![6000, 5000, 4000, 3000, 2000, 1000],
+                expect: 3500.00000,
+            },
+            Testcase {
+                salary: vec![8000, 9000, 2000, 3000, 6000, 1000],
+                expect: 4750.00000,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, Testcase { salary, expect })| {
+            let actual = average(salary);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        })
+    }
+
+    #[test]
+    fn test_mincost_to_hire_workers() {
+        struct Testcase {
+            quality: Vec<i32>,
+            wage: Vec<i32>,
+            k: i32,
+            expect: f64,
+        }
+
+        vec![
+            Testcase {
+                quality: vec![10, 20, 5],
+                wage: vec![70, 50, 30],
+                k: 2,
+                expect: 105.00000,
+            },
+            Testcase {
+                quality: vec![3, 1, 10, 10, 1],
+                wage: vec![4, 8, 2, 2, 7],
+                k: 3,
+                expect: 30.66667,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(
+            |(
+                idx,
+                Testcase {
+                    quality,
+                    wage,
+                    k,
+                    expect,
+                },
+            )| {
+                let actual = mincost_to_hire_workers(quality, wage, k);
+                assert_eq!(expect, actual, "case {} failed", idx);
+            },
+        )
+    }
 
     #[test]
     #[ignore = "暂时不知道怎么解"]

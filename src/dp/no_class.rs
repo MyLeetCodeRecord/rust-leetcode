@@ -338,12 +338,77 @@ pub fn num_factored_binary_trees(mut arr: Vec<i32>) -> i32 {
     result as i32
 }
 
+/// [1235. 规划兼职工作](https://leetcode.cn/problems/maximum-profit-in-job-scheduling)
+/// 
+/// 思路:
+/// 1. 先按照结束时间排序, 之后寻找前一份可能是谁时, 就变成了二分搜索开始时间
+/// 2. dp[i] = max{dp[i-1], dp[k]+profit[i]}
+pub fn job_scheduling(start_time: Vec<i32>, end_time: Vec<i32>, profits: Vec<i32>) -> i32 {
+    let mut zipped = start_time.into_iter().zip(end_time.into_iter()).zip(profits.into_iter()).map(|((start, end), profit)|{
+        (start, end, profit)
+    }).collect::<Vec<(i32, i32, i32)>>();
+    zipped.sort_unstable_by(|one, other|{
+        one.1.cmp(&other.1)
+    });
 
+    let mut dp = vec![0; zipped.len()+1];
+    for i in 1..=zipped.len(){
+        let (start, _, profit) = zipped.get(i-1).unwrap();
+        match zipped.binary_search_by(|item|{
+            item.1.cmp(start)
+        }){
+            // 结束后可以立即开始新的, 则在原来基础上加和
+            // 否则, 只能取前一个
+            Ok(idx) => {
+                dp[i] = std::cmp::max(dp[i-1], dp[idx+1] + *profit);
+            },
+            Err(idx) => {
+                dp[i] = std::cmp::max(dp[i-1], dp[idx] + *profit);
+            }
+        }
+    }
+
+    dp.last().copied().unwrap()
+}
 
 #[cfg(test)]
 mod test {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_job_scheduling(){
+        struct TestCase{
+            start_time: Vec<i32>,
+            end_time: Vec<i32>,
+            profits: Vec<i32>,
+            expect: i32
+        }
+
+        vec![
+            TestCase{
+                start_time: vec![1,2,3,3],
+                end_time: vec![3,4,5,6],
+                profits: vec![50,10,40,70],
+                expect: 120,
+            },
+            TestCase{
+                start_time: vec![1,2,3,4,6],
+                end_time: vec![3,5,10,6,9],
+                profits: vec![20,20,100,70,60],
+                expect: 150,
+            },
+            TestCase{
+                start_time: vec![1,1,1],
+                end_time: vec![2,3,4],
+                profits: vec![5,6,4],
+                expect: 6,
+            }
+        ].into_iter().enumerate().for_each(|(idx, TestCase{start_time, end_time, profits,expect})|{
+            let acutal = job_scheduling(start_time, end_time, profits);
+            assert_eq!(expect, acutal, "case {} failed", idx);
+        })
+    }
 
     #[test]
     fn test_num_factored_binary_trees() {
