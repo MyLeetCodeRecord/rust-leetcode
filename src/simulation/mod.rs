@@ -119,10 +119,72 @@ pub fn give_gem(mut gem: Vec<i32>, operations: Vec<Vec<i32>>) -> i32 {
     gem.last().copied().unwrap() - gem.first().copied().unwrap()
 }
 
+/// [2079. 给植物浇水](https://leetcode.cn/problems/watering-plants)
+pub fn watering_plants(plants: Vec<i32>, capacity: i32) -> i32 {
+    let mut steps = 0i32;
+    let mut water = capacity;
+    let mut idx = 0;
+    while idx < plants.len() {
+        if water >= plants[idx] {
+            // 够用, 直接浇水
+            water -= plants[idx];
+            steps += 1;
+            idx += 1;
+        } else {
+            // 不够用, 补充水
+            water = capacity;
+            steps += idx as i32 * 2;
+        }
+    }
+    steps
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_watering_plants() {
+        struct Testcase {
+            plants: Vec<i32>,
+            capacity: i32,
+            expect: i32,
+        }
+
+        vec![
+            Testcase {
+                plants: vec![2, 2, 3, 3],
+                capacity: 5,
+                expect: 14,
+            },
+            Testcase {
+                plants: vec![1, 1, 1, 4, 2, 3],
+                capacity: 4,
+                expect: 30,
+            },
+            Testcase {
+                plants: vec![7, 7, 7, 7, 7, 7, 7],
+                capacity: 8,
+                expect: 49,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(
+            |(
+                idx,
+                Testcase {
+                    plants,
+                    capacity,
+                    expect,
+                },
+            )| {
+                let actual = watering_plants(plants, capacity);
+                assert_eq!(expect, actual, "case {} failed", idx);
+            },
+        );
+    }
 
     #[test]
     fn test_give_gem() {

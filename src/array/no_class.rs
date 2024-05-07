@@ -234,10 +234,65 @@ pub fn average(salary: Vec<i32>) -> f64 {
     total / count
 }
 
+/// [1652. 拆炸弹](https://leetcode.cn/problems/defuse-the-bomb)
+pub fn decrypt(code: Vec<i32>, k: i32) -> Vec<i32> {
+    let n = code.len();
+    let mut result = vec![0; n];
+    if k == 0{
+    } else if k > 0{
+        for i in 0..n{
+            for j in 1..=k{
+                let j = j as usize;
+                result[i] += code[(i+j)%n];
+            }
+        }
+    } else {
+        for i in 0..n{
+            for j in 1..=(-k){
+                let j = j as usize;
+                result[i] += code[(i+n-j)%n];
+            }
+        }
+    }
+    result
+}
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_decrypt() {
+        struct Testcase {
+            code: Vec<i32>,
+            k: i32,
+            expect: Vec<i32>,
+        }
+
+        vec![
+            Testcase {
+                code: vec![5, 7, 1, 4],
+                k: 3,
+                expect: vec![12, 10, 16, 13],
+            },
+            Testcase {
+                code: vec![1, 2, 3, 4],
+                k: 0,
+                expect: vec![0, 0, 0, 0],
+            },
+            Testcase {
+                code: vec![2, 4, 9, 3],
+                k: -2,
+                expect: vec![12, 5, 6, 13],
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, Testcase { code, k, expect })| {
+            let actual = decrypt(code, k);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_average() {
