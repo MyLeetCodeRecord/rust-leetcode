@@ -36,7 +36,7 @@
 
 ## 参考
 
-- [labuladong 的算法小抄](https://labuladong.gitee.io/algo/)
+- [labuladong 的算法小抄](https://labuladong.online/algo/home/)
 - [代码随想录](https://programmercarl.com/)
 - [OI Wiki](https://oi-wiki.org/)
 - 以及各个题目下面的题解
