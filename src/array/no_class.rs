@@ -206,10 +206,49 @@ pub fn solve_sudoku(_board: &mut Vec<Vec<char>>) {
     todo!()
 }
 
+/// [1793. 好子数组的最大分数](https://leetcode.cn/problems/maximum-score-of-a-good-subarray/?envType=daily-question&envId=2024-03-19)
+/// 
+/// 思路:
+/// 1. 在不改变最小值的前提下, 延展最多的区间
+/// 2. 然后对比这些区间
+pub fn maximum_score(nums: Vec<i32>, k: i32) -> i32 {
+    unimplemented!("暂时不知道怎么解")
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_maximum_score(){
+        struct Testcase{
+            nums: Vec<i32>,
+            k: i32,
+            expect: i32,
+        }
+        vec![
+            Testcase{
+                nums: vec![1, 4, 3, 7, 4, 5],
+                k: 3,
+                expect: 15,
+            },
+            Testcase{
+                nums: vec![5, 5, 4, 5, 4, 1, 1, 1],
+                k: 0,
+                expect: 20,
+            },
+            Testcase{
+                nums: vec![8182,1273,9847,6230,52,1467,6062,726,4852,4507,2460,2041,500,1025,5524],
+                k: 8,
+                expect: 9014
+            }
+        ].into_iter().enumerate().for_each(|(idx, testcase)|{
+            let Testcase{nums, k, expect} = testcase;
+            let actual = maximum_score(nums, k);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     #[ignore = "暂时不知道怎么解"]
