@@ -275,7 +275,6 @@ pub fn advantage_count(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
 
     let (mut left, mut right) = (1, nums1.len());
     while let Some((index, val)) = nums2.pop() {
-        
         match val.cmp(nums1.get(right - 1).unwrap()) {
             Ordering::Greater => {
                 // 用次等马对它的好马
@@ -828,9 +827,149 @@ pub fn max_dist_to_closest(seats: Vec<i32>) -> i32 {
     ans
 }
 
+/// [2462. 雇佣 K 位工人的总代价](https://leetcode.cn/problems/total-cost-to-hire-k-workers/)
+///
+/// 思路:
+/// 1. 如果 candidates * 2 >= len(costs), 则都要取一遍, 等效于取前K小
+/// 2. 如果 candidates * 2 < len(costs), 先min-heap中放入两端的数据, 然后取出一个补充一个
+///     1. 为了标记是从左放入一个, 还是右边放入一个, 可以在元素上标记来自哪个方向
+///     2. 直到两边取值交叉
+/// 
+/// 其实可以更简化, 使用两个heap, 而不是在元素上左标记
+pub fn total_cost(mut costs: Vec<i32>, k: i32, candidates: i32) -> i64 {
+    use std::collections::BinaryHeap;
+
+    let (mut k, candidates) = (k as usize, candidates as usize);
+    if candidates * 2 >= costs.len() {
+        costs.sort_unstable();
+        return costs
+            .iter()
+            .take(k)
+            .fold(0i64, |acc, &item| acc + item as i64);
+    }
+
+    let (mut left, mut right) = (0, costs.len() - 1);
+    let mut total_cost = 0i64;
+
+    #[derive(Debug, Eq)]
+    struct Element {
+        val: i64,
+        flag: bool,
+    }
+    impl Ord for Element {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            self.val.cmp(&other.val).reverse()
+        }
+    }
+    impl PartialOrd for Element {
+        fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+            self.val.partial_cmp(&other.val).map(|raw| raw.reverse())
+        }
+    }
+    impl PartialEq for Element {
+        fn eq(&self, other: &Self) -> bool {
+            self.val.eq(&other.val)
+        }
+    }
+
+    let mut heap = BinaryHeap::new();
+    costs.iter().copied().take(candidates).for_each(|one| {
+        heap.push(Element {
+            val: one as i64,
+            flag: false,
+        });
+        left += 1;
+    });
+    costs
+        .iter()
+        .copied()
+        .rev()
+        .take(candidates)
+        .for_each(|one| {
+            heap.push(Element {
+                val: one as i64,
+                flag: true,
+            });
+            right -= 1;
+        });
+
+    loop {
+        if k == 0 {
+            break;
+        }
+
+        let one = heap.pop().unwrap();
+        total_cost += one.val;
+        k -= 1;
+
+        if one.flag {
+            heap.push(Element {
+                val: costs.get(right).copied().unwrap() as i64,
+                flag: true,
+            });
+            right -= 1;
+        } else {
+            heap.push(Element {
+                val: costs.get(left).copied().unwrap() as i64,
+                flag: false,
+            });
+            left += 1;
+        }
+        if left > right {
+            break;
+        }
+    }
+    // 前后有交叠, 不能重复, 则代表只需要从heap中取出不够的补充即可
+    for _ in 0..k {
+        let one = heap.pop().unwrap();
+        total_cost += one.val;
+    }
+    total_cost
+}
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_total_cost() {
+        struct TestCase {
+            costs: Vec<i32>,
+            k: i32,
+            candidates: i32,
+            expect: i64,
+        }
+
+        vec![
+            TestCase {
+                costs: vec![17, 12, 10, 2, 7, 2, 11, 20, 8],
+                k: 3,
+                candidates: 4,
+                expect: 11,
+            },
+            TestCase {
+                costs: vec![1, 2, 4, 1],
+                k: 3,
+                candidates: 3,
+                expect: 4,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(
+            |(
+                idx,
+                TestCase {
+                    costs,
+                    k,
+                    candidates,
+                    expect,
+                },
+            )| {
+                let actual = total_cost(costs, k, candidates);
+                assert_eq!(expect, actual, "case {} failed", idx);
+            },
+        );
+    }
 
     #[test]
     fn test_min_moves_to_seat() {
@@ -1049,7 +1188,8 @@ mod tests {
             expect: &'static [i32],
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic 1",
                 arr: &[1, 0, 2, 3, 0, 4, 5, 0],
                 expect: &[1, 0, 0, 2, 3, 0, 0, 4],
@@ -1063,7 +1203,8 @@ mod tests {
                 name: "fix 1",
                 arr: &[0, 0, 0, 0, 0, 0, 0],
                 expect: &[0, 0, 0, 0, 0, 0, 0],
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let mut arr = testcase.arr.to_vec();
@@ -1175,7 +1316,8 @@ mod tests {
             expect: &'static str,
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 s: "the sky is blue",
                 expect: "blue is sky the",
@@ -1189,7 +1331,8 @@ mod tests {
                 name: "basic 3",
                 s: "a good   example",
                 expect: "example good a",
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = reverse_words_1(testcase.s.to_string());
@@ -1251,7 +1394,8 @@ mod tests {
             expect: &'static str,
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 s: "abcdefg",
                 k: 2,
@@ -1262,7 +1406,8 @@ mod tests {
                 s: "abcd",
                 k: 2,
                 expect: "bacd",
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = reverse_str(testcase.s.to_string(), testcase.k);
@@ -1279,7 +1424,8 @@ mod tests {
             expect: &'static [i32],
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 nums1: &[2, 7, 11, 15],
                 nums2: &[1, 10, 4, 11],
@@ -1290,7 +1436,8 @@ mod tests {
                 nums1: &[12, 24, 8, 32],
                 nums2: &[13, 25, 32, 11],
                 expect: &[24, 32, 8, 12],
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let acutal = advantage_count(testcase.nums1.to_vec(), testcase.nums2.to_vec());
@@ -1306,7 +1453,8 @@ mod tests {
             val: i32,
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 nums: &[3, 2, 2, 3],
                 val: 3,
@@ -1325,7 +1473,8 @@ mod tests {
                 name: "empty",
                 nums: &[],
                 val: 0,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             use std::collections::HashSet;
@@ -1360,7 +1509,8 @@ mod tests {
             expect: &'static [i32],
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 nums: &[1, 1, 2],
                 expect: &[1, 2],
@@ -1379,7 +1529,8 @@ mod tests {
                 name: "fix 1",
                 nums: &[1, 2],
                 expect: &[1, 2],
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let mut tmp = testcase.nums.to_vec();
@@ -1397,7 +1548,8 @@ mod tests {
             expect: &'static [i32],
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 nums: &[0, 1, 0, 3, 12],
                 expect: &[1, 3, 12, 0, 0],
@@ -1411,7 +1563,8 @@ mod tests {
                 name: "cov 1",
                 nums: &[1, 2, 0, 3, 4, 5],
                 expect: &[1, 2, 3, 4, 5, 0],
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let mut tmp = testcase.nums.to_vec();
@@ -1470,7 +1623,8 @@ mod tests {
             expect: &'static [char],
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 s: &['h', 'e', 'l', 'l', 'o'],
                 expect: &['o', 'l', 'l', 'e', 'h'],
@@ -1479,7 +1633,8 @@ mod tests {
                 name: "basic 2",
                 s: &['H', 'a', 'n', 'n', 'a', 'h'],
                 expect: &['h', 'a', 'n', 'n', 'a', 'H'],
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let mut tmp = testcase.s.to_vec();
@@ -1525,7 +1680,8 @@ mod tests {
             expect: &'static [i32],
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 nums: &[-4, -1, 0, 3, 10],
                 expect: &[0, 1, 9, 16, 100],
@@ -1539,7 +1695,8 @@ mod tests {
                 name: "fix 1",
                 nums: &[1],
                 expect: &[1],
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = sorted_squares(testcase.nums.to_vec());
