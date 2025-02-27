@@ -4,6 +4,16 @@ pub struct ListNode {
     pub next: Option<Box<ListNode>>,
 }
 
+impl ListNode {
+  #[inline]
+  pub fn new(val: i32) -> Self {
+    ListNode {
+      next: None,
+      val
+    }
+  }
+}
+
 // impl TryFrom<&[i32]> for ListNode {
 //   type Error = &'static str;
 

@@ -668,24 +668,26 @@ pub fn backspace_compare(s: String, t: String) -> bool {
                 // 回退符, 计数, 跳过
                 sd += 1;
                 si -= 1;
+                continue;
             } else if sd > 0 {
                 // 需要回退, 回退一格
                 sd -= 1;
                 si -= 1;
-            } else {
-                break;
+                continue;
             }
+            break;
         }
         while ti > 0 {
             if t[ti - 1] == b'#' {
                 td += 1;
                 ti -= 1;
+                continue;
             } else if td > 0 {
                 td -= 1;
                 ti -= 1;
-            } else {
-                break;
+                continue;
             }
+            break;
         }
 
         if ti != 0 && si != 0 {
@@ -696,10 +698,12 @@ pub fn backspace_compare(s: String, t: String) -> bool {
             // 相同, 两边同时向前一格
             si -= 1;
             ti -= 1;
+            continue;
         } else if ti != 0 || si != 0 {
             // 有一个还没有结束
             return false;
         }
+        // 都结束了, 退出
     }
     true
 }
@@ -926,6 +930,7 @@ pub fn total_cost(mut costs: Vec<i32>, k: i32, candidates: i32) -> i64 {
     }
     total_cost
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;

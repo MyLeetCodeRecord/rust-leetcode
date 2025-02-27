@@ -98,8 +98,38 @@ pub fn longest_ones(nums: Vec<i32>, k: i32) -> i32 {
 
 /// [209. 长度最小的子数组](https://leetcode-cn.com/problems/minimum-size-subarray-sum/)
 ///
+/// 思路1: 滑动窗口
 /// 如果窗口内和不够, 就扩展右边界
 /// 如果大于等于, 就尝试收缩左边界, 以便求出最小长度
+/// 
+/// 另一种实现写法
+/// ```
+/// pub fn min_sub_array_len(target: i32, nums: Vec<i32>) -> i32 {
+/// 	let (mut left, mut right) = (0, 0);
+/// 	let mut curr_sum = 0;
+/// 	let mut result = nums.len() + 1;
+/// 	while right < nums.len() || curr_sum >= target{
+/// 	    if curr_sum >= target{
+/// 	        let curr_len = right - left;
+/// 	        result = result.min(curr_len);
+/// 	        
+/// 	        curr_sum = curr_sum - nums.get(left).copied().unwrap_or(0);
+/// 	        left = left + 1;
+/// 	    } else {
+/// 	        curr_sum = curr_sum + nums.get(right).copied().unwrap_or(0);
+/// 	        right = right + 1;
+/// 	    }
+/// 	}
+/// 
+/// 	if result > nums.len(){
+/// 	    0
+/// 	} else {
+/// 	    result as i32
+/// 	}
+/// }
+/// ```
+/// 
+/// 思路2: 前缀和 + 二分 [crate::array::ser::binary_search::min_sub_array_len]
 pub fn min_sub_array_len(target: i32, nums: Vec<i32>) -> i32 {
     let mut min_len: Option<usize> = None;
 

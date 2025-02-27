@@ -39,7 +39,7 @@
 //!     * `left`, `right`为第*x*个中的*x*
 //!     * `left`, `right`的含义不再是索引, 而是字面上的第几个
 //!         * 和*左闭右闭*相似, 等效于同时加1
-//!         * 因此如果判定 `target < nums[mid]`, 则`right = mid -1`, 表示不再检查第`mid`个
+//!         * 因此如果判定 `target < nums[mid]`, 则`right = mid - 1`, 表示不再检查第`mid`个
 //!         * 同理, 如果`target > nums[mid]`, 则`left = mid+1`
 //!         * 终止条件为`while left <= right` 有等号
 //!     * 注意:
@@ -141,6 +141,8 @@
 //! * 困难
 //!     * [668. 乘法表中第k小的数](find_kth_number)
 //!
+
+use std::usize;
 
 /// [704. 二分查找](https://leetcode-cn.com/problems/binary-search/)
 ///
@@ -537,6 +539,7 @@ pub fn peak_index_in_mountain_array(arr: Vec<i32>) -> i32 {
 /// 这个函数保证的是 `[from, I)` cmp不会返回 true, `[from, I)` 可能是空
 ///
 /// 做了防溢出, `from`和`end`可以是0, 即传入索引
+#[deprecated(note = "接口设计的有问题, 外部竟然需要操心内部的二分终止条件, 不合理")]
 fn first_occur<F>(from: usize, end: usize, cmp: F) -> usize
 where
     F: Fn(usize) -> bool,
@@ -567,6 +570,7 @@ where
 /// 这个函数保证的是 `(I, end]` cmp不会返回true, `(I, end]` 可能是空
 ///
 /// 做了防溢出, `from`和`end`可以是0, 即传入索引
+#[deprecated(note = "接口设计的有问题, 外部竟然需要操心内部的二分终止条件, 不合理")]
 fn last_occur<F>(from: usize, end: usize, cmp: F) -> usize
 where
     F: Fn(usize) -> bool,
@@ -591,20 +595,23 @@ where
 }
 
 /// [2560. 打家劫舍 IV](https://leetcode.cn/problems/house-robber-iv/description/)
-/// 
+///
 /// 即`f(y)`为最大偷取金额为`y`的情况下, 可以偷取的房屋最大数量
 /// 显然`f(y)`是非递减函数(y越大, 可以选择的节点越多?)
-/// 
+///
 /// 由于`f(y)`是非递减函数, 因此可以使用二分查找
 pub fn min_capability(nums: Vec<i32>, k: i32) -> i32 {
-    let (mut min, mut max) = (nums.iter().min().copied().unwrap(), nums.iter().max().copied().unwrap());
-    while min <= max{
+    let (mut min, mut max) = (
+        nums.iter().min().copied().unwrap(),
+        nums.iter().max().copied().unwrap(),
+    );
+    while min <= max {
         let mid = min + (max - min) / 2;
 
         let mut count = 0;
         let mut visited = false;
         for &num in nums.iter() {
-            if num <= mid && !visited{
+            if num <= mid && !visited {
                 count += 1;
                 visited = true;
             } else {
@@ -614,7 +621,7 @@ pub fn min_capability(nums: Vec<i32>, k: i32) -> i32 {
 
         // 非递减, 找最小
         // 因此等号在这里
-        if count >= k{
+        if count >= k {
             max = mid - 1;
         } else {
             min = mid + 1;
@@ -623,9 +630,229 @@ pub fn min_capability(nums: Vec<i32>, k: i32) -> i32 {
     min
 }
 
+/// [69. x 的平方根](https://leetcode.cn/problems/sqrtx/)
+pub fn my_sqrt(x: i32) -> i32 {
+    let x = x as i64;
+    let (mut left, mut right) = (0, x);
+
+    while left <= right {
+        let mid = left + (right - left) / 2;
+        let squ = mid * mid;
+        if squ == x {
+            return mid as i32;
+        } else if squ > x {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    right as i32
+}
+
+/// [367. 有效的完全平方数](https://leetcode.cn/problems/valid-perfect-square/description/)
+pub fn is_perfect_square(num: i32) -> bool {
+    let num = num as i64;
+    let (mut left, mut right) = (0, num);
+    while left <= right {
+        let mid = left + (right - left) / 2;
+        let mid_val = mid * mid;
+        if mid_val == num {
+            return true;
+        } else if mid_val > num {
+            right = mid - 1;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return false;
+}
+
+fn first_occur_v2<T, S, F>(s: S, f: F) -> usize
+where
+    T: PartialOrd + Eq,
+    S: AsRef<[T]>,
+    F: Fn(&T) -> bool,
+{
+    let s = s.as_ref();
+    let (mut left, mut right) = (0, s.len());
+    while right - left > 0 {
+        let mid = left + (right - left) / 2;
+        if f(&s[mid]) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    left
+}
+
+/// [209. 长度最小的子数组](https://leetcode-cn.com/problems/minimum-size-subarray-sum/)
+pub fn min_sub_array_len(target: i32, nums: Vec<i32>) -> i32 {
+    let mut pre_sum = vec![0; nums.len()];
+    pre_sum[0] = nums[0];
+
+    for i in 1..nums.len() {
+        pre_sum[i] = pre_sum[i - 1] + nums[i];
+    }
+
+    if pre_sum[0] >= target {
+        return 1;
+    }
+
+    let mut result = None;
+    for i in 0..nums.len() {
+        let at_least = pre_sum[i] - target;
+        let first = first_occur_v2(&pre_sum, |x| *x >= at_least);
+        let curr = result.unwrap_or(usize::MAX);
+        if first < pre_sum.len() {
+            result = Some(std::cmp::min(curr, first - i + 1));
+        }
+    }
+    result.unwrap_or(0) as i32
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_first_occur() {
+        struct TestCase {
+            nums: Vec<i32>,
+            cmp: fn(&i32) -> bool,
+            expect: i32,
+        }
+
+        vec![
+            TestCase {
+                nums: vec![1, 2, 3, 4, 5],
+                cmp: |x| *x >= 3,
+                expect: 2,
+            },
+            TestCase {
+                nums: vec![1, 2, 3, 4, 5],
+                cmp: |x| *x >= 6,
+                expect: 5,
+            },
+            TestCase {
+                nums: vec![1, 2, 3, 4, 5],
+                cmp: |x| *x >= 0,
+                expect: 0,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, TestCase { nums, cmp, expect })| {
+            let actual = first_occur_v2(&nums, cmp);
+            assert_eq!(expect as usize, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_min_sub_array_len() {
+        struct TestCase {
+            name: &'static str,
+            target: i32,
+            nums: &'static [i32],
+            expect: i32,
+        }
+
+        [
+            TestCase {
+                name: "basic",
+                target: 7,
+                nums: &[2, 3, 1, 2, 4, 3],
+                expect: 2,
+            },
+            TestCase {
+                name: "basic 2",
+                target: 4,
+                nums: &[1, 4, 4],
+                expect: 1,
+            },
+            TestCase {
+                name: "basic 3",
+                target: 11,
+                nums: &[1, 1, 1, 1, 1, 1, 1, 1],
+                expect: 0,
+            },
+            TestCase {
+                name: "fix 1",
+                target: 11,
+                nums: &[1, 2, 3, 4, 5],
+                expect: 3,
+            },
+            TestCase {
+                name: "fix 2",
+                target: 15,
+                nums: &[1, 2, 3, 4, 5],
+                expect: 5,
+            },
+        ]
+        .iter()
+        .for_each(|testcase| {
+            let nums = testcase.nums.to_vec();
+            let actual = min_sub_array_len(testcase.target, nums);
+            assert_eq!(testcase.expect, actual, "{} failed", testcase.name);
+        });
+    }
+
+    #[test]
+    fn test_is_perfect_square() {
+        struct TestCase {
+            num: i32,
+            expect: bool,
+        }
+
+        vec![
+            TestCase {
+                num: 16,
+                expect: true,
+            },
+            TestCase {
+                num: 14,
+                expect: false,
+            },
+            TestCase {
+                num: 1,
+                expect: true,
+            },
+            TestCase {
+                num: 2,
+                expect: false,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, TestCase { num, expect })| {
+            let actual = is_perfect_square(num);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_may_sqrt() {
+        struct TestCase {
+            x: i32,
+            expect: i32,
+        }
+
+        vec![
+            TestCase { x: 4, expect: 2 },
+            TestCase { x: 8, expect: 2 },
+            TestCase { x: 9, expect: 3 },
+            TestCase {
+                x: 2147395599,
+                expect: 46339,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, TestCase { x, expect })| {
+            let actual = my_sqrt(x);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_min_capability() {
@@ -705,7 +932,8 @@ mod tests {
             expect: i32,
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 k: 0,
                 expect: 5,
@@ -719,7 +947,8 @@ mod tests {
                 name: "basic 3",
                 k: 3,
                 expect: 5,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = preimage_size_fzf(testcase.k);
@@ -735,7 +964,8 @@ mod tests {
             expect: i32,
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic 1",
                 n: 3,
                 expect: 0,
@@ -754,7 +984,8 @@ mod tests {
                 name: "fix 1",
                 n: 10,
                 expect: 2,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = trailing_zeroes(testcase.n);
@@ -771,7 +1002,8 @@ mod tests {
             expect: i32,
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 nums: &[4, 5, 6, 7, 0, 1, 2],
                 target: 0,
@@ -794,7 +1026,8 @@ mod tests {
                 nums: &[3, 5, 1],
                 target: 3,
                 expect: 0,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = search_2(testcase.nums.to_vec(), testcase.target);
@@ -810,7 +1043,8 @@ mod tests {
             expect: &'static [i32],
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 intervals: &[&[1, 2]],
                 expect: &[-1],
@@ -824,7 +1058,8 @@ mod tests {
                 name: "basic 3",
                 intervals: &[&[1, 4], &[2, 3], &[3, 4]],
                 expect: &[-1, 2, -1],
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let intervals = testcase.intervals.iter().map(|x| x.to_vec()).collect();
@@ -843,7 +1078,8 @@ mod tests {
             expect: i32,
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 m: 3,
                 n: 3,
@@ -863,7 +1099,8 @@ mod tests {
                 n: 3,
                 k: 2,
                 expect: 2,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = find_kth_number(testcase.m, testcase.n, testcase.k);
@@ -880,7 +1117,8 @@ mod tests {
             expect: i32,
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 candies: &[5, 8, 6],
                 k: 3,
@@ -891,7 +1129,8 @@ mod tests {
                 candies: &[2, 5],
                 k: 11,
                 expect: 0,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = maximum_candies(testcase.candies.to_vec(), testcase.k);
@@ -907,7 +1146,8 @@ mod tests {
             target: i32,
             expect: i32,
         }
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 nums: vec![-1, 0, 3, 5, 9, 12],
                 target: 9,
@@ -918,7 +1158,8 @@ mod tests {
                 nums: vec![-1, 0, 3, 5, 9, 12],
                 target: 2,
                 expect: -1,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = search(testcase.nums.clone(), testcase.target);
@@ -934,7 +1175,8 @@ mod tests {
             target: i32,
             expect: i32,
         }
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 nums: vec![1, 3, 5, 6],
                 target: 5,
@@ -951,7 +1193,8 @@ mod tests {
                 nums: vec![1, 3, 5, 6],
                 target: 7,
                 expect: 4,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = search_insert(testcase.nums.clone(), testcase.target);
@@ -1028,7 +1271,8 @@ mod tests {
             expect: i32,
         }
 
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 piles: vec![3, 6, 7, 11],
                 h: 8,
@@ -1045,7 +1289,8 @@ mod tests {
                 piles: vec![30, 11, 23, 4, 20],
                 h: 6,
                 expect: 23,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = min_eating_speed(testcase.piles.clone(), testcase.h);
@@ -1061,7 +1306,8 @@ mod tests {
             days: i32,
             expect: i32,
         }
-        [TestCase {
+        [
+            TestCase {
                 name: "basic",
                 weights: vec![1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
                 days: 5,
@@ -1078,7 +1324,8 @@ mod tests {
                 weights: vec![1, 2, 3, 1, 1],
                 days: 4,
                 expect: 3,
-            }]
+            },
+        ]
         .iter()
         .for_each(|testcase| {
             let actual = ship_within_days(testcase.weights.clone(), testcase.days);

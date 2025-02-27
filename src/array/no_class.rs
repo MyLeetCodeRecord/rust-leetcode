@@ -216,6 +216,35 @@ pub fn mincost_to_hire_workers(quality: Vec<i32>, wage: Vec<i32>, k: i32) -> f64
     todo!()
 }
 
+/// [2848. Points That Intersect With Cars](https://leetcode.com/problems/points-that-intersect-with-cars/description/)
+/// 
+/// the input is many car parking ranges. maybe the range is overlapped.
+/// count the number of how many cars parked in each point.
+pub fn number_of_points(mut nums: Vec<Vec<i32>>) -> i32 {
+    nums.sort_by(|a, b| a[0].cmp(&b[0]));
+
+    let (pre_start, mut pre_end) = {
+        let init = &nums[0];
+        (init[0], init[1])
+    };
+    let mut result = pre_end - pre_start + 1;
+
+    for item in nums.iter().skip(1){
+        let (start, end) = (item[0], item[1]);
+
+        if start <= pre_end{
+            if end > pre_end{
+                result += end - pre_end;
+            }
+        } else {
+            result += end - start + 1;
+        }
+
+        pre_end = end.max(pre_end);
+    }
+    result
+}
+
 /// [1491. 去掉最低工资和最高工资后的工资平均值](https://leetcode.cn/problems/average-salary-excluding-the-minimum-and-maximum-salary)
 pub fn average(salary: Vec<i32>) -> f64 {
     let (mut min, mut max) = (i32::MAX, i32::MIN);
@@ -238,6 +267,36 @@ pub fn average(salary: Vec<i32>) -> f64 {
 mod tests {
     use super::*;
     use crate::vec2;
+
+    #[test]
+    fn test_number_of_points(){
+        struct Testcase{
+            nums: Vec<Vec<i32>>,
+            expect: i32,
+        }
+
+        vec![
+            Testcase{
+                nums: vec2![[3,6],[1,5],[4,7]],
+                expect: 7,
+            },
+            Testcase{
+                nums: vec2![[1,3],[5,8]],
+                expect: 7,
+            },
+            Testcase{
+                nums: vec2![[4,4],[9,10],[9,10],[3,8]],
+                expect: 8,
+            },
+            Testcase{
+                nums: vec2![[2,5],[3,8],[1,6],[4,10]],
+                expect: 10,
+            },
+        ].into_iter().enumerate().for_each(|(idx, Testcase{nums, expect})|{
+            let actual = number_of_points(nums);
+            assert_eq!(expect, actual, "case {} failed", idx);
+        });
+    }
 
     #[test]
     fn test_average() {

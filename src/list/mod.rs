@@ -1,5 +1,5 @@
 //! 链表题目
-//! 
+//!
 //! 由于rust写链表是真的难受, 因此将链表相关的题目汇总到这里.
 //! 当然也会右很多其他范式的题目, 比如[two pointers](crate::array::ser::two_pointers).
 //! 这种题目, 会在文档部分补上连接, 关联起来.
@@ -41,7 +41,7 @@ use datastructure::ListNode;
 ///     head
 /// }
 /// ```
-/// 
+///
 /// 递归写法
 /// ```ignore
 /// pub fn remove_elements(head: Option<Box<ListNode>>, val: i32) -> Option<Box<ListNode>> {
@@ -75,36 +75,39 @@ pub fn remove_elements(head: Option<Box<ListNode>>, val: i32) -> Option<Box<List
 }
 
 #[cfg(test)]
-mod test{
+mod test {
     use super::*;
     use macros::list;
 
     #[test]
-    fn test_remove_elements(){
-        struct Testcase{
+    fn test_remove_elements() {
+        struct Testcase {
             head: Option<Box<ListNode>>,
             val: i32,
-            expect: Option<Box<ListNode>>
+            expect: Option<Box<ListNode>>,
         }
 
         vec![
-            Testcase{
-                head: list!([1,2,6,3,4,5,6]),
+            Testcase {
+                head: list!([1, 2, 6, 3, 4, 5, 6]),
                 val: 6,
-                expect: list!([1,2,3,4,5]),
+                expect: list!([1, 2, 3, 4, 5]),
             },
-            Testcase{
+            Testcase {
                 head: list!([]),
                 val: 1,
-                expect: list!([])
+                expect: list!([]),
             },
-            Testcase{
+            Testcase {
                 head: list!([7, 7, 7, 7]),
                 val: 7,
-                expect: list!([])
-            }
-        ].into_iter().enumerate().for_each(|(idx, testcase)|{
-            let Testcase{head, val, expect} = testcase;
+                expect: list!([]),
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase { head, val, expect } = testcase;
             let acutal = remove_elements(head, val);
             assert_eq!(expect, acutal, "case {} failed", idx);
         });
