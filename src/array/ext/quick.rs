@@ -136,7 +136,7 @@ pub fn find_kth_largest(nums: Vec<i32>, k: i32) -> i32 {
     let mut nums = nums;
     let length = nums.len();
     sort_array_range(&mut nums, 0, length - 1, k as usize - 1);
-    return nums.get(k as usize - 1).copied().unwrap_or(0);
+    nums.get(k as usize - 1).copied().unwrap_or(0)
 }
 
 /// [56. 合并区间](https://leetcode.cn/problems/merge-intervals/)

@@ -3,7 +3,6 @@
     "coverage-gutters.showLineCoverage": true,
     "rust-analyzer.procMacro.enable": true,
     "rust-analyzer.debug.engine": "vadimcn.vscode-lldb",
-    "rust-analyzer.debug.openDebugPane": true,
     "rust-analyzer.inlayHints.typeHints.hideNamedConstructor": true,
     "coverage-gutters.coverageBaseDir": "target/coverage",
     "coverage-gutters.coverageFileNames": [
@@ -11,5 +10,6 @@
         "cov.xml",
         "coverage.xml",
         "jacoco.xml"
-    ]
+    ],
+    "editor.inlineSuggest.enabled": false
 }

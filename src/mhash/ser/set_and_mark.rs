@@ -198,11 +198,10 @@ pub fn min_mutation(start: String, end: String, bank: Vec<String>) -> i32 {
         }
 
         fn hit(&self, s1: &String, s2: &String) -> Option<usize> {
-            if let Some(inner) = self.cache.get(s1) {
-                if let Some(d) = inner.get(s2) {
+            if let Some(inner) = self.cache.get(s1)
+                && let Some(d) = inner.get(s2) {
                     return Some(*d);
                 }
-            }
             None
         }
         fn store(&mut self, s1: &String, s2: &String, d: usize) {

@@ -19,15 +19,14 @@ pub fn is_valid(s: String) -> bool {
             continue;
         }
         let mut mat: bool = false;
-        if let Some(last) = stack.last() {
-            if (b')'.eq(b) && b'('.eq(last))
+        if let Some(last) = stack.last()
+            && ((b')'.eq(b) && b'('.eq(last))
                 || (b']'.eq(b) && b'['.eq(last))
-                || (b'}'.eq(b) && b'{'.eq(last))
+                || (b'}'.eq(b) && b'{'.eq(last)))
             {
                 stack.pop();
                 mat = true;
             }
-        }
         if !mat {
             stack.push(*b);
         }
@@ -44,11 +43,10 @@ pub fn remove_outer_parentheses(s: String) -> String {
             stack.push((chr, idx));
         } else {
             let mut last_i = None;
-            if let Some(last) = stack.last() {
-                if last.0 == '(' {
+            if let Some(last) = stack.last()
+                && last.0 == '(' {
                     last_i.replace(last.1);
                 }
-            }
             if let Some(lasti) = last_i {
                 stack.pop();
                 if stack.is_empty() {

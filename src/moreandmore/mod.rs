@@ -504,8 +504,8 @@ pub fn schedule_course(mut courses: Vec<Vec<i32>>) -> i32 {
             continue;
         } else {
             // 学不完, 看下最耗时那个, 能不能换掉
-            if let Some(max_duration) = heap.peek(){
-                if max_duration > &duration{
+            if let Some(max_duration) = heap.peek()
+                && max_duration > &duration{
                     // 如果前面有个耗时更长的, 换掉
                     // 万一换掉也不够deadline呢? 
                     // 因为前面已经排好序了, 耗时更长的, deadline也更早
@@ -516,7 +516,6 @@ pub fn schedule_course(mut courses: Vec<Vec<i32>>) -> i32 {
                     heap.pop();
                     heap.push(duration);
                 }
-            }
         }
     }
 

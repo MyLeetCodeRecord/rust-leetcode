@@ -128,7 +128,7 @@ pub mod black_random {
 
                 let (mut lo, mut hi) = (0, self.blacklist.len() - 1);
                 while lo < hi {
-                    let mid = (lo + hi + 1) / 2;
+                    let mid = (lo + hi).div_ceil(2);
                     if x.gt(self.blacklist.get(mid).unwrap()) {
                         hi = mid - 1;
                     } else {

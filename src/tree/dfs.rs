@@ -30,21 +30,19 @@ pub fn distance_k(
         }
         // 如果没找到, 优先找左节点, 再找右节点
         // 同时为了防止重复, 需要检查是否已经访问过
-        if let Some(left) = node.borrow().left.clone() {
-            if !visited.contains(&left.borrow().val) {
+        if let Some(left) = node.borrow().left.clone()
+            && !visited.contains(&left.borrow().val) {
                 // 在深入一层之前, 先把当前节点放入栈中
                 stack.push(node.clone());
                 stack.push(left);
                 continue;
             }
-        }
-        if let Some(right) = node.borrow().right.clone() {
-            if !visited.contains(&right.borrow().val) {
+        if let Some(right) = node.borrow().right.clone()
+            && !visited.contains(&right.borrow().val) {
                 stack.push(node.clone());
                 stack.push(right);
                 continue;
             }
-        }
         // 没有子节点, 或者子节点已经访问过, 那么就pop
         // 同时标记为已访问
         // 此时不再压栈
@@ -61,16 +59,14 @@ pub fn distance_k(
             ret.push(node.unwrap().borrow().val);
             return;
         }
-        if let Some(left) = node.clone().unwrap().borrow().left.clone() {
-            if !visited.contains(&left.borrow().val) {
+        if let Some(left) = node.clone().unwrap().borrow().left.clone()
+            && !visited.contains(&left.borrow().val) {
                 dfs(ret, visited, Some(left), lvl - 1);
             }
-        }
-        if let Some(right) = node.clone().unwrap().borrow().right.clone() {
-            if !visited.contains(&right.borrow().val) {
+        if let Some(right) = node.clone().unwrap().borrow().right.clone()
+            && !visited.contains(&right.borrow().val) {
                 dfs(ret, visited, Some(right), lvl - 1);
             }
-        }
         visited.insert(node.unwrap().borrow().val);
     }
 

@@ -61,7 +61,7 @@ pub fn shortest_path_length(graph: Vec<Vec<i32>>) -> i32 {
 pub fn k_similarity(s1: String, s2: String) -> i32 {
     use std::collections::{HashSet, VecDeque};
 
-    let n = s1.as_bytes().len();
+    let n = s1.len();
     let s2b = s2.as_bytes();
 
     let mut step = 0;

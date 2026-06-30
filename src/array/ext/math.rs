@@ -41,7 +41,7 @@ pub fn min_moves2(nums: Vec<i32>) -> i32 {
 
     let a = nums.get(length / 2).copied().unwrap();
     let b = {
-        if length % 2 == 0 {
+        if length.is_multiple_of(2) {
             nums.get(length / 2).copied().unwrap()
         } else {
             nums.get(length / 2 - 1).copied().unwrap()
@@ -294,7 +294,7 @@ pub fn consecutive_numbers_sum(n: i32) -> i32 {
 ///             {
 ///                 *counter.entry(s[j]).or_insert(0) += 1;
 ///             }
-///             cnt += counter.iter().filter(|(_, &v)| v == 1).count();
+///             cnt += counter.iter().filter(|&(_, &v)| v == 1).count();
 ///         }
 ///     }
 ///     cnt as i32
@@ -334,7 +334,7 @@ pub fn unique_letter_string(s: String) -> i32 {
         curr_pos[i] = pos;
     }
     // 对于只出现过一次的字符, 上面循环统计不到, 即等效 后一个 的位置为字符结尾
-    for (last, curr) in last_pos.into_iter().zip(curr_pos.into_iter()) {
+    for (last, curr) in last_pos.into_iter().zip(curr_pos) {
         if curr > -1 {
             ans += (curr - last) * (s.len() as i32 - curr);
         }

@@ -42,8 +42,8 @@ pub fn largest_island(grid: Vec<Vec<i32>>) -> i32 {
                 (row, col + 1),                           // 右边
                 (row + 1, col),                           // 下边
             ] {
-                if let Some(line) = grid.get(r) {
-                    if let Some(ele) = line.get(c) {
+                if let Some(line) = grid.get(r)
+                    && let Some(ele) = line.get(c) {
                         if visited_map[r][c] != 0 {
                             continue;
                         }
@@ -55,7 +55,6 @@ pub fn largest_island(grid: Vec<Vec<i32>>) -> i32 {
                             zero.push((r, c));
                         }
                     }
-                }
             }
         }
         ret
@@ -104,14 +103,13 @@ pub fn largest_island(grid: Vec<Vec<i32>>) -> i32 {
             (row, col + 1),                           // 右边
             (row + 1, col),                           // 下边
         ] {
-            if let Some(line) = grid.get(r) {
-                if line.get(c).is_some() {
+            if let Some(line) = grid.get(r)
+                && line.get(c).is_some() {
                     let id = visited_map[r][c];
                     if visited_area.insert(id) {
                         area += area_size_map.get(&id).copied().unwrap_or(0);
                     }
                 }
-            }
         }
         max_area = max_area.max(area);
     }

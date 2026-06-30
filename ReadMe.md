@@ -16,7 +16,7 @@
 - OJ: 
   - [LeetCode][leetcode]
 - 语言: [Rust][rust]
-- IDE: [我的 IDE 配置][我的ide 配置]
+- IDE: VSCode(关闭了自动补全, 否则AI又快又准)
 - 一些辅助工具
   - [LaTeX公式编辑器](https://www.latexlive.com/##)
 
@@ -24,7 +24,7 @@
 
 - 题目的*解法&说明*都在代码文档中标注了. 可以执行`cargo doc`查看.
 - 利用 Rust 的单测, 对题目说明中的基础测试用例和修复过程中的 badcase 都做了校验, 可以通过`cargo test`查看.
-- 覆盖率使用了[grcov](https://github.com/mozilla/grcov) 和 [codecov](https://about.codecov.io/), 可参考前面的[IDE 配置][我的ide 配置]
+- 覆盖率使用了[grcov](https://github.com/mozilla/grcov) 和 [codecov](https://about.codecov.io/)
 
 ### 其他
 
@@ -49,4 +49,3 @@ MIT
 
 [leetcode]: https://leetcode-cn.com/problemset/all/
 [rust]: https://www.rust-lang.org/
-[我的ide 配置]: https://www.wolai.com/4NmTTcVoLjSGPLxpKMYJRp

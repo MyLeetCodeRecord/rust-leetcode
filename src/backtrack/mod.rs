@@ -84,7 +84,7 @@ pub fn split_into_fibonacci(num: String) -> Vec<i32> {
     }
 
     let mut ans = vec![];
-    if backtrack(&mut ans, num.as_bytes(), num.as_bytes().len(), 0, 0, 0) {
+    if backtrack(&mut ans, num.as_bytes(), num.len(), 0, 0, 0) {
         ans.into_iter().map(|n| n as i32).collect()
     } else {
         vec![]

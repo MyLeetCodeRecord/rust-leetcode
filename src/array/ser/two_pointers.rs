@@ -1,6 +1,6 @@
 //! # 双指针
 //! > swap 不就是双指针吗
-//! 特点: 就地; 相对
+//! > 特点: 就地; 相对
 //!
 //! ## 概念
 //! 双指针主要有 **快慢指针**, **左右指针**.
@@ -269,7 +269,7 @@ pub fn advantage_count(nums1: Vec<i32>, nums2: Vec<i32>) -> Vec<i32> {
     let mut nums1 = nums1;
     nums1.sort();
     let mut nums2 = nums2.into_iter().enumerate().collect::<Vec<(usize, i32)>>();
-    nums2.sort_by(|a, b| a.1.cmp(&b.1));
+    nums2.sort_by_key(|a| a.1);
 
     let mut result = nums1.clone();
 
@@ -410,11 +410,10 @@ pub fn reverse_words_1(s: String) -> String {
             need_space = false;
         }
     }
-    if let Some(c) = bytes.get(insert_pos - 1) {
-        if *c == b' ' {
+    if let Some(c) = bytes.get(insert_pos - 1)
+        && *c == b' ' {
             insert_pos -= 1;
         }
-    }
     bytes.truncate(insert_pos);
 
     let mut start = 0;

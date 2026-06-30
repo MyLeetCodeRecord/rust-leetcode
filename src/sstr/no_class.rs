@@ -262,7 +262,7 @@ pub fn find_replace_string(
             targets[i].as_str(),
         ));
     }
-    ops.sort_by(|a, b| a.0.cmp(&b.0));
+    ops.sort_by_key(|a| a.0);
 
     let mut ans = String::new();
 

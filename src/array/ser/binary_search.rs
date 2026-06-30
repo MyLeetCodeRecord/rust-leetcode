@@ -367,7 +367,7 @@ pub fn find_right_interval(intervals: Vec<Vec<i32>>) -> Vec<i32> {
         .enumerate()
         .map(|(idx, rng)| (rng.first().copied().unwrap(), idx))
         .collect::<Vec<(i32, usize)>>();
-    start.sort_by(|a, b| a.0.cmp(&b.0));
+    start.sort_by_key(|a| a.0);
 
     let mut ret = vec![];
     for inter in intervals.iter() {

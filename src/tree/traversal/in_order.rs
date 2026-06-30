@@ -48,7 +48,7 @@ pub fn is_valid_bst(root: Option<Rc<RefCell<TreeNode>>>) -> bool {
 
     inorder(&mut store, root);
 
-    store.windows(2).all(|w| &w[0] < &w[1])
+    store.windows(2).all(|w| w[0] < w[1])
 }
 
 /// [98. 验证二叉搜索树](https://leetcode.cn/problems/validate-binary-search-tree/)

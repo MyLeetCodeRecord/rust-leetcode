@@ -58,7 +58,7 @@ fn divisors(integer: u32) -> Result<Vec<u32>, String> {
     // assert!((u32::MAX as f64) < f64::MAX );
 	let mut div = vec![];
     for i in 2..(integer as f64).sqrt() as u32 + 1{
-        if integer%i == 0{
+        if integer.is_multiple_of(i){
             div.push(i);
             div.push(integer/i);
         }

@@ -33,7 +33,7 @@ pub fn k_similarity(s1: String, s2: String) -> i32 {
         fn heuristic(&self) -> usize {
             // 直接使用 diff_count 并不一定得到 最小交换
             // 启发式搜索能取到最小cost的条件是 heuristic 比实际值小, 不包含等于
-            (self.diff_count() + 1) / 2
+            self.diff_count().div_ceil(2)
         }
     }
 

@@ -1,11 +1,11 @@
 [package]
 name = "macros"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 description = ""
 
 [lib]
-proc_macro=true
+proc-macro=true
 
 [[test]]
 name = "tests"

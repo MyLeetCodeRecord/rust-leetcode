@@ -79,9 +79,9 @@ pub fn subtree_with_all_deepest(
         if left_depth == right_depth {
             (Some(root), left_depth)
         } else if left_depth > right_depth {
-            return (left, left_depth);
+            (left, left_depth)
         } else {
-            return (right, right_depth);
+            (right, right_depth)
         }
     }
 
