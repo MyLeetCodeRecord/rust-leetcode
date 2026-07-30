@@ -5,6 +5,7 @@
 //! * 中等
 //!     * [98. 验证二叉搜索树](is_valid_bst)
 //!     * [98. 验证二叉搜索树](is_valid_bst_2)
+//!     * [2476. 二叉搜索树最近节点查询](closest_nodes)
 //! * 困难
 
 use datastructure::TreeNode;
@@ -64,14 +65,16 @@ pub fn is_valid_bst_2(root: Option<Rc<RefCell<TreeNode>>>) -> bool {
         let (l, lmin, lmax, lnone) = inorder(inner.borrow().left.clone());
         if !l {
             return (false, 0, 0, false);
-        } else if !lnone && v <= lmax {
+        }
+        if !lnone && v <= lmax {
             return (false, 0, 0, false);
         }
 
         let (r, rmin, rmax, rnone) = inorder(inner.borrow().right.clone());
         if !r {
             return (false, 0, 0, false);
-        } else if !rnone && v >= rmin {
+        }
+        if !rnone && v >= rmin {
             return (false, 0, 0, false);
         }
 
@@ -82,10 +85,210 @@ pub fn is_valid_bst_2(root: Option<Rc<RefCell<TreeNode>>>) -> bool {
     flag
 }
 
+/// [2476. 二叉搜索树最近节点查询](https://leetcode.cn/problems/closest-nodes-queries-in-a-binary-search-tree/)
+///
+/// ## 思路2: 利用二茬搜索树的性质, 递归. 实际不可行, 因为题目没有保证树的平衡性, 会超时
+/// ## 思路1: 展开成有序数组, 二分查找
+pub fn closest_nodes(root: Option<Rc<RefCell<TreeNode>>>, queries: Vec<i32>) -> Vec<Vec<i32>> {
+    fn inorder(store: &mut Vec<i32>, node: Option<Rc<RefCell<TreeNode>>>) {
+        if node.is_none() {
+            return;
+        }
+        let inner = node.unwrap().clone();
+
+        inorder(store, inner.borrow().left.clone());
+        store.push(inner.borrow().val);
+        inorder(store, inner.borrow().right.clone());
+    }
+    let mut store = vec![];
+    inorder(&mut store, root);
+
+    let mut result = vec![];
+    for q in queries {
+        match store.binary_search(&q) {
+            Ok(_) => {
+                result.push(vec![q, q]);
+                continue;
+            }
+            Err(idx) => {
+                if idx == 0 {
+                    result.push(vec![-1, store[0]]);
+                } else if idx == store.len() {
+                    result.push(vec![store[store.len() - 1], -1]);
+                } else {
+                    result.push(vec![store[idx - 1], store[idx]]);
+                }
+            }
+        }
+    }
+    result
+}
+
+/// [235. 二叉搜索树的最近公共祖先](https://leetcode.cn/problems/lowest-common-ancestor-of-a-binary-search-tree/description/)
+///
+/// ## 思路
+/// 由于是二叉搜索树, 因此只需要找到一个能将两个值左右分割的点即可, 不用存储父节点的栈
+pub fn lowest_common_ancestor(
+    root: Option<Rc<RefCell<TreeNode>>>,
+    p: Option<Rc<RefCell<TreeNode>>>,
+    q: Option<Rc<RefCell<TreeNode>>>,
+) -> Option<Rc<RefCell<TreeNode>>> {
+    let p = p.unwrap().borrow().val;
+    let q = q.unwrap().borrow().val;
+
+    let mut node = root;
+    while let Some(inner) = node {
+        let v = inner.borrow().val;
+        if p < v && q < v {
+            node = inner.borrow().left.clone();
+        } else if p > v && q > v {
+            node = inner.borrow().right.clone();
+        } else {
+            return Some(inner);
+        }
+    }
+    None
+}
+
+/// [938. 二叉搜索树的范围和](https://leetcode.cn/problems/range-sum-of-bst/)
+pub fn range_sum_bst(root: Option<Rc<RefCell<TreeNode>>>, low: i32, high: i32) -> i32 {
+    fn inorder(node: Option<Rc<RefCell<TreeNode>>>, store: &mut Vec<i32>) {
+        if node.is_none() {
+            return;
+        }
+        let inner = node.unwrap().clone();
+        inorder(inner.borrow().left.clone(), store);
+        store.push(inner.borrow().val);
+        inorder(inner.borrow().right.clone(), store);
+    }
+    let mut store = vec![];
+    inorder(root, &mut store);
+
+    let left = match store.binary_search(&low) {
+        Ok(idx) => idx,
+        Err(idx) => idx,
+    };
+    let right = match store.binary_search(&high) {
+        Ok(idx) => idx+1,
+        Err(idx) => idx,
+    };
+    //println!("left: {}, right: {}, store {:?}", left, right, &store[left..right]);
+
+    store[left..right].iter().sum()
+}
+
 #[cfg(test)]
 mod tests {
+    use crate::vec2;
+
     use super::*;
     use macros::tree;
+
+    #[test]
+    fn test_range_sum_bst() {
+        struct Testcase {
+            tree: Option<Rc<RefCell<TreeNode>>>,
+            low: i32,
+            high: i32,
+            expect: i32,
+        }
+
+        vec![
+            Testcase {
+                tree: tree!({10, left: {5, left: {3}, right: {7}}, right: {15, right: {18}}}),
+                low: 7,
+                high: 15,
+                expect: 32,
+            },
+            Testcase {
+                tree: tree!{val: 10, left: {val: 5, left: {val: 3, left: {val: 1}}, right: {val: 7, left: {val:6}}}, right: {val: 15,  left: {val: 13}, right: {val: 18}}},
+                low: 6,
+                high: 10,
+                expect: 23,
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase {
+                tree,
+                low,
+                high,
+                expect,
+            } = testcase;
+            let acutal = range_sum_bst(tree, low, high);
+            assert_eq!(expect, acutal, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_lowest_common_ancestor() {
+        struct Testcase {
+            tree: Option<Rc<RefCell<TreeNode>>>,
+            p: Option<Rc<RefCell<TreeNode>>>,
+            q: Option<Rc<RefCell<TreeNode>>>,
+            expect: Option<Rc<RefCell<TreeNode>>>,
+        }
+
+        vec![
+            Testcase {
+                tree: tree!({6, left: {2, left: {0}, right: {4, left: {3}, right: {5}}}, right: {8, left: {7}, right: {9}}}),
+                p: tree!({2}),
+                q: tree!({8}),
+                expect: tree!({6}),
+            },
+            Testcase {
+                tree: tree!({6, left: {2, left: {0}, right: {4, left: {3}, right: {5}}}, right: {8, left: {7}, right: {9}}}),
+                p: tree!({2}),
+                q: tree!({4}),
+                expect: tree!({2}),
+            },
+        ]
+        .into_iter()
+        .enumerate()
+        .for_each(|(idx, testcase)| {
+            let Testcase {
+                tree,
+                p,
+                q,
+                expect,
+            } = testcase;
+            let acutal = lowest_common_ancestor(tree, p, q);
+            let actual_val = acutal.map(|x| x.borrow().val).unwrap();
+            let expect_val = expect.map(|x| x.borrow().val).unwrap();
+            assert_eq!(expect_val, actual_val, "case {} failed", idx);
+        });
+    }
+
+    #[test]
+    fn test_closest_nodes() {
+        struct TestCase {
+            tree: Option<Rc<RefCell<TreeNode>>>,
+            queries: Vec<i32>,
+            expected: Vec<Vec<i32>>,
+        }
+
+        vec![
+            TestCase{
+                tree: tree!{val:6, left:{val:2, left: {val:1}, right: {val:4}}, right: {val:13, left: {val:9}, right: {val: 15, left: {val: 14}}}},
+                queries: vec![2, 5, 16],
+                expected: vec![vec![2, 2], vec![4, 6], vec![15, -1]],
+            },
+            TestCase{
+                tree: tree!{val: 4, right: {val: 9}},
+                queries: vec![3],
+                expected: vec![vec![-1, 4]],
+            },
+            TestCase{
+                tree: tree!{val: 16, left: {val: 8, left: {val: 1, right: {val: 2, right: {val: 7}}}, right: {val:12, left: {val: 9}}}, right: {val: 18, right: {val: 20}}},
+                queries: vec![8,14,285508,6],
+                expected: vec2![[8,8],[12,16],[20,-1],[2,7]],
+            }
+        ].into_iter().enumerate().for_each(|(idx, TestCase{tree, queries, expected})|{
+            let result = closest_nodes(tree, queries);
+            assert_eq!(result, expected, "index: {}", idx);
+        })
+    }
 
     #[test]
     fn test_is_valid_bst_2() {
@@ -100,9 +303,8 @@ mod tests {
                 expect: true,
             },
             Testcase {
-                tree: 
-                    tree!({5, left: {1}, right:{4, left: {3}, right:{6} }}),
-                
+                tree: tree!({5, left: {1}, right:{4, left: {3}, right:{6} }}),
+
                 expect: false,
             },
             Testcase {
@@ -132,9 +334,8 @@ mod tests {
                 expect: true,
             },
             Testcase {
-                tree: 
-                    tree!({5, left: {1}, right:{4, left: {3}, right:{6} }}),
-                
+                tree: tree!({5, left: {1}, right:{4, left: {3}, right:{6} }}),
+
                 expect: false,
             },
         ]
@@ -151,7 +352,7 @@ mod tests {
     fn test_inorder_traversal() {
         struct Testcase {
             tree: Option<Rc<RefCell<TreeNode>>>,
-            expect:Vec<i32>,
+            expect: Vec<i32>,
         }
 
         vec![
@@ -171,7 +372,7 @@ mod tests {
         .into_iter()
         .enumerate()
         .for_each(|(idx, testcase)| {
-            let Testcase {tree, expect } = testcase;
+            let Testcase { tree, expect } = testcase;
             let acutal = inorder_traversal(tree);
             assert_eq!(expect, acutal, "case {} failed", idx);
         });

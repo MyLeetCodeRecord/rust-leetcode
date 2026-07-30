@@ -94,7 +94,6 @@ mod tests {
     use std::vec;
 
     use super::*;
-    use datastructure::TreeNode;
 
     #[test]
     fn test_distance_k() {

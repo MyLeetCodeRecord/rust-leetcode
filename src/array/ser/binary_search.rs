@@ -563,7 +563,7 @@ where
 /// 要求序列满足 `[from, x]` cmp 返回 true, `[x+1, end]` 返回 false
 /// 即一开始必须时 true
 ///
-/// 返回的 `I` 不保证 `cmp(I) == true`
+/// 返回的 `I` 不保证 `cmp(I) == false`
 /// 这个函数保证的是 `(I, end]` cmp不会返回true, `(I, end]` 可能是空
 ///
 /// 做了防溢出, `from`和`end`可以是0, 即传入索引
@@ -623,9 +623,99 @@ pub fn min_capability(nums: Vec<i32>, k: i32) -> i32 {
     min
 }
 
+
+/// [2529. 正整数和负整数的最大计数](https://leetcode.cn/problems/maximum-count-of-positive-integer-and-negative-integer)
+/// 
+/// 注意: 0 既不是正整数也不是负整数
+/// 
+/// 思路: 利用单调性, 找到第一个正整数和最后一个负整数, 然后计算各自的长度
+pub fn maximum_count(nums: Vec<i32>) -> i32 {
+    let first_positive = {
+        let tmp = first_occur(0, nums.len()-1, |i| nums[i] > 0);
+        if tmp == 0{
+            if nums[0] > 0{
+                0i32
+            } else {
+                1i32
+            }
+        } else if tmp == nums.len(){
+            nums.len() as i32
+        } else {
+            tmp as i32
+        }
+
+    };
+    let last_negative = {
+        let tmp = last_occur(0, nums.len()-1, |i| nums[i] < 0);
+        if tmp == 0 {
+            if nums[0] < 0{
+                1i32
+            } else {
+                0i32
+            }
+        } else if tmp == nums.len(){
+            nums.len() as i32
+        } else {
+            tmp as i32 + 1
+        }
+    };
+    
+    let pos_len = nums.len() as i32 - first_positive;
+    let neg_len = last_negative;
+
+    pos_len.max(neg_len)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_maximum_count(){
+        struct TestCase{
+            name: &'static str,
+            nums: Vec<i32>,
+            expect: i32,
+        }
+
+        vec![
+            TestCase{
+                name: "basic",
+                nums: vec![-5, -4, -3, -2, -1, 1, 2, 3, 4, 5],
+                expect: 5,
+            },
+            TestCase{
+                name: "basic 2",
+                nums: vec![-5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5],
+                expect: 5,
+            },
+            TestCase{
+                name: "basic 3",
+                nums: vec![1, 2, 3, 4, 5],
+                expect: 5,
+            },
+            TestCase{
+                name: "basic 4",
+                nums: vec![-5, -4, -3, -2, -1],
+                expect: 5,
+            },
+            TestCase{
+                name: "basic 5",
+                nums: vec![0, 1, 2, 3, 4, 5],
+                expect: 5,
+            },
+            TestCase{
+                name: "basic 6",
+                nums: vec![-5, -4, -3, -2, -1, 0],
+                expect: 5,
+            },
+        ]
+        .iter()
+        .for_each(|TestCase{name, nums, expect}|{
+            let actual = maximum_count(nums.to_vec());
+            assert_eq!(*expect, actual, "{} failed", name);
+        });
+    }
 
     #[test]
     fn test_min_capability() {

@@ -11,3 +11,4 @@ pub mod stock;
 pub mod tree;
 pub mod path;
 pub mod rob;
+pub mod combination;
